@@ -1,75 +1,93 @@
-import Image from "next/image";
-import Link from "next/link";
-import { client } from "../../lib/prismicio";
-import * as prismicH from "@prismicio/helpers";
-import type { BlogPostDocument } from "../../prismicio-types";
+// app/page.tsx
+import Header from '@/components/Header';
+import NavigationBar from '@/components/Navigation';
+import MainContent from '@/components/MainContent';
+import RightSidebar from '@/components/RightSidebar';
+import { client } from '../../lib/prismicio';
+import type { BlogPostDocument } from '../../prismicio-types';
+import TopStories from '@/components/TopStories';
+import Footer from '@/components/Footer';
+import TodaysPaperSpotlight from '@/components/TodaysPaper';
+import EnhancedVideoSection from '@/components/VideosSection';
 
-export default async function Page() {
+export default async function Home() {
   try {
+    // Fetch all blog posts
     const posts: BlogPostDocument[] = await client.getAllByType("blog_post", {
       orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
     });
 
-    return (
-      <main className="max-w-5xl mx-auto p-6 bg-gray-900 min-h-screen">
-        <h1 className="text-4xl font-bold mb-8 text-center text-white">
-          All Blog Posts
-        </h1>
-
-        <div className="grid gap-8">
-          {posts.map((post) => {
-            const title = post.data.title || "Untitled";
-            const date = post.data.published_date
-              ? new Date(post.data.published_date).toLocaleDateString()
-              : "No date";
-            const category = post.data.category || "Uncategorized";
-            const image = post.data.featured_image;
-
-            return (
-              <Link
-                key={post.id}
-                href={`/blog/${post.uid}`}
-                className="block border rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-gray-800"
-              >
-                {image?.url && (
-                  <div className="relative w-full h-64">
-                    <Image
-                      src={image.url}
-                      alt={image.alt ?? "Blog cover"}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="p-6">
-                  <h2 className="text-2xl font-semibold mb-2 text-white">
-                    {title}
-                  </h2>
-
-                  <p className="text-sm text-gray-400 mb-2">{date}</p>
-                  <p className="text-sm text-gray-400 mb-4">Category: {category}</p>
-
-                  <div className="text-gray-200">
-                    {prismicH.asText(post.data.content).split("\n").map((line, i) => (
-                      <p key={i} className="mb-2 line-clamp-3">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+    // Handle case where no posts exist
+    if (!posts || posts.length === 0) {
+      return (
+        <div className="bg-black min-h-screen text-white">
+          <Header />
+          <NavigationBar />
+          
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="text-center bg-black border-2 border-yellow-500/30 rounded-xl p-12">
+              <h1 className="text-3xl font-bold mb-4 text-yellow-400">No Content Available</h1>
+              <p className="text-gray-300">Please create some blog posts in Prismic to see content here.</p>
+            </div>
+          </div>
         </div>
-      </main>
+      );
+    }
+
+    // Filter and select posts for different sections
+    const featuredPosts = posts.filter(post => post.data.is_featured === true);
+    const newsPosts = posts.filter(post => post.data.category === "news");
+    const sportsPosts = posts.filter(post => post.data.category === "sports");
+    const businessPosts = posts.filter(post => post.data.category === "business");
+
+    // Select specific posts for each component section with better fallbacks
+    const heroPost = featuredPosts[0] || newsPosts[0] || posts[0];
+    const featuredPost = sportsPosts[0] || featuredPosts[1] || businessPosts[0] || posts[1] || posts[0];
+    const editorialPost = newsPosts[1] || newsPosts[0] || posts[2];
+
+    return (
+      <div className="bg-black min-h-screen text-white">
+        <Header />
+        <NavigationBar />
+        
+        {/* Overall Layout Structure */}
+        <div className="max-w-7xl mx-auto px-4 py-8 pb">
+          <div className="grid lg:grid-cols-4 gap-8">
+            <MainContent 
+              heroPost={heroPost}
+              featuredPost={featuredPost}
+              editorialPost={editorialPost}
+            />
+            <RightSidebar />
+            
+          </div>
+                  
+        </div>
+      <TopStories title={"Local News"} stories={posts} />
+     <TodaysPaperSpotlight/>
+      <TopStories title={"Negros"} stories={posts} />
+      <EnhancedVideoSection/>
+      <Footer/>
+   
+      </div>
+
+
     );
   } catch (err) {
+    console.error('Error fetching posts:', err);
     return (
-      <div className="p-6 max-w-4xl mx-auto text-red-600">
-        <h1>Error fetching posts</h1>
-        <pre>{JSON.stringify(err, null, 2)}</pre>
+      <div className="bg-black min-h-screen text-white">
+        <Header />
+        <NavigationBar />
+        
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center text-red-400">
+            <h1 className="text-2xl font-bold mb-4">Unable to load content</h1>
+            <p>Please check your Prismic configuration and try refreshing the page.</p>
+          </div>
+        </div>
       </div>
     );
   }
+  
 }
