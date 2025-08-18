@@ -126,7 +126,7 @@ interface BlogPostDocumentData {
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/fields/select
    */
-  category: prismic.SelectField<"1" | "2">;
+  category: prismic.SelectField<"sports" | "featured" | "news" | "business">;
 
   /**
    * author field in *blog_post*
@@ -172,6 +172,29 @@ interface BlogPostDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/date
    */
   updated_date: prismic.DateField;
+
+  /**
+   * editors pick field in *blog_post*
+   *
+   * - **Field Type**: Boolean
+   * - **Placeholder**: *None*
+   * - **Default Value**: false
+   * - **API ID Path**: blog_post.editors_pick
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/boolean
+   */
+  editors_pick: prismic.BooleanField;
+
+  /**
+   * tags field in *blog_post*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.tags
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  tags: prismic.KeyTextField;
 }
 
 /**
