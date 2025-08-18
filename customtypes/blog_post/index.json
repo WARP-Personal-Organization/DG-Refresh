@@ -50,7 +50,7 @@
         "config": {
           "label": "category",
           "placeholder": "",
-          "options": ["1", "2"]
+          "options": ["sports", "featured", "news", "business"]
         }
       },
       "author": {
@@ -82,6 +82,22 @@
         "type": "Date",
         "config": {
           "label": "updated_date",
+          "placeholder": ""
+        }
+      },
+      "editors_pick": {
+        "type": "Boolean",
+        "config": {
+          "label": "editors pick",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
+      "tags": {
+        "type": "Text",
+        "config": {
+          "label": "tags",
           "placeholder": ""
         }
       }
