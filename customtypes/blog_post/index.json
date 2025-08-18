@@ -1,0 +1,90 @@
+{
+  "format": "custom",
+  "id": "blog_post",
+  "label": "blog_post",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "title": {
+        "type": "Text",
+        "config": {
+          "label": "title",
+          "placeholder": ""
+        }
+      },
+      "summary": {
+        "type": "StructuredText",
+        "config": {
+          "label": "summary",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      },
+      "content": {
+        "type": "StructuredText",
+        "config": {
+          "label": "content",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      },
+      "featured_image": {
+        "type": "Image",
+        "config": {
+          "label": "featured_image",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "category": {
+        "type": "Select",
+        "config": {
+          "label": "category",
+          "placeholder": "",
+          "options": ["1", "2"]
+        }
+      },
+      "author": {
+        "type": "StructuredText",
+        "config": {
+          "label": "author",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      },
+      "published_date": {
+        "type": "Date",
+        "config": {
+          "label": "published_date",
+          "placeholder": ""
+        }
+      },
+      "is_featured": {
+        "type": "Boolean",
+        "config": {
+          "label": "is_featured",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
+      "updated_date": {
+        "type": "Date",
+        "config": {
+          "label": "updated_date",
+          "placeholder": ""
+        }
+      }
+    }
+  }
+}
