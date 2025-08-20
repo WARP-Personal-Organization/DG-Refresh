@@ -122,16 +122,16 @@ const Header: React.FC = () => {
             </button>
 
             {/* Subscribe Button - Responsive */}
-            <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-2 px-3 sm:px-4 lg:px-6 rounded-lg font-serif text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25 whitespace-nowrap">
+            {/* <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-2 px-3 sm:px-4 lg:px-6 rounded-lg font-serif text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25 whitespace-nowrap">
               <span className="hidden sm:inline">Subscribe</span>
               <span className="sm:hidden">Sub</span>
             </button>
-            
+             */}
             {/* Sign In Button - Responsive */}
-            <button className="hidden md:flex items-center gap-2 text-gray-300 hover:text-yellow-400 font-medium transition-all duration-200 group border border-gray-700 hover:border-yellow-500/50 px-3 lg:px-4 py-2 rounded-lg">
+            {/* <button className="hidden md:flex items-center gap-2 text-gray-300 hover:text-yellow-400 font-medium transition-all duration-200 group border border-gray-700 hover:border-yellow-500/50 px-3 lg:px-4 py-2 rounded-lg">
               <User size={16} className="group-hover:scale-110 transition-transform duration-200" />
               <span className="font-serif text-sm lg:text-base">Sign In</span>
-            </button>
+            </button> */}
 
             {/* Mobile Sign In */}
             <button className="md:hidden text-gray-300 hover:text-yellow-400 transition-colors duration-200 p-2">
@@ -140,8 +140,7 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom accent line */}
-        <div className="h-0.5 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
+
       </div>
 
       {/* Enhanced Mobile Menu Overlay */}
@@ -172,11 +171,11 @@ const Header: React.FC = () => {
 
             {/* Mobile User Actions */}
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
-              <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300">
+              {/* <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300">
                 <User size={16} />
                 Sign In
               </button>
-              
+               */}
               <button className="flex items-center justify-center gap-2 border border-yellow-500/50 text-yellow-400 font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300 hover:bg-yellow-500/10">
                 <Bell size={16} />
                 Alerts

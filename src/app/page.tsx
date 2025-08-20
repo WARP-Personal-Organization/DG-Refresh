@@ -6,9 +6,10 @@ import RightSidebar from '@/components/RightSidebar';
 import { client } from '../../lib/prismicio';
 import type { BlogPostDocument } from '../../prismicio-types';
 import TopStories from '@/components/TopStories';
-import Footer from '@/components/Footer';
 import TodaysPaperSpotlight from '@/components/TodaysPaper';
 import EnhancedVideoSection from '@/components/VideosSection';
+import OpinionSection from '@/components/Opinion';
+
 
 export default async function Home() {
   try {
@@ -47,8 +48,6 @@ export default async function Home() {
 
     return (
       <div className="bg-black min-h-screen text-white">
-        <Header />
-        <NavigationBar />
         
         {/* Overall Layout Structure */}
         <div className="max-w-7xl mx-auto px-4 py-8 pb">
@@ -58,7 +57,7 @@ export default async function Home() {
               featuredPost={featuredPost}
               editorialPost={editorialPost}
             />
-            <RightSidebar />
+            <RightSidebar editorsPicks={posts} />
             
           </div>
                   
@@ -66,9 +65,9 @@ export default async function Home() {
       <TopStories title={"Local News"} stories={posts} />
      <TodaysPaperSpotlight/>
       <TopStories title={"Negros"} stories={posts} />
+      <OpinionSection/>
       <EnhancedVideoSection/>
-      <Footer/>
-   
+
       </div>
 
 
@@ -77,8 +76,6 @@ export default async function Home() {
     console.error('Error fetching posts:', err);
     return (
       <div className="bg-black min-h-screen text-white">
-        <Header />
-        <NavigationBar />
         
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-red-400">

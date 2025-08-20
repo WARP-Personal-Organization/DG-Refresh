@@ -19,6 +19,7 @@ import {
 import type { BlogPostDocument } from '../../../../prismicio-types';
 import * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
+import { PrismicRichText } from '@prismicio/react';
 interface BlogPageProps {
   params: {
     uid: string;
@@ -75,7 +76,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
   return (
     <div className="bg-black min-h-screen">
       {/* Header with back navigation */}
-      <header className="bg-black border-b border-yellow-500/30 sticky top-0 z-50">
+      <header className="bg-black border-b border-yellow-500/30 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link 
             href="/"
@@ -193,11 +194,24 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
 
         {/* Article Content */}
-        <div className="prose prose-lg prose-invert max-w-none">
-          <div className="text-gray-200 leading-relaxed space-y-6">
-            {prismicH.asHTML(post.data.content)}
-          </div>
-        </div>
+{/* Article Content */}
+<div className="prose prose-lg prose-invert max-w-none">
+  <PrismicRichText
+    field={post.data.content}
+    components={{
+      paragraph: ({ children }) => (
+        <p className="mb-6 text-gray-200">{children}</p>
+      ),
+      heading2: ({ children }) => (
+        <h2 className="mt-8 mb-4 text-2xl font-bold text-white">
+          {children}
+        </h2>
+      ),
+      // add more custom element renderers as needed
+    }}
+  />
+</div>
+
 
         {/* Tags */}
         {post.data.tags && (

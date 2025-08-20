@@ -174,9 +174,9 @@ const Footer: React.FC = () => {
                   placeholder="Enter your email"
                   className="w-full px-3 py-2 bg-gray-900 border border-gray-700 hover:border-yellow-500/30 focus:border-yellow-500 rounded text-white text-sm focus:outline-none transition-all duration-200"
                 />
-                <button className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black font-semibold py-2 px-4 rounded text-sm transition-all duration-200 transform hover:scale-105">
+                {/* <button className="w-full bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black font-semibold py-2 px-4 rounded text-sm transition-all duration-200 transform hover:scale-105">
                   Subscribe
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

@@ -167,7 +167,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
             {/* Enhanced Headlines */}
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white leading-tight group-hover:text-yellow-100 transition-colors duration-300">
+              <h1 className="text-4xl lg:text-4xl font-serif font-bold text-white leading-tight group-hover:text-yellow-100 transition-colors duration-300">
                 {heroPost.data.title || 'Untitled Article'}
               </h1>
               
