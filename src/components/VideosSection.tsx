@@ -1,7 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Play, Clock, Users, Calendar, Filter, Grid, List, ExternalLink, Share2, Bookmark } from 'lucide-react';
+import {
+  Bookmark,
+  Calendar,
+  Clock,
+  ExternalLink,
+  Filter,
+  Grid,
+  List,
+  Play,
+  Share2,
+  Users,
+} from "lucide-react";
+import React, { useState } from "react";
 
 interface VideoData {
   id: string;
@@ -17,78 +28,98 @@ interface VideoData {
 
 const videosData: VideoData[] = [
   {
-    id: '1',
-    title: 'DGD Episode 9: Business Leaders\' Summit 5.0',
-    description: 'An exclusive look at the annual business summit featuring local entrepreneurs and industry leaders discussing the future of our local economy.',
-    duration: '12:45',
-    views: '2.3K',
-    publishDate: '2 days ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/1a1a1a/FFD700?text=Business+Summit',
-    category: 'Business',
-    featured: true
+    id: "1",
+    title: "DGD Episode 9: Business Leaders' Summit 5.0",
+    description:
+      "An exclusive look at the annual business summit featuring local entrepreneurs and industry leaders discussing the future of our local economy.",
+    duration: "12:45",
+    views: "2.3K",
+    publishDate: "2 days ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/1a1a1a/FFD700?text=Business+Summit",
+    category: "Business",
+    featured: true,
   },
   {
-    id: '2',
-    title: 'DGD Episode 8: Daily Guardian Cup 2019',
-    description: 'Highlights from the annual Daily Guardian sponsored community sports championship.',
-    duration: '08:52',
-    views: '1.8K',
-    publishDate: '5 days ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/2a2a2a/FFD700?text=Sports+Cup',
-    category: 'Sports'
+    id: "2",
+    title: "DGD Episode 8: Daily Guardian Cup 2019",
+    description:
+      "Highlights from the annual Daily Guardian sponsored community sports championship.",
+    duration: "08:52",
+    views: "1.8K",
+    publishDate: "5 days ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/2a2a2a/FFD700?text=Sports+Cup",
+    category: "Sports",
   },
   {
-    id: '3',
-    title: 'DGD Episode 7: Pride Celebration',
-    description: 'Community comes together for the annual Pride celebration in downtown.',
-    duration: '06:24',
-    views: '3.1K',
-    publishDate: '1 week ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/3a3a3a/FFD700?text=Pride+Event',
-    category: 'Community'
+    id: "3",
+    title: "DGD Episode 7: Pride Celebration",
+    description:
+      "Community comes together for the annual Pride celebration in downtown.",
+    duration: "06:24",
+    views: "3.1K",
+    publishDate: "1 week ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/3a3a3a/FFD700?text=Pride+Event",
+    category: "Community",
   },
   {
-    id: '4',
-    title: 'DGD Episode 6: The Royal Homecoming',
-    description: 'Local high school celebrates homecoming with record attendance.',
-    duration: '10:56',
-    views: '4.2K',
-    publishDate: '2 weeks ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/4a4a4a/FFD700?text=Homecoming',
-    category: 'Education'
+    id: "4",
+    title: "DGD Episode 6: The Royal Homecoming",
+    description:
+      "Local high school celebrates homecoming with record attendance.",
+    duration: "10:56",
+    views: "4.2K",
+    publishDate: "2 weeks ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/4a4a4a/FFD700?text=Homecoming",
+    category: "Education",
   },
   {
-    id: '5',
-    title: 'DGD Episode 5: Iloilo Fade Barber',
-    description: 'Meet the local barber who\'s become a community institution.',
-    duration: '07:27',
-    views: '1.5K',
-    publishDate: '3 weeks ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/5a5a5a/FFD700?text=Local+Barber',
-    category: 'Profiles'
+    id: "5",
+    title: "DGD Episode 5: Iloilo Fade Barber",
+    description: "Meet the local barber who's become a community institution.",
+    duration: "07:27",
+    views: "1.5K",
+    publishDate: "3 weeks ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/5a5a5a/FFD700?text=Local+Barber",
+    category: "Profiles",
   },
   {
-    id: '6',
-    title: 'DGD Episode 4: Ilonggo Hablon Heritage',
-    duration: '09:34',
-    views: '2.7K',
-    publishDate: '1 month ago',
-    thumbnail: 'https://via.placeholder.com/400x225.png/6a6a6a/FFD700?text=Heritage',
-    category: 'Culture',
-    description: 'Exploring the traditional weaving techniques of local artisans.'
-  }
+    id: "6",
+    title: "DGD Episode 4: Ilonggo Hablon Heritage",
+    duration: "09:34",
+    views: "2.7K",
+    publishDate: "1 month ago",
+    thumbnail:
+      "https://via.placeholder.com/400x225.png/6a6a6a/FFD700?text=Heritage",
+    category: "Culture",
+    description:
+      "Exploring the traditional weaving techniques of local artisans.",
+  },
 ];
 
-const categories = ['All', 'Business', 'Sports', 'Community', 'Education', 'Profiles', 'Culture'];
+const categories = [
+  "All",
+  "Business",
+  "Sports",
+  "Community",
+  "Education",
+  "Profiles",
+  "Culture",
+];
 
 const EnhancedVideoSection: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoData>(videosData[0]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
-  const filteredVideos = selectedCategory === 'All' 
-    ? videosData 
-    : videosData.filter(video => video.category === selectedCategory);
+  const filteredVideos =
+    selectedCategory === "All"
+      ? videosData
+      : videosData.filter((video) => video.category === selectedCategory);
 
   const handleVideoSelect = (video: VideoData) => {
     setSelectedVideo(video);
@@ -111,10 +142,11 @@ const EnhancedVideoSection: React.FC = () => {
             </div>
             <div className="flex-1 h-px bg-gradient-to-l from-transparent via-yellow-500 to-transparent"></div>
           </div>
-          
+
           <p className="text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Dive deep into the stories that shape our community. From business leaders to local heroes, 
-            our documentary series captures the heart and soul of our neighborhood.
+            Dive deep into the stories that shape our community. From business
+            leaders to local heroes, our documentary series captures the heart
+            and soul of our neighborhood.
           </p>
         </div>
 
@@ -129,11 +161,15 @@ const EnhancedVideoSection: React.FC = () => {
                   alt={selectedVideo.title}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center group cursor-pointer">
                   <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                    <Play size={32} className="text-black ml-1" fill="currentColor" />
+                    <Play
+                      size={32}
+                      className="text-black ml-1"
+                      fill="currentColor"
+                    />
                   </div>
                 </div>
 
@@ -161,11 +197,11 @@ const EnhancedVideoSection: React.FC = () => {
                     <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-3">
                       {selectedVideo.category}
                     </span>
-                    
+
                     <h3 className="text-2xl font-serif font-bold text-white leading-tight mb-3">
                       {selectedVideo.title}
                     </h3>
-                    
+
                     <p className="text-gray-300 leading-relaxed mb-4">
                       {selectedVideo.description}
                     </p>
@@ -185,13 +221,22 @@ const EnhancedVideoSection: React.FC = () => {
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2 ml-4">
                     <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <Share2 size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                      <Share2
+                        size={16}
+                        className="group-hover:scale-110 transition-transform duration-200"
+                      />
                     </button>
                     <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <Bookmark size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                      <Bookmark
+                        size={16}
+                        className="group-hover:scale-110 transition-transform duration-200"
+                      />
                     </button>
                     <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <ExternalLink size={16} className="group-hover:scale-110 transition-transform duration-200" />
+                      <ExternalLink
+                        size={16}
+                        className="group-hover:scale-110 transition-transform duration-200"
+                      />
                     </button>
                   </div>
                 </div>
@@ -205,24 +250,26 @@ const EnhancedVideoSection: React.FC = () => {
               {/* Playlist Header */}
               <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-yellow-500/10 to-yellow-600/5">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-serif font-bold text-white">Episode Playlist</h4>
+                  <h4 className="text-lg font-serif font-bold text-white">
+                    Episode Playlist
+                  </h4>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setViewMode('list')}
+                      onClick={() => setViewMode("list")}
                       className={`p-2 rounded transition-all duration-200 ${
-                        viewMode === 'list' 
-                          ? 'bg-yellow-500 text-black' 
-                          : 'bg-gray-800 text-gray-400 hover:text-white'
+                        viewMode === "list"
+                          ? "bg-yellow-500 text-black"
+                          : "bg-gray-800 text-gray-400 hover:text-white"
                       }`}
                     >
                       <List size={14} />
                     </button>
                     <button
-                      onClick={() => setViewMode('grid')}
+                      onClick={() => setViewMode("grid")}
                       className={`p-2 rounded transition-all duration-200 ${
-                        viewMode === 'grid' 
-                          ? 'bg-yellow-500 text-black' 
-                          : 'bg-gray-800 text-gray-400 hover:text-white'
+                        viewMode === "grid"
+                          ? "bg-yellow-500 text-black"
+                          : "bg-gray-800 text-gray-400 hover:text-white"
                       }`}
                     >
                       <Grid size={14} />
@@ -238,35 +285,46 @@ const EnhancedVideoSection: React.FC = () => {
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="bg-gray-800 text-white border border-gray-600 rounded px-3 py-1 text-sm focus:border-yellow-500 focus:outline-none"
                   >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <p className="text-xs text-gray-400">
-                  {filteredVideos.length} episode{filteredVideos.length !== 1 ? 's' : ''} available
+                  {filteredVideos.length} episode
+                  {filteredVideos.length !== 1 ? "s" : ""} available
                 </p>
               </div>
 
               {/* Video List */}
               <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-2 p-2' : 'space-y-2 p-2'}>
+                <div
+                  className={
+                    viewMode === "grid"
+                      ? "grid grid-cols-2 gap-2 p-2"
+                      : "space-y-2 p-2"
+                  }
+                >
                   {filteredVideos.map((video, index) => (
                     <div
                       key={video.id}
                       onClick={() => handleVideoSelect(video)}
                       className={`cursor-pointer rounded-lg border transition-all duration-300 group ${
                         selectedVideo.id === video.id
-                          ? 'border-yellow-500/50 bg-yellow-500/10'
-                          : 'border-gray-800 hover:border-yellow-500/30 bg-gray-900/50 hover:bg-gray-800/50'
-                      } ${viewMode === 'grid' ? 'p-2' : 'p-3'}`}
+                          ? "border-yellow-500/50 bg-yellow-500/10"
+                          : "border-gray-800 hover:border-yellow-500/30 bg-gray-900/50 hover:bg-gray-800/50"
+                      } ${viewMode === "grid" ? "p-2" : "p-3"}`}
                     >
-                      {viewMode === 'list' ? (
+                      {viewMode === "list" ? (
                         <div className="flex gap-3">
                           {/* Episode Number */}
                           <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                            <span className="text-black text-xs font-bold">{index + 1}</span>
+                            <span className="text-black text-xs font-bold">
+                              {index + 1}
+                            </span>
                           </div>
 
                           {/* Thumbnail */}

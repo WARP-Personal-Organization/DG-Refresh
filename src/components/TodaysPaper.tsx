@@ -1,13 +1,13 @@
-import React from 'react';
-import Link from 'next/link';
-import { Calendar, User, ArrowRight, Newspaper } from 'lucide-react';
+import { ArrowRight, Calendar, Newspaper, User } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 const TodaysPaperSpotlight: React.FC = () => {
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   return (
@@ -34,14 +34,15 @@ const TodaysPaperSpotlight: React.FC = () => {
               <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-3 py-1 rounded text-xs font-bold tracking-wider uppercase mb-4">
                 Front Page
               </span>
-              
+
               <h3 className="text-2xl lg:text-3xl font-serif font-bold text-white leading-tight mb-4">
                 Daily Guardian delivers comprehensive local coverage
               </h3>
-              
+
               <p className="text-gray-300 leading-relaxed mb-6">
-                From breaking news to community events — today&apos;s edition features in-depth reporting 
-                on the stories that matter most to our readers.
+                From breaking news to community events — today&apos;s edition
+                features in-depth reporting on the stories that matter most to
+                our readers.
               </p>
 
               <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -69,10 +70,12 @@ const TodaysPaperSpotlight: React.FC = () => {
                       <div className="p-4 h-full flex flex-col">
                         {/* Header */}
                         <div className="text-center border-b border-gray-400 pb-2 mb-3">
-                          <h4 className="text-lg font-serif font-bold text-black">DAILY GUARDIAN</h4>
+                          <h4 className="text-lg font-serif font-bold text-black">
+                            DAILY GUARDIAN
+                          </h4>
                           <p className="text-xs text-gray-600">{currentDate}</p>
                         </div>
-                        
+
                         {/* Headline */}
                         <div className="flex-1">
                           <h5 className="text-sm font-serif font-bold text-black leading-tight mb-2">
@@ -86,7 +89,7 @@ const TodaysPaperSpotlight: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <span className="bg-yellow-500 text-black px-3 py-1 rounded font-bold text-xs">
@@ -103,10 +106,14 @@ const TodaysPaperSpotlight: React.FC = () => {
                   <Link href="/todays-paper/sports" className="block group">
                     <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-3 shadow-md hover:shadow-lg">
                       <div className="text-center border-b border-blue-300 pb-1 mb-2">
-                        <h5 className="text-xs font-serif font-bold text-black">SPORTS</h5>
+                        <h5 className="text-xs font-serif font-bold text-black">
+                          SPORTS
+                        </h5>
                       </div>
                       <div className="space-y-1">
-                        <h6 className="text-xs font-bold text-black">Championship Finals</h6>
+                        <h6 className="text-xs font-bold text-black">
+                          Championship Finals
+                        </h6>
                         <div className="bg-blue-300 h-8 rounded"></div>
                         <div className="space-y-1">
                           <div className="bg-blue-300 h-1 rounded"></div>
@@ -120,10 +127,14 @@ const TodaysPaperSpotlight: React.FC = () => {
                   <Link href="/todays-paper/business" className="block group">
                     <div className="bg-gradient-to-br from-green-100 to-green-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-3 shadow-md hover:shadow-lg">
                       <div className="text-center border-b border-green-300 pb-1 mb-2">
-                        <h5 className="text-xs font-serif font-bold text-black">BUSINESS</h5>
+                        <h5 className="text-xs font-serif font-bold text-black">
+                          BUSINESS
+                        </h5>
                       </div>
                       <div className="space-y-1">
-                        <h6 className="text-xs font-bold text-black">Market Update</h6>
+                        <h6 className="text-xs font-bold text-black">
+                          Market Update
+                        </h6>
                         <div className="bg-green-300 h-8 rounded"></div>
                         <div className="space-y-1">
                           <div className="bg-green-300 h-1 rounded"></div>
@@ -140,7 +151,9 @@ const TodaysPaperSpotlight: React.FC = () => {
                 {/* Opinion */}
                 <Link href="/todays-paper/opinion" className="block group">
                   <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-2 shadow-md">
-                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-purple-300 pb-1 mb-1">OPINION</h6>
+                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-purple-300 pb-1 mb-1">
+                      OPINION
+                    </h6>
                     <div className="space-y-1">
                       <div className="bg-purple-300 h-1 rounded"></div>
                       <div className="bg-purple-300 h-1 rounded w-4/5"></div>
@@ -151,7 +164,9 @@ const TodaysPaperSpotlight: React.FC = () => {
                 {/* Life & Arts */}
                 <Link href="/todays-paper/lifestyle" className="block group">
                   <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-2 shadow-md">
-                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-pink-300 pb-1 mb-1">LIFESTYLE</h6>
+                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-pink-300 pb-1 mb-1">
+                      LIFESTYLE
+                    </h6>
                     <div className="space-y-1">
                       <div className="bg-pink-300 h-1 rounded"></div>
                       <div className="bg-pink-300 h-1 rounded w-3/5"></div>
@@ -162,7 +177,9 @@ const TodaysPaperSpotlight: React.FC = () => {
                 {/* Weather */}
                 <Link href="/todays-paper/weather" className="block group">
                   <div className="bg-gradient-to-br from-cyan-100 to-cyan-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-2 shadow-md">
-                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-cyan-300 pb-1 mb-1">WEATHER</h6>
+                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-cyan-300 pb-1 mb-1">
+                      WEATHER
+                    </h6>
                     <div className="text-center">
                       <div className="bg-cyan-300 w-6 h-6 rounded-full mx-auto mb-1"></div>
                       <div className="text-xs font-bold text-black">72°F</div>
@@ -173,7 +190,9 @@ const TodaysPaperSpotlight: React.FC = () => {
                 {/* Classifieds */}
                 <Link href="/todays-paper/classifieds" className="block group">
                   <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded border border-gray-600 hover:border-yellow-500/50 transition-all duration-300 aspect-[3/4] p-2 shadow-md">
-                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-orange-300 pb-1 mb-1">CLASSIFIED</h6>
+                    <h6 className="text-xs font-serif font-bold text-center text-black border-b border-orange-300 pb-1 mb-1">
+                      CLASSIFIED
+                    </h6>
                     <div className="space-y-1">
                       <div className="bg-orange-300 h-1 rounded"></div>
                       <div className="bg-orange-300 h-1 rounded w-2/3"></div>
@@ -190,29 +209,38 @@ const TodaysPaperSpotlight: React.FC = () => {
               <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-3 py-1 rounded text-xs font-bold tracking-wider uppercase mb-4">
                 Editor&apos;s Choice
               </span>
-              
+
               <blockquote className="border-l-4 border-yellow-500 pl-4 mb-6">
                 <p className="text-lg italic text-yellow-100 leading-relaxed mb-4">
-                  &quot;This week&apos;s investigation into local infrastructure reveals both challenges and opportunities for our growing community.&quot;
+                  &quot;This week&apos;s investigation into local infrastructure
+                  reveals both challenges and opportunities for our growing
+                  community.&quot;
                 </p>
-                
+
                 <footer className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
                     <User size={16} className="text-black" />
                   </div>
                   <div>
-                    <cite className="text-yellow-200 font-medium not-italic block">Sarah Mitchell</cite>
-                    <span className="text-gray-400 text-sm">Editor-in-Chief</span>
+                    <cite className="text-yellow-200 font-medium not-italic block">
+                      Sarah Mitchell
+                    </cite>
+                    <span className="text-gray-400 text-sm">
+                      Editor-in-Chief
+                    </span>
                   </div>
                 </footer>
               </blockquote>
 
-              <Link 
-                href="/todays-paper/featured" 
+              <Link
+                href="/todays-paper/featured"
                 className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors duration-200 group"
               >
-                Read Full Article 
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
+                Read Full Article
+                <ArrowRight
+                  size={16}
+                  className="group-hover:translate-x-1 transition-transform duration-200"
+                />
               </Link>
             </div>
           </div>

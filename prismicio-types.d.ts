@@ -195,6 +195,17 @@ interface BlogPostDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/text
    */
   tags: prismic.KeyTextField;
+
+  /**
+   * subcategory field in *blog_post*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.subcategory
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  subcategory: prismic.SelectField<"localnews" | "Fact First">;
 }
 
 /**

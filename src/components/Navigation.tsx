@@ -1,42 +1,42 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import Link from "next/link";
+import React, { useState } from "react";
 
 // Navigation structure with dropdown items - Updated for category pages
 const navigationData = [
   {
     name: "News",
-    href: "/news",        // Links to category page
+    href: "/news", // Links to category page
     dropdown: [
       { name: "#PinoyVote2025", href: "/news/PinoyVote2025" },
       { name: "CAPIZ", href: "/news/CAPIZ" },
       { name: "FACTS FIRST PH", href: "/news/FACTS_FIRST_PH" },
-      { name: "LOCAL NEWS", href: "/news/LOCAL_NEWS" },
+      { name: "LOCAL NEWS", href: "/news/localnews" },
       { name: "NATION", href: "/news/NATION" },
-      { name: "NEGROS", href: "/news/NEGROS" }
-    ]
+      { name: "NEGROS", href: "/news/NEGROS" },
+    ],
   },
   {
     name: "Opinion",
-    href: "/opinion",     // Links to category page
+    href: "/opinion", // Links to category page
   },
   {
     name: "Business",
-    href: "/business",    // Links to category page
+    href: "/business", // Links to category page
     dropdown: [
       { name: "MONITORING", href: "/business/MONITORING" },
       { name: "TECH TALK", href: "/business/TECH_TALK" },
-    ]
+    ],
   },
   {
     name: "Sports",
-    href: "/sports",      // Links to category page
+    href: "/sports", // Links to category page
   },
   {
     name: "Features",
-    href: "/features",    // Links to category page
+    href: "/features", // Links to category page
     dropdown: [
       { name: "ARTS AND CULTURE", href: "/features/ARTS_AND_CULTURE" },
       { name: "DOUBLE TEAM", href: "/features/DOUBLE_TEAM" },
@@ -44,26 +44,28 @@ const navigationData = [
       { name: "ENTERTAINMENT", href: "/features/ENTERTAINMENT" },
       { name: "ENVIRONMENT", href: "/features/ENVIRONMENT" },
       { name: "EVENTS", href: "/features/EVENTS" },
-    ]
+    ],
   },
   {
     name: "Initiative",
-    href: "/initiative", 
+    href: "/initiative",
   },
   {
-    name: "Policies", 
-    href: "/policies",    
+    name: "Policies",
+    href: "/policies",
   },
   {
     name: "Others",
-    href: "/others",      
-  }
+    href: "/others",
+  },
 ];
 
 const NavigationBar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [mobileExpandedItems, setMobileExpandedItems] = useState<Set<string>>(new Set());
+  const [mobileExpandedItems, setMobileExpandedItems] = useState<Set<string>>(
+    new Set()
+  );
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -99,8 +101,8 @@ const NavigationBar: React.FC = () => {
         {/* Desktop Navigation */}
         <ul className="hidden md:flex z-20 justify-center space-x-8 text-sm relative">
           {navigationData.map((item, index) => (
-            <li 
-              key={item.name} 
+            <li
+              key={item.name}
               className="relative group"
               onMouseEnter={() => handleDropdownEnter(item.name)}
               onMouseLeave={handleDropdownLeave}
@@ -112,56 +114,56 @@ const NavigationBar: React.FC = () => {
                 `}
               >
                 {item.name.toUpperCase()}
-       {item.dropdown && (
-                <ChevronDown 
-                    size={12} 
+                {item.dropdown && (
+                  <ChevronDown
+                    size={12}
                     className={`transition-transform duration-200 ${
-                    activeDropdown === item.name ? 'rotate-180' : ''
+                      activeDropdown === item.name ? "rotate-180" : ""
                     }`}
-                />
+                  />
                 )}
-
               </Link>
 
               {/* Desktop Dropdown */}
               {item.dropdown && (
-              <div 
-                className={`
+                <div
+                  className={`
                   absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 
                   bg-black border-2 border-yellow-500/30 rounded-lg shadow-xl shadow-yellow-500/10
                   transition-all duration-300 ease-out group
-                  ${activeDropdown === item.name 
-                    ? 'opacity-100 visible translate-y-0' 
-                    : 'opacity-0 invisible -translate-y-2'
+                  ${
+                    activeDropdown === item.name
+                      ? "opacity-100 visible translate-y-0"
+                      : "opacity-0 invisible -translate-y-2"
                   }
                 `}
-              >
-                {/* Gold accent line - appears on hover */}
-                <div className="h-0 group-hover:h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-t-md transition-all duration-300 ease-out"></div>
-                
-                <div className="py-2">
-               {item.dropdown && item.dropdown.map((dropdownItem) => (
+                >
+                  {/* Gold accent line - appears on hover */}
+                  <div className="h-0 group-hover:h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-t-md transition-all duration-300 ease-out"></div>
 
+                  <div className="py-2">
+                    {item.dropdown &&
+                      item.dropdown.map((dropdownItem) => (
+                        <Link
+                          key={dropdownItem.name}
+                          href={dropdownItem.href}
+                          className="block px-4 py-3 text-sm font-serif text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/50"
+                        >
+                          {dropdownItem.name}
+                        </Link>
+                      ))}
+                  </div>
+
+                  {/* Bottom accent */}
+                  <div className="px-4 py-2 border-t border-yellow-500/20 bg-yellow-500/5">
                     <Link
-                      key={dropdownItem.name}
-                      href={dropdownItem.href}
-                      className="block px-4 py-3 text-sm font-serif text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/50"
+                      href={item.href}
+                      className="text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors duration-200"
                     >
-                      {dropdownItem.name}
+                      View All {item.name} →
                     </Link>
-                  ))}
+                  </div>
                 </div>
-
-                {/* Bottom accent */}
-                <div className="px-4 py-2 border-t border-yellow-500/20 bg-yellow-500/5">
-                  <Link 
-                    href={item.href}
-                    className="text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors duration-200"
-                  >
-                    View All {item.name} →
-                  </Link>
-                </div>
-              </div>
               )}
             </li>
           ))}
@@ -181,9 +183,15 @@ const NavigationBar: React.FC = () => {
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
-              <X size={24} className="transform transition-transform duration-200" />
+              <X
+                size={24}
+                className="transform transition-transform duration-200"
+              />
             ) : (
-              <Menu size={24} className="transform transition-transform duration-200" />
+              <Menu
+                size={24}
+                className="transform transition-transform duration-200"
+              />
             )}
           </button>
         </div>
@@ -191,17 +199,17 @@ const NavigationBar: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={closeMobileMenu}
         />
       )}
 
       {/* Mobile Menu */}
-      <div 
+      <div
         className={`
           md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-yellow-500/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
-          ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+          ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Mobile Menu Header */}
@@ -223,12 +231,13 @@ const NavigationBar: React.FC = () => {
             {navigationData.map((item, index) => (
               <li key={item.name}>
                 {/* Main Menu Item */}
-                <div 
+                <div
                   className={`
                     flex items-center justify-between px-6 py-4 font-serif font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent cursor-pointer
-                    ${index === 0 
-                      ? 'bg-yellow-500/10 border-l-yellow-500 text-yellow-500' 
-                      : 'text-gray-200 hover:bg-yellow-500/5 hover:border-l-yellow-400 hover:text-yellow-300'
+                    ${
+                      index === 0
+                        ? "bg-yellow-500/10 border-l-yellow-500 text-yellow-500"
+                        : "text-gray-200 hover:bg-yellow-500/5 hover:border-l-yellow-400 hover:text-yellow-300"
                     }
                   `}
                   onClick={() => toggleMobileDropdown(item.name)}
@@ -240,47 +249,48 @@ const NavigationBar: React.FC = () => {
                       <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full ml-2"></span>
                     )}
                   </span>
-                  
-                  <ChevronRight 
-                    size={16} 
+
+                  <ChevronRight
+                    size={16}
                     className={`transition-transform duration-200 ${
-                      mobileExpandedItems.has(item.name) ? 'rotate-90' : ''
+                      mobileExpandedItems.has(item.name) ? "rotate-90" : ""
                     }`}
                   />
                 </div>
 
                 {/* Mobile Dropdown Items */}
                 {item.dropdown && (
-                <div 
-                  className={`
+                  <div
+                    className={`
                     overflow-hidden transition-all duration-300 ease-in-out bg-gray-950/50
-                    ${mobileExpandedItems.has(item.name) 
-                      ? 'max-h-96 opacity-100' 
-                      : 'max-h-0 opacity-0'
+                    ${
+                      mobileExpandedItems.has(item.name)
+                        ? "max-h-96 opacity-100"
+                        : "max-h-0 opacity-0"
                     }
                   `}
-                >
-              {item.dropdown && item.dropdown.map((dropdownItem) => (
-
-                    <Link
-                      key={dropdownItem.name}
-                      href={dropdownItem.href}
-                      onClick={closeMobileMenu}
-                      className="block px-10 py-3 text-sm font-serif text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/30"
-                    >
-                      {dropdownItem.name}
-                    </Link>
-                  ))}
-                  
-                  {/* View All Link */}
-                  <Link
-                    href={item.href}
-                    onClick={closeMobileMenu}
-                    className="block px-10 py-3 text-xs font-serif text-yellow-400 hover:text-yellow-300 border-t border-yellow-500/20 bg-yellow-500/5 transition-colors duration-200"
                   >
-                    View All {item.name} →
-                  </Link>
-                </div>
+                    {item.dropdown &&
+                      item.dropdown.map((dropdownItem) => (
+                        <Link
+                          key={dropdownItem.name}
+                          href={dropdownItem.href}
+                          onClick={closeMobileMenu}
+                          className="block px-10 py-3 text-sm font-serif text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/30"
+                        >
+                          {dropdownItem.name}
+                        </Link>
+                      ))}
+
+                    {/* View All Link */}
+                    <Link
+                      href={item.href}
+                      onClick={closeMobileMenu}
+                      className="block px-10 py-3 text-xs font-serif text-yellow-400 hover:text-yellow-300 border-t border-yellow-500/20 bg-yellow-500/5 transition-colors duration-200"
+                    >
+                      View All {item.name} →
+                    </Link>
+                  </div>
                 )}
               </li>
             ))}
