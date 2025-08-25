@@ -2,13 +2,102 @@
 
 import { Bell, Calendar, MapPin, Menu, Search, User, X } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+// Weather data interface
+interface WeatherData {
+  temperature: number;
+  description: string;
+  loading: boolean;
+  error: boolean;
+}
+
+// Custom hook for weather data
+const useWeather = () => {
+  const [weather, setWeather] = useState<WeatherData>({
+    temperature: 0,
+    description: "Loading...",
+    loading: true,
+    error: false,
+  });
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // Using OpenWeatherMap API - you'll need to get a free API key from openweathermap.org
+        // For demo purposes, I'm using a mock API. Replace with your actual API key.
+        const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || "demo_key";
+
+        // Coordinates for Iloilo City, Philippines
+        const lat = 10.7202;
+        const lon = 122.5621;
+
+        if (API_KEY === "demo_key") {
+          // Mock data for demo purposes
+          setTimeout(() => {
+            setWeather({
+              temperature: 28,
+              description: "Partly Cloudy",
+              loading: false,
+              error: false,
+            });
+          }, 1000);
+          return;
+        }
+
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+        );
+
+        if (!response.ok) {
+          throw new Error("Weather data unavailable");
+        }
+
+        const data = await response.json();
+
+        setWeather({
+          temperature: Math.round(data.main.temp),
+          description: data.weather[0].description
+            .split(" ")
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" "),
+          loading: false,
+          error: false,
+        });
+      } catch (error) {
+        console.error("Weather fetch error:", error);
+        setWeather({
+          temperature: 28,
+          description: "Partly Cloudy",
+          loading: false,
+          error: true,
+        });
+      }
+    };
+
+    fetchWeather();
+
+    // Refresh weather data every 10 minutes
+    const interval = setInterval(fetchWeather, 10 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return weather;
+};
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const weather = useWeather();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Convert Celsius to Fahrenheit for display
+  const getTemperatureDisplay = (celsius: number) => {
+    const fahrenheit = Math.round((celsius * 9) / 5 + 32);
+    return `${fahrenheit}°F`;
   };
 
   return (
@@ -29,7 +118,14 @@ const Header: React.FC = () => {
             <span className="text-gray-600">|</span>
             <span className="text-yellow-400 flex items-center gap-1">
               <MapPin size={12} />
-              72°F Partly Cloudy
+              {weather.loading
+                ? "Loading weather..."
+                : `${getTemperatureDisplay(weather.temperature)} ${weather.description}`}
+              {weather.error && (
+                <span className="text-gray-500 text-xs ml-1">
+                  (Iloilo City)
+                </span>
+              )}
             </span>
           </div>
 
@@ -57,7 +153,9 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
             <span className="text-yellow-400 text-xs font-medium truncate max-w-32">
-              Breaking News
+              {weather.loading
+                ? "Loading..."
+                : `${getTemperatureDisplay(weather.temperature)}`}
             </span>
           </div>
         </div>
@@ -106,7 +204,7 @@ const Header: React.FC = () => {
 
                 {/* Mobile Tagline */}
                 <p className="text-xs text-gray-400 font-serif italic mt-1 tracking-wide sm:hidden">
-                  Since 1985
+                  Since 2000
                 </p>
 
                 {/* Responsive Decorative Elements */}
@@ -121,27 +219,6 @@ const Header: React.FC = () => {
 
           {/* Right Section - Enhanced Responsive */}
           <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
-            {/* Notifications (Tablet and Desktop) */}
-            <button className="hidden md:flex relative text-gray-300 hover:text-yellow-400 transition-colors duration-200 group p-2">
-              <Bell
-                size={18}
-                className="group-hover:scale-110 transition-transform duration-200"
-              />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* Subscribe Button - Responsive */}
-            {/* <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-2 px-3 sm:px-4 lg:px-6 rounded-lg font-serif text-xs sm:text-sm lg:text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25 whitespace-nowrap">
-              <span className="hidden sm:inline">Subscribe</span>
-              <span className="sm:hidden">Sub</span>
-            </button>
-             */}
-            {/* Sign In Button - Responsive */}
-            {/* <button className="hidden md:flex items-center gap-2 text-gray-300 hover:text-yellow-400 font-medium transition-all duration-200 group border border-gray-700 hover:border-yellow-500/50 px-3 lg:px-4 py-2 rounded-lg">
-              <User size={16} className="group-hover:scale-110 transition-transform duration-200" />
-              <span className="font-serif text-sm lg:text-base">Sign In</span>
-            </button> */}
-
             {/* Mobile Sign In */}
             <button className="md:hidden text-gray-300 hover:text-yellow-400 transition-colors duration-200 p-2">
               <User size={18} />
@@ -154,6 +231,26 @@ const Header: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 z-50 bg-gradient-to-b from-black via-gray-950 to-black border-b-2 border-yellow-500/30 shadow-2xl">
           <div className="max-w-7xl mx-auto px-4 py-6">
+            {/* Weather Widget for Mobile */}
+            <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-yellow-400" />
+                  <span className="text-sm text-gray-400">Iloilo City</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-yellow-400 font-bold">
+                    {weather.loading
+                      ? "Loading..."
+                      : getTemperatureDisplay(weather.temperature)}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {weather.loading ? "" : weather.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Mobile Navigation Links */}
             <nav className="space-y-4 mb-6">
               <Link
@@ -185,14 +282,13 @@ const Header: React.FC = () => {
 
             {/* Mobile User Actions */}
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
-              {/* <button className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300">
-                <User size={16} />
-                Sign In
-              </button>
-               */}
               <button className="flex items-center justify-center gap-2 border border-yellow-500/50 text-yellow-400 font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300 hover:bg-yellow-500/10">
                 <Bell size={16} />
                 Alerts
+              </button>
+              <button className="flex items-center justify-center gap-2 border border-gray-600 text-gray-300 font-bold py-3 px-4 rounded-lg font-serif transition-all duration-300 hover:bg-gray-700/50">
+                <User size={16} />
+                Sign In
               </button>
             </div>
 

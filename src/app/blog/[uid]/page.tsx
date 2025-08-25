@@ -1,25 +1,24 @@
 // app/blog/[uid]/page.tsx
-import React from 'react';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { client } from '../../../../lib/prismicio';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Share2, 
-  Bookmark, 
-  ArrowLeft,
-  Play,
-  MessageCircle,
-  Eye,
-  Tag
-} from 'lucide-react';
-import type { BlogPostDocument } from '../../../../prismicio-types';
 import * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
-import { PrismicRichText } from '@prismicio/react';
+import { PrismicRichText } from "@prismicio/react";
+import {
+  ArrowLeft,
+  Bookmark,
+  Calendar,
+  Clock,
+  Eye,
+  MessageCircle,
+  Play,
+  Share2,
+  Tag,
+  User,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { client } from "../../../../lib/prismicio";
+import type { BlogPostDocument } from "../../../../prismicio-types";
 interface BlogPageProps {
   params: {
     uid: string;
@@ -28,13 +27,13 @@ interface BlogPageProps {
 
 // Helper function to format date
 const formatDate = (dateString: string | null): string => {
-  if (!dateString) return '';
-  
+  if (!dateString) return "";
+
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
@@ -49,21 +48,30 @@ const estimateReadingTime = (content: prismic.RichTextField): string => {
 
 // Helper function to get category styling
 const getCategoryStyle = (category: string | null) => {
-  const categoryMap: Record<string, { bg: string; text: string; name: string }> = {
-    'news': { bg: 'bg-red-600', text: 'text-red-100', name: 'NEWS ANALYSIS' },
-    'sports': { bg: 'bg-blue-600', text: 'text-blue-100', name: 'SPORTS' },
-    'business': { bg: 'bg-green-600', text: 'text-green-100', name: 'BUSINESS' },
-    'featured': { bg: 'bg-yellow-600', text: 'text-yellow-100', name: 'FEATURED' }
+  const categoryMap: Record<
+    string,
+    { bg: string; text: string; name: string }
+  > = {
+    news: { bg: "bg-red-600", text: "text-red-100", name: "NEWS ANALYSIS" },
+    sports: { bg: "bg-blue-600", text: "text-blue-100", name: "SPORTS" },
+    business: { bg: "bg-green-600", text: "text-green-100", name: "BUSINESS" },
+    featured: {
+      bg: "bg-yellow-600",
+      text: "text-yellow-100",
+      name: "FEATURED",
+    },
   };
-  
-  return category ? categoryMap[category] || categoryMap['news'] : categoryMap['news'];
+
+  return category
+    ? categoryMap[category] || categoryMap["news"]
+    : categoryMap["news"];
 };
 
 export default async function BlogPost({ params }: BlogPageProps) {
   let post: BlogPostDocument;
 
   try {
-    post = await client.getByUID('blog_post', params.uid);
+    post = await client.getByUID("blog_post", params.uid);
   } catch (error) {
     notFound();
   }
@@ -72,13 +80,21 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const readingTime = estimateReadingTime(post.data.content);
   const publishDate = formatDate(post.data.published_date);
   const updateDate = formatDate(post.data.updated_date);
+  const extractTagsFromGroup = (tagsGroup: any[]): string[] => {
+    if (!Array.isArray(tagsGroup)) return [];
+    return tagsGroup
+      .map((item) => item.tag) // Extract the 'tag' field from each group item
+      .filter((tag) => tag && typeof tag === "string") // Remove empty/invalid tags
+      .map((tag) => tag.trim()); // Clean up whitespace
+  };
+  const postTags = extractTagsFromGroup(post.data.tags || []);
 
   return (
     <div className="bg-black min-h-screen">
       {/* Header with back navigation */}
       <header className="bg-black border-b border-yellow-500/30 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
           >
@@ -91,7 +107,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
       <article className="max-w-4xl mx-auto px-4 py-8">
         {/* Category Badge */}
         <div className="mb-6">
-          <span className={`inline-block px-4 py-2 text-sm font-bold tracking-wider uppercase rounded ${categoryStyle.bg} ${categoryStyle.text}`}>
+          <span
+            className={`inline-block px-4 py-2 text-sm font-bold tracking-wider uppercase rounded ${categoryStyle.bg} ${categoryStyle.text}`}
+          >
             {categoryStyle.name}
           </span>
         </div>
@@ -101,7 +119,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
           <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white leading-tight mb-6">
             {post.data.title}
           </h1>
-          
+
           {/* Summary/Subtitle */}
           {post.data.summary && (
             <div className="text-xl text-gray-300 leading-relaxed mb-6 font-light">
@@ -114,7 +132,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
             {/* Audio Player */}
             <button className="flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200">
               <Play size={16} />
-              <span className="text-sm font-medium">Listen to this article • {readingTime} read</span>
+              <span className="text-sm font-medium">
+                Listen to this article • {readingTime} read
+              </span>
             </button>
 
             {/* Share Button */}
@@ -142,7 +162,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
               <Image
                 src={post.data.featured_image.url}
-                alt={post.data.featured_image.alt || 'Article image'}
+                alt={post.data.featured_image.alt || "Article image"}
                 fill
                 className="object-cover"
                 priority
@@ -164,7 +184,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             </div>
             <div>
               <p className="font-medium text-white">
-                By {prismicH.asText(post.data.author) || 'Staff Writer'}
+                By {prismicH.asText(post.data.author) || "Staff Writer"}
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-1">
@@ -194,24 +214,23 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
 
         {/* Article Content */}
-{/* Article Content */}
-<div className="prose prose-lg prose-invert max-w-none">
-  <PrismicRichText
-    field={post.data.content}
-    components={{
-      paragraph: ({ children }) => (
-        <p className="mb-6 text-gray-200">{children}</p>
-      ),
-      heading2: ({ children }) => (
-        <h2 className="mt-8 mb-4 text-2xl font-bold text-white">
-          {children}
-        </h2>
-      ),
-      // add more custom element renderers as needed
-    }}
-  />
-</div>
-
+        {/* Article Content */}
+        <div className="prose prose-lg prose-invert max-w-none">
+          <PrismicRichText
+            field={post.data.content}
+            components={{
+              paragraph: ({ children }) => (
+                <p className="mb-6 text-gray-200">{children}</p>
+              ),
+              heading2: ({ children }) => (
+                <h2 className="mt-8 mb-4 text-2xl font-bold text-white">
+                  {children}
+                </h2>
+              ),
+              // add more custom element renderers as needed
+            }}
+          />
+        </div>
 
         {/* Tags */}
         {post.data.tags && (
@@ -221,7 +240,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
               <span className="text-gray-400 font-medium">Tags:</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {post.data.tags.split(',').map((tag, index) => (
+              {postTags.map((tag, index) => (
                 <Link
                   key={index}
                   href={`/tags/${tag.trim().toLowerCase()}`}
@@ -236,7 +255,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
 
         {/* Share Section */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-          <h3 className="text-lg font-bold text-white mb-4">Share this article</h3>
+          <h3 className="text-lg font-bold text-white mb-4">
+            Share this article
+          </h3>
           <div className="flex justify-center gap-4">
             <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200">
               Facebook
@@ -255,7 +276,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
 
         {/* Related Articles */}
         <div className="mt-16 pt-8 border-t border-gray-800">
-          <h3 className="text-2xl font-bold text-white mb-6 font-serif">Related Articles</h3>
+          <h3 className="text-2xl font-bold text-white mb-6 font-serif">
+            Related Articles
+          </h3>
           <div className="grid md:grid-cols-2 gap-6">
             {/* You can fetch related articles here */}
             <Link href="/blog/related-article-1" className="block group">
@@ -278,20 +301,22 @@ export default async function BlogPost({ params }: BlogPageProps) {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BlogPageProps) {
   try {
-    const post = await client.getByUID('blog_post', params.uid);
-    
+    const post = await client.getByUID("blog_post", params.uid);
+
     return {
       title: post.data.title,
       description: prismicH.asText(post.data.summary),
       openGraph: {
         title: post.data.title,
         description: prismicH.asText(post.data.summary),
-        images: post.data.featured_image?.url ? [post.data.featured_image.url] : [],
+        images: post.data.featured_image?.url
+          ? [post.data.featured_image.url]
+          : [],
       },
     };
   } catch {
     return {
-      title: 'Article Not Found',
+      title: "Article Not Found",
     };
   }
 }

@@ -16,7 +16,7 @@ export default async function Home() {
     const posts: BlogPostDocument[] = await client.getAllByType("blog_post", {
       orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
     });
-
+    console.log(posts);
     // Handle case where no posts exist
     if (!posts || posts.length === 0) {
       return (
@@ -72,7 +72,7 @@ export default async function Home() {
           </div>
         </div>
         <TopStories title={"Local News"} stories={posts} />
-        <TodaysPaperSpotlight />
+        {/* <TodaysPaperSpotlight /> */}
         <TopStories title={"Negros"} stories={posts} />
         <OpinionSection />
         <EnhancedVideoSection />
