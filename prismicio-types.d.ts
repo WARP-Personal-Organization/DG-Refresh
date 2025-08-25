@@ -126,7 +126,7 @@ interface BlogPostDocumentData {
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/fields/select
    */
-  category: prismic.SelectField<"1" | "2">;
+  category: prismic.SelectField<"sports" | "featured" | "news" | "business">;
 
   /**
    * author field in *blog_post*
@@ -172,6 +172,40 @@ interface BlogPostDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/date
    */
   updated_date: prismic.DateField;
+
+  /**
+   * editors pick field in *blog_post*
+   *
+   * - **Field Type**: Boolean
+   * - **Placeholder**: *None*
+   * - **Default Value**: false
+   * - **API ID Path**: blog_post.editors_pick
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/boolean
+   */
+  editors_pick: prismic.BooleanField;
+
+  /**
+   * tags field in *blog_post*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.tags
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  tags: prismic.KeyTextField;
+
+  /**
+   * subcategory field in *blog_post*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.subcategory
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  subcategory: prismic.SelectField<"localnews" | "Fact First">;
 }
 
 /**
@@ -190,7 +224,62 @@ export type BlogPostDocument<Lang extends string = string> =
     Lang
   >;
 
-export type AllDocumentTypes = BlogPostDocument;
+/**
+ * Content for category documents
+ */
+interface CategoryDocumentData {
+  /**
+   * name field in *category*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: category.name
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  name: prismic.KeyTextField;
+
+  /**
+   * hasSubcategories field in *category*
+   *
+   * - **Field Type**: Boolean
+   * - **Placeholder**: *None*
+   * - **Default Value**: false
+   * - **API ID Path**: category.hassubcategories
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/boolean
+   */
+  hassubcategories: prismic.BooleanField;
+
+  /**
+   * subcategories field in *category*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: *None*
+   * - **API ID Path**: category.subcategories
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  subcategories: prismic.SelectField<"1" | "2">;
+}
+
+/**
+ * category document from Prismic
+ *
+ * - **API ID**: `category`
+ * - **Repeatable**: `true`
+ * - **Documentation**: https://prismic.io/docs/content-modeling
+ *
+ * @typeParam Lang - Language API ID of the document.
+ */
+export type CategoryDocument<Lang extends string = string> =
+  prismic.PrismicDocumentWithUID<
+    Simplify<CategoryDocumentData>,
+    "category",
+    Lang
+  >;
+
+export type AllDocumentTypes = BlogPostDocument | CategoryDocument;
 
 declare module "@prismicio/client" {
   interface CreateClient {
@@ -212,6 +301,12 @@ declare module "@prismicio/client" {
   }
 
   namespace Content {
-    export type { BlogPostDocument, BlogPostDocumentData, AllDocumentTypes };
+    export type {
+      BlogPostDocument,
+      BlogPostDocumentData,
+      CategoryDocument,
+      CategoryDocumentData,
+      AllDocumentTypes,
+    };
   }
 }

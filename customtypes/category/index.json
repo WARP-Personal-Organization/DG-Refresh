@@ -1,0 +1,41 @@
+{
+  "format": "custom",
+  "id": "category",
+  "label": "category",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "name": {
+        "type": "Text",
+        "config": {
+          "label": "name",
+          "placeholder": ""
+        }
+      },
+      "hassubcategories": {
+        "type": "Boolean",
+        "config": {
+          "label": "hasSubcategories",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
+      "subcategories": {
+        "type": "Select",
+        "config": {
+          "label": "subcategories",
+          "placeholder": "",
+          "options": ["1", "2"]
+        }
+      }
+    }
+  }
+}
