@@ -50,7 +50,79 @@
         "config": {
           "label": "category",
           "placeholder": "",
-          "options": ["sports", "featured", "news", "business"]
+          "options": [
+            "news",
+            "feature",
+            "opinion",
+            "industries",
+            "sports",
+            "business",
+            "other-pages"
+          ]
+        }
+      },
+      "subcategory": {
+        "type": "Select",
+        "config": {
+          "label": "subcategory",
+          "placeholder": "",
+          "options": [
+            "local",
+            "health",
+            "auto-racing",
+            "fact-check-news",
+            "cebu",
+            "negroes",
+            "health-wellness",
+            "medical-frontiers",
+            "travel",
+            "destinations",
+            "entertainment",
+            "film",
+            "music",
+            "celebrity-news",
+            "lifestyle",
+            "fashion",
+            "food",
+            "franchise-living",
+            "arts-culture",
+            "therapeutic-arts-stories",
+            "cultural-events",
+            "education",
+            "academic-updates",
+            "universities",
+            "students-teachers",
+            "environment",
+            "climate-change",
+            "environmental-awareness",
+            "green-lifestyles",
+            "editorial",
+            "current-events",
+            "politics",
+            "special-issues",
+            "foreign-politics-trends",
+            "weekly-fashion-trends",
+            "weekly-fashion-shopping",
+            "exposer",
+            "entertainment-social-impact",
+            "community-building-advocacy-reporting",
+            "sports-day",
+            "farm-related-supplies-stories",
+            "local-news",
+            "all-sport-games",
+            "national-news",
+            "business",
+            "motoring",
+            "vehicles",
+            "transportation",
+            "techbark",
+            "innovations-gadgets",
+            "about-us",
+            "news-members-staff",
+            "contact-us",
+            "company-details-social-platforms",
+            "pricing-terms-feedback-survey"
+          ]
         }
       },
       "author": {
@@ -95,18 +167,104 @@
         }
       },
       "tags": {
-        "type": "Text",
+        "type": "Group",
         "config": {
-          "label": "tags",
-          "placeholder": ""
+          "label": "Tags",
+          "fields": {
+            "tag": {
+              "type": "Select",
+              "config": {
+                "label": "Tag",
+                "placeholder": "Select a tag",
+                "options": [
+                  "local-news",
+                  "health-wellness",
+                  "auto-racing",
+                  "fact-check-news",
+                  "cebu-news",
+                  "negroes-news",
+                  "medical-frontiers",
+                  "travel-destinations",
+                  "entertainment",
+                  "film-reviews",
+                  "music-news",
+                  "celebrity-updates",
+                  "lifestyle-trends",
+                  "fashion-style",
+                  "food-dining",
+                  "franchise-business",
+                  "arts-culture",
+                  "therapeutic-arts",
+                  "cultural-events",
+                  "education-news",
+                  "academic-updates",
+                  "university-news",
+                  "student-life",
+                  "teacher-stories",
+                  "environment-news",
+                  "climate-change",
+                  "green-living",
+                  "environmental-awareness",
+                  "editorial-opinion",
+                  "current-events",
+                  "politics-news",
+                  "special-issues",
+                  "foreign-politics",
+                  "fashion-trends",
+                  "fashion-shopping",
+                  "investigative-journalism",
+                  "social-impact",
+                  "community-building",
+                  "advocacy-reporting",
+                  "sports-day",
+                  "farming-agriculture",
+                  "all-sports",
+                  "national-news",
+                  "business-news",
+                  "automotive",
+                  "vehicles",
+                  "transportation",
+                  "technology",
+                  "innovations",
+                  "gadgets",
+                  "company-news",
+                  "staff-updates",
+                  "contact-info"
+                ]
+              }
+            },
+            "priority": {
+              "type": "Select",
+              "config": {
+                "label": "Tag Priority",
+                "placeholder": "",
+                "options": ["primary", "secondary", "tertiary"]
+              }
+            }
+          }
         }
       },
-      "subcategory": {
-        "type": "Select",
+      "reading_time": {
+        "type": "Number",
         "config": {
-          "label": "subcategory",
-          "placeholder": "",
-          "options": ["localnews", "Fact First"]
+          "label": "Estimated Reading Time (minutes)",
+          "placeholder": "Auto-calculated if left empty"
+        }
+      },
+      "meta_description": {
+        "type": "Text",
+        "config": {
+          "label": "Meta Description",
+          "placeholder": "SEO meta description"
+        }
+      },
+      "is_breaking_news": {
+        "type": "Boolean",
+        "config": {
+          "label": "Breaking News",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
         }
       }
     }
