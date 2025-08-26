@@ -17,7 +17,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { BlogPostDocument } from "../../../../prismicio-types";
-type Params = { subcategory: string };
+
+// FIXED: Changed to Promise type for Next.js 15+
+type Params = Promise<{ subcategory: string }>;
 interface SubCategoryPageProps {
   params: Params;
 }
@@ -72,12 +74,10 @@ const formatDate = (dateString: string | null | undefined): string => {
   }
 };
 
-// Updated comprehensive mapping for all subcategories
-
-// Updated display name formatting
-
 // Generate static params for all subcategories
-export async function generateStaticParams(): Promise<Params[]> {
+export async function generateStaticParams(): Promise<
+  { subcategory: string }[]
+> {
   const client = createClient();
 
   try {
@@ -103,11 +103,12 @@ export async function generateStaticParams(): Promise<Params[]> {
   }
 }
 
-// Generate metadata for the page
+// FIXED: Generate metadata for the page - now awaits params
 export async function generateMetadata({
   params,
 }: SubCategoryPageProps): Promise<Metadata> {
-  const subcategoryValue = slugToSubcategory(params.subcategory);
+  const resolvedParams = await params;
+  const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
   const displayName = formatSubcategoryName(subcategoryValue);
 
   return {
@@ -126,7 +127,7 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
 
   return (
     <Link href={`/blog/${article.uid}`} className="block group">
-      <article className="bg-black border border-gray-800 hover:border-yellow-500/50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10">
+      <article className="bg-[#1b1a1b] border border-gray-800 hover:border-[#fcee16]/50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-[#fcee16]/10">
         {/* Article Image */}
         {article.data.featured_image?.url && (
           <div className="relative aspect-[16/10] overflow-hidden">
@@ -141,7 +142,7 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
 
             {/* Article Number Badge */}
             <div className="absolute top-4 left-4">
-              <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
+              <span className="bg-[#fcee16] text-[#1b1a1b] px-2 py-1 rounded-full text-xs font-bold">
                 #{index + 1}
               </span>
             </div>
@@ -159,7 +160,7 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
 
         <div className="p-6 space-y-4">
           {/* Article Title */}
-          <h3 className="text-xl font-serif font-bold text-white group-hover:text-yellow-200 transition-colors duration-200 leading-tight">
+          <h3 className="text-xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
             {renderText(article.data.title) || "Untitled Article"}
           </h3>
 
@@ -172,23 +173,23 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
-                <User size={12} className="text-yellow-400" />
+                <User size={12} className="text-[#fcee16]" />
                 {renderText(article.data.author) || "Staff Reporter"}
               </span>
               <span className="flex items-center gap-1">
-                <Calendar size={12} className="text-yellow-400" />
+                <Calendar size={12} className="text-[#fcee16]" />
                 {formatDate(article.data.published_date)}
               </span>
               {article.data.reading_time && (
                 <span className="flex items-center gap-1">
-                  <Clock size={12} className="text-yellow-400" />
+                  <Clock size={12} className="text-[#fcee16]" />
                   {article.data.reading_time} min
                 </span>
               )}
             </div>
 
             {/* Read More Arrow */}
-            <div className="text-yellow-400 group-hover:translate-x-1 transition-transform duration-200">
+            <div className="text-[#fcee16] group-hover:translate-x-1 transition-transform duration-200">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -223,15 +224,15 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
   article,
 }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
-    <article className="bg-gradient-to-r from-gray-900 to-black border border-yellow-500/30 rounded-lg overflow-hidden">
+    <article className="bg-gradient-to-r from-[#1b1a1b] to-black border border-[#fcee16]/30 rounded-lg overflow-hidden">
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Content Side */}
         <div className="p-8 space-y-6">
           <div className="flex items-center gap-4">
-            <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider">
+            <span className="inline-block bg-[#fcee16] text-[#1b1a1b] px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider">
               Featured Story
             </span>
-            <TrendingUp className="text-yellow-400" size={20} />
+            <TrendingUp className="text-[#fcee16]" size={20} />
             {article.data.is_breaking_news && (
               <span className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                 BREAKING NEWS
@@ -239,7 +240,7 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
             )}
           </div>
 
-          <h2 className="text-3xl lg:text-4xl font-serif font-bold text-white group-hover:text-yellow-200 transition-colors duration-300 leading-tight">
+          <h2 className="text-3xl lg:text-4xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-300 leading-tight">
             {renderText(article.data.title) || "Untitled Article"}
           </h2>
 
@@ -249,23 +250,23 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
 
           <div className="flex items-center gap-6 text-sm text-gray-400">
             <span className="flex items-center gap-2">
-              <User size={16} className="text-yellow-400" />
+              <User size={16} className="text-[#fcee16]" />
               {renderText(article.data.author) || "Staff Reporter"}
             </span>
             <span className="flex items-center gap-2">
-              <Calendar size={16} className="text-yellow-400" />
+              <Calendar size={16} className="text-[#fcee16]" />
               {formatDate(article.data.published_date)}
             </span>
             {article.data.reading_time && (
               <span className="flex items-center gap-2">
-                <Clock size={16} className="text-yellow-400" />
+                <Clock size={16} className="text-[#fcee16]" />
                 {article.data.reading_time} min read
               </span>
             )}
           </div>
 
           <div className="pt-4">
-            <span className="inline-flex items-center gap-2 text-yellow-400 font-semibold group-hover:gap-3 transition-all duration-200">
+            <span className="inline-flex items-center gap-2 text-[#fcee16] font-semibold group-hover:gap-3 transition-all duration-200">
               Read Full Story
               <svg
                 className="w-5 h-5"
@@ -301,13 +302,16 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
   </Link>
 );
 
+// FIXED: Main page component - now awaits params
 export default async function SubCategoryPage({
   params,
 }: SubCategoryPageProps) {
   const client = createClient();
 
   try {
-    const subcategoryValue = slugToSubcategory(params.subcategory);
+    // FIXED: Await the params promise
+    const resolvedParams = await params;
+    const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
     const displayName = formatSubcategoryName(subcategoryValue);
 
     // Fetch all blog posts for this subcategory
@@ -338,14 +342,14 @@ export default async function SubCategoryPage({
     );
 
     return (
-      <div className="bg-black min-h-screen text-white">
+      <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Enhanced Header */}
           <div className="mb-12">
             {/* Back Navigation */}
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors duration-200 mb-6 group"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 mb-6 group"
             >
               <ArrowLeft
                 size={16}
@@ -356,11 +360,11 @@ export default async function SubCategoryPage({
 
             {/* Page Title */}
             <div className="space-y-4">
-              <h1 className="text-5xl lg:text-6xl font-serif font-bold text-white">
+              <h1 className="text-5xl lg:text-6xl font-roboto font-bold text-white">
                 {displayName}
               </h1>
               <div className="flex items-center gap-4">
-                <div className="h-1 w-24 bg-gradient-to-r from-yellow-400 to-yellow-500"></div>
+                <div className="h-1 w-24 bg-[#fcee16]"></div>
                 <span className="text-lg text-gray-300">
                   {allPosts.length} article{allPosts.length !== 1 ? "s" : ""}{" "}
                   available
@@ -384,7 +388,7 @@ export default async function SubCategoryPage({
                     <Link
                       key={article.id}
                       href={`/blog/${article.uid}`}
-                      className="block text-white hover:text-yellow-200 transition-colors duration-200"
+                      className="block text-white hover:text-[#fcee16] transition-colors duration-200"
                     >
                       <span className="font-semibold">
                         {renderText(article.data.title)}
@@ -410,8 +414,8 @@ export default async function SubCategoryPage({
               {regularArticles.length > 0 && (
                 <section>
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-yellow-500"></div>
-                    <h2 className="text-3xl font-serif font-bold text-white">
+                    <div className="w-1 h-8 bg-[#fcee16]"></div>
+                    <h2 className="text-3xl font-roboto font-bold text-white">
                       Latest {displayName} Articles
                     </h2>
                   </div>
@@ -436,10 +440,10 @@ export default async function SubCategoryPage({
               <div className="sticky top-8 space-y-8">
                 {/* Editor's Picks */}
                 {editorsPicks.length > 0 && (
-                  <section className="bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-lg p-6">
+                  <section className="bg-gradient-to-b from-[#1b1a1b] to-black border border-gray-800 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <TrendingUp className="text-yellow-400" size={20} />
-                      <h3 className="text-xl font-serif font-bold text-white">
+                      <TrendingUp className="text-[#fcee16]" size={20} />
+                      <h3 className="text-xl font-roboto font-bold text-white">
                         Editor&apos;s Picks
                       </h3>
                     </div>
@@ -454,11 +458,11 @@ export default async function SubCategoryPage({
                             className="block group"
                           >
                             <div className="flex gap-4">
-                              <span className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 text-black font-bold rounded-full flex items-center justify-center text-sm">
+                              <span className="flex-shrink-0 w-8 h-8 bg-[#fcee16] text-[#1b1a1b] font-bold rounded-full flex items-center justify-center text-sm">
                                 {index + 1}
                               </span>
                               <div className="space-y-2">
-                                <h4 className="text-white group-hover:text-yellow-200 transition-colors text-sm font-semibold leading-tight">
+                                <h4 className="text-white group-hover:text-[#fcee16] transition-colors text-sm font-semibold leading-tight font-open-sans">
                                   {renderText(article.data.title) ||
                                     "Untitled Article"}
                                 </h4>
@@ -474,37 +478,6 @@ export default async function SubCategoryPage({
                 )}
 
                 {/* Enhanced Category Stats */}
-                <section className="bg-gradient-to-b from-gray-900 to-black border border-gray-800 rounded-lg p-6">
-                  <h3 className="text-xl font-serif font-bold text-white mb-6">
-                    {displayName} Overview
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
-                      <span className="text-gray-300">Total Articles</span>
-                      <span className="text-yellow-400 font-bold text-lg">
-                        {allPosts.length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
-                      <span className="text-gray-300">Featured Stories</span>
-                      <span className="text-yellow-400 font-bold text-lg">
-                        {featuredArticles.length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
-                      <span className="text-gray-300">Editor&apos;s Picks</span>
-                      <span className="text-yellow-400 font-bold text-lg">
-                        {editorsPicks.length}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-gray-800 rounded">
-                      <span className="text-gray-300">Breaking News</span>
-                      <span className="text-red-400 font-bold text-lg">
-                        {breakingNews.length}
-                      </span>
-                    </div>
-                  </div>
-                </section>
               </div>
             </div>
           </div>

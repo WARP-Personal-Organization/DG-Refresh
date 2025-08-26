@@ -103,11 +103,11 @@ const OpinionSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 border-t border-gray-800">
+    <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-gray-800">
-          <h2 className="text-3xl font-serif font-bold text-white">Opinion</h2>
+          <h2 className="text-3xl font-roboto font-bold text-white">Opinion</h2>
         </div>
 
         {/* Main Content Grid */}
@@ -121,19 +121,19 @@ const OpinionSection: React.FC = () => {
               <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-gray-800">
                 {/* Content */}
                 <div className="space-y-4">
-                  <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide">
+                  <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
                     Opinion
                   </div>
 
-                  <h1 className="text-3xl font-serif font-bold text-white leading-tight group-hover:text-gray-300 transition-colors duration-200">
+                  <h1 className="text-3xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
                     {featuredArticle.title}
                   </h1>
 
-                  <p className="text-lg text-gray-400 leading-relaxed">
+                  <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
                     {featuredArticle.subtitle}
                   </p>
 
-                  <div className="flex items-center gap-3 text-sm text-gray-500 pt-2">
+                  <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
                     <span className="font-medium">
                       {featuredArticle.author.name}
                     </span>
@@ -160,12 +160,12 @@ const OpinionSection: React.FC = () => {
           <div className="lg:col-span-1 border-l border-gray-800 pl-8">
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-serif font-bold text-white">
+                <h3 className="text-lg font-roboto font-bold text-white">
                   More Opinion
                 </h3>
                 <Link
                   href="/opinion"
-                  className="text-yellow-500 hover:text-yellow-400 text-sm flex items-center gap-1 transition-colors duration-200"
+                  className="text-[#fcee16] hover:text-[#fcee16]/80 text-sm flex items-center gap-1 transition-colors duration-200 font-open-sans"
                 >
                   More <ChevronRight size={14} />
                 </Link>
@@ -181,16 +181,16 @@ const OpinionSection: React.FC = () => {
                     className="block group"
                   >
                     {article.category && (
-                      <div className="text-yellow-500 text-xs font-medium uppercase tracking-wide mb-2">
+                      <div className="text-[#fcee16] text-xs font-medium uppercase tracking-wide mb-2 font-open-sans">
                         {article.category}
                       </div>
                     )}
 
-                    <h4 className="font-serif font-semibold text-white text-sm leading-tight mb-2 group-hover:text-gray-300 transition-colors duration-200">
+                    <h4 className="font-roboto font-semibold text-white text-sm leading-tight mb-2 group-hover:text-[#fcee16] transition-colors duration-200">
                       {article.title}
                     </h4>
 
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 font-open-sans">
                       {article.author.name}
                     </div>
                   </Link>
@@ -206,15 +206,15 @@ const OpinionSection: React.FC = () => {
             <article key={article.id} className="group">
               <Link href={`/opinion/${article.slug}`} className="block">
                 {/* Quote marker */}
-                <div className="text-4xl text-yellow-500 font-serif mb-3 leading-none">
+                <div className="text-4xl text-[#fcee16] font-roboto mb-3 leading-none">
                   &quot;
                 </div>
 
-                <h3 className="font-serif font-bold text-lg text-white leading-tight mb-4 group-hover:text-gray-300 transition-colors duration-200">
+                <h3 className="font-roboto font-bold text-lg text-white leading-tight mb-4 group-hover:text-[#fcee16] transition-colors duration-200">
                   {article.title}
                 </h3>
 
-                <div className="text-sm text-gray-500 border-t border-gray-800/50 pt-3">
+                <div className="text-sm text-gray-500 border-t border-gray-800/50 pt-3 font-open-sans">
                   {article.author.name}
                 </div>
               </Link>
@@ -226,7 +226,7 @@ const OpinionSection: React.FC = () => {
         <div className="text-center mt-12 pt-8 border-t border-gray-800">
           <Link
             href="/opinion"
-            className="inline-block px-6 py-3 text-yellow-500 hover:text-yellow-400 font-medium transition-colors duration-200 border border-yellow-500 hover:border-yellow-400 rounded"
+            className="inline-block px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans"
           >
             View All Opinion
           </Link>

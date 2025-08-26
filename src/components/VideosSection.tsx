@@ -113,14 +113,16 @@ const EnhancedVideoSection: React.FC = () => {
   };
 
   return (
-    <section className="py-12 border-t border-gray-800">
+    <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-gray-800">
-          <h2 className="text-3xl font-serif font-bold text-white mb-2">
+          <h2 className="text-3xl font-roboto font-bold text-white mb-2">
             DGD Documentaries
           </h2>
-          <p className="text-gray-400 italic">Your Stories Are Us</p>
+          <p className="text-gray-400 italic font-open-sans">
+            Your Stories Are Us
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -136,36 +138,36 @@ const EnhancedVideoSection: React.FC = () => {
 
               {/* Simple Play Button */}
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center group cursor-pointer">
-                <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center group-hover:bg-yellow-400 transition-colors duration-200">
+                <div className="w-16 h-16 bg-[#fcee16] rounded-full flex items-center justify-center group-hover:bg-[#fcee16]/80 transition-colors duration-200">
                   <Play
                     size={24}
-                    className="text-black ml-1"
+                    className="text-[#1b1a1b] ml-1"
                     fill="currentColor"
                   />
                 </div>
               </div>
 
               {/* Duration */}
-              <div className="absolute bottom-4 right-4 bg-black/80 text-white px-2 py-1 rounded text-sm">
+              <div className="absolute bottom-4 right-4 bg-black/80 text-white px-2 py-1 rounded text-sm font-open-sans">
                 {selectedVideo.duration}
               </div>
             </div>
 
             {/* Video Info */}
             <div className="space-y-4">
-              <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide">
+              <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
                 {selectedVideo.category}
               </div>
 
-              <h3 className="text-2xl font-serif font-bold text-white leading-tight">
+              <h3 className="text-2xl font-roboto font-bold text-white leading-tight">
                 {selectedVideo.title}
               </h3>
 
-              <p className="text-gray-400 leading-relaxed">
+              <p className="text-gray-400 leading-relaxed font-open-sans">
                 {selectedVideo.description}
               </p>
 
-              <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-gray-800/50">
+              <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-gray-800/50 font-open-sans">
                 <span className="flex items-center gap-2">
                   <Users size={14} />
                   {selectedVideo.views} views
@@ -181,7 +183,7 @@ const EnhancedVideoSection: React.FC = () => {
             {/* Playlist Header */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-serif font-bold text-white">
+                <h4 className="text-lg font-roboto font-bold text-white">
                   Episodes
                 </h4>
 
@@ -191,7 +193,7 @@ const EnhancedVideoSection: React.FC = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="bg-black border border-gray-700 text-white rounded px-2 py-1 text-sm focus:border-yellow-500 focus:outline-none"
+                    className="bg-black border border-gray-700 text-white rounded px-2 py-1 text-sm focus:border-[#fcee16] focus:outline-none font-open-sans"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
@@ -202,7 +204,7 @@ const EnhancedVideoSection: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 font-open-sans">
                 {filteredVideos.length} episodes available
               </p>
             </div>
@@ -221,7 +223,7 @@ const EnhancedVideoSection: React.FC = () => {
                 >
                   <div className="flex gap-3">
                     {/* Episode Number */}
-                    <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-black rounded-full flex items-center justify-center text-xs font-bold">
+                    <div className="flex-shrink-0 w-6 h-6 bg-[#fcee16] text-[#1b1a1b] rounded-full flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </div>
 
@@ -236,11 +238,11 @@ const EnhancedVideoSection: React.FC = () => {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h5 className="text-sm font-semibold text-white group-hover:text-gray-300 transition-colors duration-200 leading-tight mb-1">
+                      <h5 className="text-sm font-semibold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight mb-1 font-roboto">
                         {video.title}
                       </h5>
 
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans">
                         <span className="flex items-center gap-1">
                           <Clock size={10} />
                           {video.duration}
@@ -258,7 +260,7 @@ const EnhancedVideoSection: React.FC = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <button className="px-6 py-3 text-yellow-500 hover:text-yellow-400 font-medium transition-colors duration-200 border border-yellow-500 hover:border-yellow-400 rounded">
+          <button className="px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans">
             View All Episodes
           </button>
         </div>

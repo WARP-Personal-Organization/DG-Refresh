@@ -70,15 +70,15 @@ const ArticleCard: React.FC<{ article: BlogPostDocument }> = ({ article }) => (
 
       {/* Article Content */}
       <div className="space-y-3">
-        <h3 className="text-lg font-serif font-bold text-white leading-tight group-hover:text-gray-300 transition-colors duration-200">
+        <h3 className="text-lg font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
           {article.data.title || "Untitled Article"}
         </h3>
 
-        <p className="text-gray-400 text-sm leading-relaxed">
+        <p className="text-gray-400 text-sm leading-relaxed font-open-sans">
           {renderText(article.data.summary).substring(0, 120)}...
         </p>
 
-        <div className="flex items-center gap-3 text-xs text-gray-500 pt-2">
+        <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 font-open-sans">
           <span>{renderText(article.data.author) || "Staff"}</span>
           <span>•</span>
           <span>{formatDate(article.data.published_date)}</span>
@@ -96,11 +96,11 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
   recommendedArticles,
 }) => {
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Clean Category Header */}
         <div className="mb-12 pb-4 border-b border-gray-800">
-          <h1 className="text-4xl font-serif font-bold text-white">
+          <h1 className="text-4xl font-roboto font-bold text-white">
             {categoryName}
           </h1>
         </div>
@@ -118,15 +118,15 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                   <article className="grid md:grid-cols-2 gap-8">
                     {/* Content */}
                     <div className="space-y-4">
-                      <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide">
+                      <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
                         Featured
                       </div>
 
-                      <h2 className="text-3xl font-serif font-bold text-white leading-tight group-hover:text-gray-300 transition-colors duration-200">
+                      <h2 className="text-3xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
                         {featuredArticle.data.title || "Untitled Article"}
                       </h2>
 
-                      <p className="text-lg text-gray-400 leading-relaxed">
+                      <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
                         {renderText(featuredArticle.data.summary).substring(
                           0,
                           200
@@ -134,7 +134,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                         ...
                       </p>
 
-                      <div className="flex items-center gap-3 text-sm text-gray-500 pt-2">
+                      <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
                         <span>
                           {renderText(featuredArticle.data.author) || "Staff"}
                         </span>
@@ -168,7 +168,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             {/* Latest Articles */}
             {newsArticles.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                   Latest {categoryName}
                 </h2>
 
@@ -183,7 +183,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             {/* Related Stories */}
             {opinionArticles.length > 0 && (
               <section>
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                   Related Stories
                 </h2>
 
@@ -201,7 +201,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             <div className="sticky top-8">
               {recommendedArticles.length > 0 && (
                 <section>
-                  <h3 className="text-lg font-serif font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                  <h3 className="text-lg font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                     Recommended
                   </h3>
 
@@ -217,17 +217,17 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                         >
                           <div className="flex gap-3">
                             {/* Number */}
-                            <span className="flex-shrink-0 w-6 h-6 bg-yellow-500 text-black font-bold rounded-full flex items-center justify-center text-xs">
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#fcee16] text-[#1b1a1b] font-bold rounded-full flex items-center justify-center text-xs">
                               {index + 1}
                             </span>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-white group-hover:text-gray-300 transition-colors duration-200 text-sm font-semibold leading-tight mb-2">
+                              <h4 className="text-white group-hover:text-[#fcee16] transition-colors duration-200 text-sm font-semibold leading-tight mb-2 font-roboto">
                                 {article.data.title || "Untitled Article"}
                               </h4>
 
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 font-open-sans">
                                 {formatDate(article.data.published_date)}
                               </div>
                             </div>
@@ -238,34 +238,6 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                   </div>
                 </section>
               )}
-
-              {/* Category Stats */}
-              <section className="mt-8 pt-6 border-t border-gray-800">
-                <h3 className="text-lg font-serif font-bold text-white mb-4">
-                  {categoryName} Overview
-                </h3>
-
-                <div className="space-y-3 text-sm text-gray-400">
-                  <div className="flex justify-between">
-                    <span>Latest Articles</span>
-                    <span className="text-yellow-500 font-medium">
-                      {newsArticles.length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Related Stories</span>
-                    <span className="text-yellow-500 font-medium">
-                      {opinionArticles.length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Recommended</span>
-                    <span className="text-yellow-500 font-medium">
-                      {recommendedArticles.length}
-                    </span>
-                  </div>
-                </div>
-              </section>
             </div>
           </div>
         </div>

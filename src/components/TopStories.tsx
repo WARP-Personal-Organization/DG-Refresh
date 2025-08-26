@@ -1,6 +1,5 @@
 import type * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
-import { Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -56,7 +55,7 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
 
         {/* Stories Grid - Clean Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {topStories.map((story, index) => (
+          {topStories.map((story) => (
             <article key={story.id} className="group">
               <Link href={`/blog/${story.uid}`} className="block">
                 {/* Story Image */}

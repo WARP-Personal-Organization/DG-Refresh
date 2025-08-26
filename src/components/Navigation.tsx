@@ -15,7 +15,7 @@ const navigationData = [
       { name: "AUTO RACING", href: "/subcategory/auto-racing" },
       { name: "FACT CHECK NEWS", href: "/subcategory/fact-check-news" },
       { name: "CEBU", href: "/subcategory/cebu" },
-      { name: "NEGROES", href: "/subcategory/negroes" },
+      { name: "NEGROS", href: "/subcategory/negroes" },
     ],
   },
   {
@@ -171,7 +171,7 @@ const NavigationBar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-black text-white border-t border-b border-yellow-500/30 relative z-50">
+    <nav className="bg-black text-white border-t border-b border-[#fcee16]/30 relative  font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Navigation */}
         <ul className="hidden md:flex z-20 justify-center space-x-8 text-sm relative">
@@ -185,7 +185,7 @@ const NavigationBar: React.FC = () => {
               <Link
                 href={item.href}
                 className={`
-                  flex items-center gap-1 py-2 px-1 font-serif font-medium tracking-wider transition-all duration-300 hover:text-yellow-400
+                  flex items-center gap-1 py-2 px-1 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#fcee16]
                 `}
               >
                 {item.name.toUpperCase()}
@@ -204,7 +204,7 @@ const NavigationBar: React.FC = () => {
                 <div
                   className={`
                   absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 
-                  bg-black border-2 border-yellow-500/30 rounded-lg shadow-xl shadow-yellow-500/10
+                  bg-black border-2 border-[#fcee16] rounded-lg shadow-xl shadow-[#fcee16]/20
                   transition-all duration-300 ease-out group
                   ${
                     activeDropdown === item.name
@@ -214,24 +214,24 @@ const NavigationBar: React.FC = () => {
                 `}
                 >
                   {/* Gold accent line - appears on hover */}
-                  <div className="h-0 group-hover:h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-t-md transition-all duration-300 ease-out"></div>
+                  <div className="h-0 group-hover:h-1 bg-[#fcee16] rounded-t-md transition-all duration-300 ease-out"></div>
 
                   {/* Scrollable dropdown content */}
                   <div
                     className={`py-2 ${
                       item.name === "Feature"
-                        ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500 scrollbar-track-gray-800 hover:scrollbar-thumb-yellow-400"
+                        ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800 hover:scrollbar-thumb-[#fcee16]/80"
                         : ""
                     }`}
                   >
                     {/* Scroll indicator for Feature dropdown */}
                     {item.name === "Feature" && (
-                      <div className="px-4 py-2 border-b border-yellow-500/20 bg-yellow-500/5 sticky top-0 z-10">
+                      <div className="px-4 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-yellow-400 font-medium">
+                          <span className="text-[#fcee16] font-medium font-open-sans">
                             {item.dropdown?.length} subcategories
                           </span>
-                          <span className="text-gray-400 flex items-center gap-1">
+                          <span className="text-gray-400 flex items-center gap-1 font-open-sans">
                             <svg
                               className="w-3 h-3"
                               fill="currentColor"
@@ -254,7 +254,7 @@ const NavigationBar: React.FC = () => {
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href}
-                          className="block px-4 py-3 text-sm font-serif text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/50"
+                          className="block px-4 py-3 text-sm font-open-sans text-gray-300 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/50"
                         >
                           {dropdownItem.name}
                         </Link>
@@ -262,10 +262,10 @@ const NavigationBar: React.FC = () => {
                   </div>
 
                   {/* Bottom accent */}
-                  <div className="px-4 py-2 border-t border-yellow-500/20 bg-yellow-500/5 sticky bottom-0">
+                  <div className="px-4 py-2 border-t border-[#fcee16]/20 bg-[#fcee16]/5 sticky bottom-0">
                     <Link
                       href={item.href}
-                      className="text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors duration-200"
+                      className="text-xs text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 font-open-sans"
                     >
                       View All {item.name} →
                     </Link>
@@ -279,14 +279,14 @@ const NavigationBar: React.FC = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between">
           {/* Logo/Brand */}
-          <div className="text-yellow-500 font-serif font-bold text-lg tracking-wider">
+          <div className="text-[#fcee16] font-roboto font-bold text-lg tracking-wider">
             MENU
           </div>
 
           {/* Burger Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200 p-2"
+            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-2"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -315,18 +315,18 @@ const NavigationBar: React.FC = () => {
       {/* Mobile Menu */}
       <div
         className={`
-          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-yellow-500/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
+          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-[#fcee16]/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
           ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Mobile Menu Header */}
-        <div className="flex items-center justify-between p-4 border-b border-yellow-500/30 sticky top-0 bg-black">
-          <span className="text-yellow-500 font-serif font-bold text-xl tracking-wider">
+        <div className="flex items-center justify-between p-4 border-b border-[#fcee16]/30 sticky top-0 bg-black">
+          <span className="text-[#fcee16] font-roboto font-bold text-xl tracking-wider">
             NAVIGATION
           </span>
           <button
             onClick={closeMobileMenu}
-            className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200 p-1"
+            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-1"
           >
             <X size={24} />
           </button>
@@ -343,11 +343,11 @@ const NavigationBar: React.FC = () => {
                     href={item.href}
                     onClick={closeMobileMenu}
                     className={`
-                      flex-1 font-serif font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent
+                      flex-1 font-roboto font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent
                       ${
                         index === 0
-                          ? "text-yellow-500"
-                          : "text-gray-200 hover:text-yellow-300"
+                          ? "text-[#fcee16]"
+                          : "text-gray-200 hover:text-[#fcee16]"
                       }
                     `}
                   >
@@ -355,7 +355,7 @@ const NavigationBar: React.FC = () => {
                       {item.name.toUpperCase()}
                       {/* Active indicator dot */}
                       {index === 0 && (
-                        <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full ml-2"></span>
+                        <span className="inline-block w-2 h-2 bg-[#fcee16] rounded-full ml-2"></span>
                       )}
                     </span>
                   </Link>
@@ -367,7 +367,7 @@ const NavigationBar: React.FC = () => {
                         e.stopPropagation();
                         toggleMobileDropdown(item.name);
                       }}
-                      className="p-2 text-gray-400 hover:text-yellow-400 transition-colors duration-200"
+                      className="p-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200"
                     >
                       <ChevronRight
                         size={16}
@@ -396,12 +396,12 @@ const NavigationBar: React.FC = () => {
                     {/* Mobile scroll indicator for Feature */}
                     {item.name === "Feature" &&
                       mobileExpandedItems.has(item.name) && (
-                        <div className="px-10 py-2 border-b border-yellow-500/20 bg-yellow-500/5 sticky top-0 z-10">
+                        <div className="px-10 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-yellow-400 font-medium">
+                            <span className="text-[#fcee16] font-medium font-open-sans">
                               {item.dropdown?.length} items
                             </span>
-                            <span className="text-gray-400 flex items-center gap-1">
+                            <span className="text-gray-400 flex items-center gap-1 font-open-sans">
                               <svg
                                 className="w-3 h-3 animate-bounce"
                                 fill="currentColor"
@@ -423,7 +423,7 @@ const NavigationBar: React.FC = () => {
                     <div
                       className={
                         item.name === "Feature"
-                          ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500 scrollbar-track-gray-800"
+                          ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800"
                           : ""
                       }
                     >
@@ -433,7 +433,7 @@ const NavigationBar: React.FC = () => {
                             key={dropdownItem.name}
                             href={dropdownItem.href}
                             onClick={closeMobileMenu}
-                            className="block px-10 py-3 text-sm font-serif text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/30"
+                            className="block px-10 py-3 text-sm font-open-sans text-gray-400 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/30"
                           >
                             {dropdownItem.name}
                           </Link>
@@ -441,11 +441,11 @@ const NavigationBar: React.FC = () => {
                     </div>
 
                     {/* View All Link - sticky at bottom */}
-                    <div className="sticky bottom-0 bg-gray-950/50 border-t border-yellow-500/20">
+                    <div className="sticky bottom-0 bg-gray-950/50 border-t border-[#fcee16]/20">
                       <Link
                         href={item.href}
                         onClick={closeMobileMenu}
-                        className="block px-10 py-3 text-xs font-serif text-yellow-400 hover:text-yellow-300 bg-yellow-500/5 transition-colors duration-200"
+                        className="block px-10 py-3 text-xs font-open-sans text-[#fcee16] hover:text-[#fcee16]/80 bg-[#fcee16]/5 transition-colors duration-200"
                       >
                         View All {item.name} →
                       </Link>
@@ -457,14 +457,14 @@ const NavigationBar: React.FC = () => {
           </ul>
 
           {/* Mobile Menu Footer */}
-          <div className="mt-8 px-6 py-4 border-t border-yellow-500/20">
-            <p className="text-xs text-gray-400 font-serif">
+          <div className="mt-8 px-6 py-4 border-t border-[#fcee16]/20">
+            <p className="text-xs text-gray-400 font-open-sans">
               Stay informed with the latest news
             </p>
             <div className="flex space-x-1 mt-2">
-              <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
-              <div className="w-1 h-1 bg-yellow-500 rounded-full"></div>
-              <div className="w-1 h-1 bg-yellow-600 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16] rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16]/80 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16]/60 rounded-full"></div>
             </div>
           </div>
         </div>
