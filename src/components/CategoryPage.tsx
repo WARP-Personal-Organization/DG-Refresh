@@ -21,7 +21,6 @@ const renderText = (richText: RichTextField | string | null): string => {
   if (!richText) return "";
   if (typeof richText === "string") return richText;
 
-  // Prismic RichTextField is an array of nodes
   if (Array.isArray(richText)) {
     return richText
       .map((block) => ("text" in block ? block.text : ""))
@@ -37,50 +36,52 @@ const formatDate = (dateString: string | null): string => {
   if (!dateString) return "";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return "JUST NOW";
+    if (diffInHours < 24) return `${diffInHours}H AGO`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}D AGO`;
+
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   } catch {
     return "";
   }
 };
 
-// Simple article card
+// Clean article card
 const ArticleCard: React.FC<{ article: BlogPostDocument }> = ({ article }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
-    <article className="bg-black border border-gray-800 hover:border-yellow-500/50 rounded-lg p-4 transition-all duration-300">
+    <article className="pb-6 border-b border-gray-800/50 last:border-b-0">
+      {/* Article Image */}
       {article.data.featured_image?.url && (
-        <div className="relative aspect-[16/10] mb-4 overflow-hidden rounded">
+        <div className="relative aspect-[16/10] mb-4 overflow-hidden">
           <Image
             src={article.data.featured_image.url}
             alt={article.data.featured_image.alt || "Article image"}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:opacity-90 transition-opacity duration-200"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
       )}
 
+      {/* Article Content */}
       <div className="space-y-3">
-        <h3 className="font-serif font-bold text-white group-hover:text-yellow-200 transition-colors duration-200 leading-tight">
+        <h3 className="text-lg font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
           {article.data.title || "Untitled Article"}
         </h3>
 
-        <p className="text-gray-400 text-sm">
-          {renderText(article.data.summary).substring(0, 150)}...
+        <p className="text-gray-400 text-sm leading-relaxed font-open-sans">
+          {renderText(article.data.summary).substring(0, 120)}...
         </p>
 
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <User size={12} className="text-yellow-400" />
-            {renderText(article.data.author) || "Staff Reporter"}
-          </span>
-          <span className="flex items-center gap-1">
-            <Calendar size={12} className="text-yellow-400" />
-            {formatDate(article.data.published_date)}
-          </span>
+        <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 font-open-sans">
+          <span>{renderText(article.data.author) || "Staff"}</span>
+          <span>•</span>
+          <span>{formatDate(article.data.published_date)}</span>
         </div>
       </div>
     </article>
@@ -95,86 +96,83 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
   recommendedArticles,
 }) => {
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Simple Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-white mb-4">
+        {/* Clean Category Header */}
+        <div className="mb-12 pb-4 border-b border-gray-800">
+          <h1 className="text-4xl font-roboto font-bold text-white">
             {categoryName}
           </h1>
-          <div className="h-1 w-20 bg-gradient-to-r from-yellow-400 to-yellow-500"></div>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-12">
-            {/* Featured Article */}
+          <div className="lg:col-span-3">
+            {/* Featured Article - Clean Layout */}
             {featuredArticle && (
-              <section>
+              <section className="mb-12 pb-8 border-b border-gray-800">
                 <Link
                   href={`/blog/${featuredArticle.uid}`}
                   className="block group"
                 >
-                  <article className="bg-black border border-yellow-500/30 rounded-lg p-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-3 py-1 rounded text-xs font-bold uppercase">
-                          Featured
-                        </span>
-
-                        <h2 className="text-3xl font-serif font-bold text-white group-hover:text-yellow-200 transition-colors duration-300">
-                          {featuredArticle.data.title || "Untitled Article"}
-                        </h2>
-
-                        <p className="text-gray-300 leading-relaxed">
-                          {renderText(featuredArticle.data.summary).substring(
-                            0,
-                            200
-                          )}
-                          ...
-                        </p>
-
-                        <div className="flex items-center gap-4 text-sm text-gray-400">
-                          <span className="flex items-center gap-2">
-                            <User size={14} className="text-yellow-400" />
-                            {renderText(featuredArticle.data.author) ||
-                              "Staff Reporter"}
-                          </span>
-                          <span className="flex items-center gap-2">
-                            <Calendar size={14} className="text-yellow-400" />
-                            {formatDate(featuredArticle.data.published_date)}
-                          </span>
-                        </div>
+                  <article className="grid md:grid-cols-2 gap-8">
+                    {/* Content */}
+                    <div className="space-y-4">
+                      <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
+                        Featured
                       </div>
 
-                      {featuredArticle.data.featured_image?.url && (
-                        <div className="relative aspect-[4/3] overflow-hidden rounded">
-                          <Image
-                            src={featuredArticle.data.featured_image.url}
-                            alt={
-                              featuredArticle.data.featured_image.alt ||
-                              "Featured article"
-                            }
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      )}
+                      <h2 className="text-3xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
+                        {featuredArticle.data.title || "Untitled Article"}
+                      </h2>
+
+                      <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
+                        {renderText(featuredArticle.data.summary).substring(
+                          0,
+                          200
+                        )}
+                        ...
+                      </p>
+
+                      <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
+                        <span>
+                          {renderText(featuredArticle.data.author) || "Staff"}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          {formatDate(featuredArticle.data.published_date)}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Featured Image */}
+                    {featuredArticle.data.featured_image?.url && (
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        <Image
+                          src={featuredArticle.data.featured_image.url}
+                          alt={
+                            featuredArticle.data.featured_image.alt ||
+                            "Featured article"
+                          }
+                          fill
+                          className="object-cover group-hover:opacity-90 transition-opacity duration-200"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </div>
+                    )}
                   </article>
                 </Link>
               </section>
             )}
 
-            {/* News Articles */}
+            {/* Latest Articles */}
             {newsArticles.length > 0 && (
-              <section>
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-yellow-500"></div>
+              <section className="mb-12">
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                   Latest {categoryName}
                 </h2>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-8">
                   {newsArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -182,15 +180,14 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
               </section>
             )}
 
-            {/* Opinion Articles */}
+            {/* Related Stories */}
             {opinionArticles.length > 0 && (
               <section>
-                <h2 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-yellow-500"></div>
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                   Related Stories
                 </h2>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-8">
                   {opinionArticles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
                   ))}
@@ -199,36 +196,44 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             )}
           </div>
 
-          {/* Simple Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+          {/* Clean Sidebar */}
+          <div className="lg:col-span-1 border-l border-gray-800 pl-8">
+            <div className="sticky top-8">
               {recommendedArticles.length > 0 && (
-                <section className="bg-black border border-gray-800 rounded-lg p-6">
-                  <h3 className="text-xl font-serif font-bold text-white mb-4">
+                <section>
+                  <h3 className="text-lg font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
                     Recommended
                   </h3>
 
-                  <div className="space-y-4">
-                    {recommendedArticles.map((article, index) => (
-                      <Link
+                  <div className="space-y-6">
+                    {recommendedArticles.slice(0, 5).map((article, index) => (
+                      <article
                         key={article.id}
-                        href={`/blog/${article.uid}`}
-                        className="block group"
+                        className="pb-4 border-b border-gray-800/50 last:border-b-0"
                       >
-                        <div className="flex gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 text-black font-bold rounded-full flex items-center justify-center text-xs">
-                            {index + 1}
-                          </span>
-                          <div>
-                            <h4 className="text-white group-hover:text-yellow-200 transition-colors text-sm font-semibold">
-                              {article.data.title || "Untitled Article"}
-                            </h4>
-                            <p className="text-gray-400 text-xs mt-1">
-                              {formatDate(article.data.published_date)}
-                            </p>
+                        <Link
+                          href={`/blog/${article.uid}`}
+                          className="block group"
+                        >
+                          <div className="flex gap-3">
+                            {/* Number */}
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#fcee16] text-[#1b1a1b] font-bold rounded-full flex items-center justify-center text-xs">
+                              {index + 1}
+                            </span>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-white group-hover:text-[#fcee16] transition-colors duration-200 text-sm font-semibold leading-tight mb-2 font-roboto">
+                                {article.data.title || "Untitled Article"}
+                              </h4>
+
+                              <div className="text-xs text-gray-500 font-open-sans">
+                                {formatDate(article.data.published_date)}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </article>
                     ))}
                   </div>
                 </section>

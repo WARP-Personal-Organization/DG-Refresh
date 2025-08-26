@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  Bookmark,
-  Calendar,
-  Clock,
-  ExternalLink,
-  Filter,
-  Grid,
-  List,
-  Play,
-  Share2,
-  Users,
-} from "lucide-react";
+import { Clock, Filter, Play, Users } from "lucide-react";
 import React, { useState } from "react";
 
 interface VideoData {
@@ -35,8 +24,7 @@ const videosData: VideoData[] = [
     duration: "12:45",
     views: "2.3K",
     publishDate: "2 days ago",
-    thumbnail:
-      "https://via.placeholder.com/400x225.png/1a1a1a/FFD700?text=Business+Summit",
+    thumbnail: "https://youtu.be/pspDeWO-HHQ",
     category: "Business",
     featured: true,
   },
@@ -114,7 +102,6 @@ const categories = [
 const EnhancedVideoSection: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoData>(videosData[0]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const filteredVideos =
     selectedCategory === "All"
@@ -126,164 +113,87 @@ const EnhancedVideoSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-black py-16">
+    <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
-            <div className="px-8">
-              <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 tracking-wider font-serif">
-                DGD DOCUMENTARIES
-              </h2>
-              <p className="text-gray-400 text-lg mt-2 font-serif italic">
-                Your Stories Are Us
-              </p>
-            </div>
-            <div className="flex-1 h-px bg-gradient-to-l from-transparent via-yellow-500 to-transparent"></div>
-          </div>
-
-          <p className="text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Dive deep into the stories that shape our community. From business
-            leaders to local heroes, our documentary series captures the heart
-            and soul of our neighborhood.
+        {/* Clean Section Header */}
+        <div className="mb-12 pb-4 border-b border-gray-800">
+          <h2 className="text-3xl font-roboto font-bold text-white mb-2">
+            DGD Documentaries
+          </h2>
+          <p className="text-gray-400 italic font-open-sans">
+            Your Stories Are Us
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Main Video Player */}
-          <div className="lg:col-span-8">
-            <div className="bg-black border-2 border-yellow-500/30 rounded-xl overflow-hidden hover:border-yellow-500/50 transition-all duration-300 shadow-2xl hover:shadow-yellow-500/10">
-              {/* Video Player Area */}
-              <div className="relative aspect-video bg-gradient-to-br from-gray-900 to-black">
-                <img
-                  src={selectedVideo.thumbnail}
-                  alt={selectedVideo.title}
-                  className="w-full h-full object-cover"
-                />
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Video Player - 2/3 width */}
+          <div className="lg:col-span-2">
+            {/* Video Player Area */}
+            <div className="relative aspect-video bg-black mb-6 overflow-hidden">
+              <img
+                src={selectedVideo.thumbnail}
+                alt={selectedVideo.title}
+                className="w-full h-full object-cover"
+              />
 
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center group cursor-pointer">
-                  <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
-                    <Play
-                      size={32}
-                      className="text-black ml-1"
-                      fill="currentColor"
-                    />
-                  </div>
-                </div>
-
-                {/* Video Badge */}
-                <div className="absolute top-4 left-4">
-                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase flex items-center gap-1">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    LIVE
-                  </span>
-                </div>
-
-                {/* Duration Badge */}
-                <div className="absolute bottom-4 right-4">
-                  <span className="bg-black/80 text-white px-2 py-1 rounded text-sm font-medium flex items-center gap-1">
-                    <Clock size={12} />
-                    {selectedVideo.duration}
-                  </span>
+              {/* Simple Play Button */}
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center group cursor-pointer">
+                <div className="w-16 h-16 bg-[#fcee16] rounded-full flex items-center justify-center group-hover:bg-[#fcee16]/80 transition-colors duration-200">
+                  <Play
+                    size={24}
+                    className="text-[#1b1a1b] ml-1"
+                    fill="currentColor"
+                  />
                 </div>
               </div>
 
-              {/* Video Info */}
-              <div className="p-6 border-t border-yellow-500/20">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-3">
-                      {selectedVideo.category}
-                    </span>
+              {/* Duration */}
+              <div className="absolute bottom-4 right-4 bg-black/80 text-white px-2 py-1 rounded text-sm font-open-sans">
+                {selectedVideo.duration}
+              </div>
+            </div>
 
-                    <h3 className="text-2xl font-serif font-bold text-white leading-tight mb-3">
-                      {selectedVideo.title}
-                    </h3>
+            {/* Video Info */}
+            <div className="space-y-4">
+              <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
+                {selectedVideo.category}
+              </div>
 
-                    <p className="text-gray-300 leading-relaxed mb-4">
-                      {selectedVideo.description}
-                    </p>
+              <h3 className="text-2xl font-roboto font-bold text-white leading-tight">
+                {selectedVideo.title}
+              </h3>
 
-                    <div className="flex items-center gap-6 text-sm text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <Users size={14} className="text-yellow-400" />
-                        <span>{selectedVideo.views} views</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-yellow-400" />
-                        <span>{selectedVideo.publishDate}</span>
-                      </div>
-                    </div>
-                  </div>
+              <p className="text-gray-400 leading-relaxed font-open-sans">
+                {selectedVideo.description}
+              </p>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 ml-4">
-                    <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <Share2
-                        size={16}
-                        className="group-hover:scale-110 transition-transform duration-200"
-                      />
-                    </button>
-                    <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <Bookmark
-                        size={16}
-                        className="group-hover:scale-110 transition-transform duration-200"
-                      />
-                    </button>
-                    <button className="p-2 bg-gray-800 hover:bg-yellow-500 text-gray-300 hover:text-black rounded-lg transition-all duration-200 group">
-                      <ExternalLink
-                        size={16}
-                        className="group-hover:scale-110 transition-transform duration-200"
-                      />
-                    </button>
-                  </div>
-                </div>
+              <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-gray-800/50 font-open-sans">
+                <span className="flex items-center gap-2">
+                  <Users size={14} />
+                  {selectedVideo.views} views
+                </span>
+                <span>•</span>
+                <span>{selectedVideo.publishDate}</span>
               </div>
             </div>
           </div>
 
-          {/* Video Playlist */}
-          <div className="lg:col-span-4">
-            <div className="bg-black border-2 border-gray-800 rounded-xl overflow-hidden">
-              {/* Playlist Header */}
-              <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-yellow-500/10 to-yellow-600/5">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-serif font-bold text-white">
-                    Episode Playlist
-                  </h4>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`p-2 rounded transition-all duration-200 ${
-                        viewMode === "list"
-                          ? "bg-yellow-500 text-black"
-                          : "bg-gray-800 text-gray-400 hover:text-white"
-                      }`}
-                    >
-                      <List size={14} />
-                    </button>
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={`p-2 rounded transition-all duration-200 ${
-                        viewMode === "grid"
-                          ? "bg-yellow-500 text-black"
-                          : "bg-gray-800 text-gray-400 hover:text-white"
-                      }`}
-                    >
-                      <Grid size={14} />
-                    </button>
-                  </div>
-                </div>
+          {/* Playlist Sidebar - 1/3 width */}
+          <div className="lg:col-span-1 border-l border-gray-800 pl-8">
+            {/* Playlist Header */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-roboto font-bold text-white">
+                  Episodes
+                </h4>
 
                 {/* Category Filter */}
-                <div className="flex items-center gap-2 mb-4">
-                  <Filter size={14} className="text-yellow-400" />
+                <div className="flex items-center gap-2">
+                  <Filter size={14} className="text-gray-400" />
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="bg-gray-800 text-white border border-gray-600 rounded px-3 py-1 text-sm focus:border-yellow-500 focus:outline-none"
+                    className="bg-black border border-gray-700 text-white rounded px-2 py-1 text-sm focus:border-[#fcee16] focus:outline-none font-open-sans"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
@@ -292,116 +202,69 @@ const EnhancedVideoSection: React.FC = () => {
                     ))}
                   </select>
                 </div>
-
-                <p className="text-xs text-gray-400">
-                  {filteredVideos.length} episode
-                  {filteredVideos.length !== 1 ? "s" : ""} available
-                </p>
               </div>
 
-              {/* Video List */}
-              <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                <div
-                  className={
-                    viewMode === "grid"
-                      ? "grid grid-cols-2 gap-2 p-2"
-                      : "space-y-2 p-2"
-                  }
+              <p className="text-xs text-gray-500 font-open-sans">
+                {filteredVideos.length} episodes available
+              </p>
+            </div>
+
+            {/* Video List */}
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {filteredVideos.map((video, index) => (
+                <article
+                  key={video.id}
+                  onClick={() => handleVideoSelect(video)}
+                  className={`cursor-pointer pb-4 border-b border-gray-800/50 last:border-b-0 group ${
+                    selectedVideo.id === video.id
+                      ? "opacity-100"
+                      : "opacity-70 hover:opacity-100"
+                  } transition-opacity duration-200`}
                 >
-                  {filteredVideos.map((video, index) => (
-                    <div
-                      key={video.id}
-                      onClick={() => handleVideoSelect(video)}
-                      className={`cursor-pointer rounded-lg border transition-all duration-300 group ${
-                        selectedVideo.id === video.id
-                          ? "border-yellow-500/50 bg-yellow-500/10"
-                          : "border-gray-800 hover:border-yellow-500/30 bg-gray-900/50 hover:bg-gray-800/50"
-                      } ${viewMode === "grid" ? "p-2" : "p-3"}`}
-                    >
-                      {viewMode === "list" ? (
-                        <div className="flex gap-3">
-                          {/* Episode Number */}
-                          <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                            <span className="text-black text-xs font-bold">
-                              {index + 1}
-                            </span>
-                          </div>
-
-                          {/* Thumbnail */}
-                          <div className="relative flex-shrink-0 w-16 h-12 rounded overflow-hidden">
-                            <img
-                              src={video.thumbnail}
-                              alt={video.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <h5 className="text-sm font-medium text-white group-hover:text-yellow-200 transition-colors duration-200 line-clamp-2 leading-tight mb-1">
-                              {video.title}
-                            </h5>
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <Clock size={10} />
-                                {video.duration}
-                              </span>
-                              <span>•</span>
-                              <span>{video.views} views</span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {/* Grid Thumbnail */}
-                          <div className="relative aspect-video rounded overflow-hidden">
-                            <img
-                              src={video.thumbnail}
-                              alt={video.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                            <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
-                              {video.duration}
-                            </div>
-                          </div>
-                          <h5 className="text-xs font-medium text-white group-hover:text-yellow-200 transition-colors duration-200 line-clamp-2">
-                            {video.title}
-                          </h5>
-                        </div>
-                      )}
+                  <div className="flex gap-3">
+                    {/* Episode Number */}
+                    <div className="flex-shrink-0 w-6 h-6 bg-[#fcee16] text-[#1b1a1b] rounded-full flex items-center justify-center text-xs font-bold">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                    {/* Thumbnail */}
+                    <div className="relative flex-shrink-0 w-16 h-12 rounded overflow-hidden">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h5 className="text-sm font-semibold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight mb-1 font-roboto">
+                        {video.title}
+                      </h5>
+
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans">
+                        <span className="flex items-center gap-1">
+                          <Clock size={10} />
+                          {video.duration}
+                        </span>
+                        <span>•</span>
+                        <span>{video.views} views</span>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Bottom Action */}
-        <div className="mt-12 text-center">
-          <button className="bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black font-bold py-4 px-8 rounded-xl font-serif transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25">
+        {/* View All Button */}
+        <div className="text-center mt-12 pt-8 border-t border-gray-800">
+          <button className="px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans">
             View All Episodes
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #1f2937;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #fbbf24;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #f59e0b;
-        }
-      `}</style>
     </section>
   );
 };

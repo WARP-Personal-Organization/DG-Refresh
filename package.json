@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "slicemachine": "start-slicemachine"
+    "slicemachine": "start-slicemachine",
+    "codegen": "prismic-ts-codegen"
   },
   "dependencies": {
     "@prismicio/client": "^7.20.1",
@@ -23,13 +24,15 @@
     "@eslint/eslintrc": "^3",
     "@slicemachine/adapter-next": "^0.3.83",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "prismic-ts-codegen": "^0.1.27",
     "slice-machine-ui": "^2.18.1",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5"
   }
 }

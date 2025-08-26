@@ -4,59 +4,134 @@ import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 
-// Navigation structure with dropdown items - Updated for category pages
+// Navigation structure matching your updated Prismic schema
 const navigationData = [
   {
     name: "News",
-    href: "/news", // Links to category page
+    href: "/news",
     dropdown: [
-      { name: "#PinoyVote2025", href: "/news/PinoyVote2025" },
-      { name: "CAPIZ", href: "/news/CAPIZ" },
-      { name: "FACTS FIRST PH", href: "/news/FACTS_FIRST_PH" },
-      { name: "LOCAL NEWS", href: "/news/localnews" },
-      { name: "NATION", href: "/news/NATION" },
-      { name: "NEGROS", href: "/news/NEGROS" },
+      { name: "LOCAL", href: "/subcategory/local" },
+      { name: "HEALTH", href: "/subcategory/health" },
+      { name: "AUTO RACING", href: "/subcategory/auto-racing" },
+      { name: "FACT CHECK NEWS", href: "/subcategory/fact-check-news" },
+      { name: "CEBU", href: "/subcategory/cebu" },
+      { name: "NEGROS", href: "/subcategory/negroes" },
+    ],
+  },
+  {
+    name: "Feature",
+    href: "/feature",
+    dropdown: [
+      { name: "HEALTH & WELLNESS", href: "/subcategory/health-wellness" },
+      { name: "MEDICAL FRONTIERS", href: "/subcategory/medical-frontiers" },
+      { name: "TRAVEL", href: "/subcategory/travel" },
+      { name: "DESTINATIONS", href: "/subcategory/destinations" },
+      { name: "ENTERTAINMENT", href: "/subcategory/entertainment" },
+      { name: "FILM", href: "/subcategory/film" },
+      { name: "MUSIC", href: "/subcategory/music" },
+      { name: "CELEBRITY NEWS", href: "/subcategory/celebrity-news" },
+      { name: "LIFESTYLE", href: "/subcategory/lifestyle" },
+      { name: "FASHION", href: "/subcategory/fashion" },
+      { name: "FOOD", href: "/subcategory/food" },
+      { name: "FRANCHISE LIVING", href: "/subcategory/franchise-living" },
+      { name: "ARTS & CULTURE", href: "/subcategory/arts-culture" },
+      {
+        name: "THERAPEUTIC ARTS",
+        href: "/subcategory/therapeutic-arts-stories",
+      },
+      { name: "CULTURAL EVENTS", href: "/subcategory/cultural-events" },
+      { name: "EDUCATION", href: "/subcategory/education" },
+      { name: "ACADEMIC UPDATES", href: "/subcategory/academic-updates" },
+      { name: "UNIVERSITIES", href: "/subcategory/universities" },
+      { name: "STUDENTS & TEACHERS", href: "/subcategory/students-teachers" },
+      { name: "ENVIRONMENT", href: "/subcategory/environment" },
+      { name: "CLIMATE CHANGE", href: "/subcategory/climate-change" },
+      {
+        name: "ENVIRONMENTAL AWARENESS",
+        href: "/subcategory/environmental-awareness",
+      },
+      { name: "GREEN LIFESTYLES", href: "/subcategory/green-lifestyles" },
     ],
   },
   {
     name: "Opinion",
-    href: "/opinion", // Links to category page
+    href: "/opinion",
+    dropdown: [
+      { name: "EDITORIAL", href: "/subcategory/editorial" },
+      { name: "CURRENT EVENTS", href: "/subcategory/current-events" },
+      { name: "POLITICS", href: "/subcategory/politics" },
+      { name: "SPECIAL ISSUES", href: "/subcategory/special-issues" },
+      {
+        name: "FOREIGN POLITICS",
+        href: "/subcategory/foreign-politics-trends",
+      },
+    ],
   },
   {
-    name: "Business",
-    href: "/business", // Links to category page
+    name: "Industries",
+    href: "/industries",
     dropdown: [
-      { name: "MONITORING", href: "/business/MONITORING" },
-      { name: "TECH TALK", href: "/business/TECH_TALK" },
+      { name: "FASHION TRENDS", href: "/subcategory/weekly-fashion-trends" },
+      {
+        name: "FASHION SHOPPING",
+        href: "/subcategory/weekly-fashion-shopping",
+      },
+      { name: "EXPOSÉ", href: "/subcategory/exposer" },
+      {
+        name: "ENTERTAINMENT & SOCIAL IMPACT",
+        href: "/subcategory/entertainment-social-impact",
+      },
+      {
+        name: "COMMUNITY BUILDING",
+        href: "/subcategory/community-building-advocacy-reporting",
+      },
     ],
   },
   {
     name: "Sports",
-    href: "/sports", // Links to category page
-  },
-  {
-    name: "Features",
-    href: "/features", // Links to category page
+    href: "/sports",
     dropdown: [
-      { name: "ARTS AND CULTURE", href: "/features/ARTS_AND_CULTURE" },
-      { name: "DOUBLE TEAM", href: "/features/DOUBLE_TEAM" },
-      { name: "EDUCATION", href: "/features/EDUCATION" },
-      { name: "ENTERTAINMENT", href: "/features/ENTERTAINMENT" },
-      { name: "ENVIRONMENT", href: "/features/ENVIRONMENT" },
-      { name: "EVENTS", href: "/features/EVENTS" },
+      { name: "SPORTS DAY", href: "/subcategory/sports-day" },
+      {
+        name: "FARM RELATED",
+        href: "/subcategory/farm-related-supplies-stories",
+      },
+      { name: "LOCAL NEWS", href: "/subcategory/local-news" },
+      { name: "ALL SPORT GAMES", href: "/subcategory/all-sport-games" },
+      { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
     ],
   },
   {
-    name: "Initiative",
-    href: "/initiative",
+    name: "Business",
+    href: "/business",
+    dropdown: [
+      { name: "BUSINESS", href: "/subcategory/business" },
+      { name: "MOTORING", href: "/subcategory/motoring" },
+      { name: "VEHICLES", href: "/subcategory/vehicles" },
+      { name: "TRANSPORTATION", href: "/subcategory/transportation" },
+      { name: "TECHBARK", href: "/subcategory/techbark" },
+      {
+        name: "INNOVATIONS & GADGETS",
+        href: "/subcategory/innovations-gadgets",
+      },
+    ],
   },
   {
-    name: "Policies",
-    href: "/policies",
-  },
-  {
-    name: "Others",
-    href: "/others",
+    name: "Other Pages",
+    href: "/other-pages",
+    dropdown: [
+      { name: "ABOUT US", href: "/subcategory/about-us" },
+      { name: "NEWS MEMBERS & STAFF", href: "/subcategory/news-members-staff" },
+      { name: "CONTACT US", href: "/subcategory/contact-us" },
+      {
+        name: "COMPANY DETAILS",
+        href: "/subcategory/company-details-social-platforms",
+      },
+      {
+        name: "PRICING & TERMS",
+        href: "/subcategory/pricing-terms-feedback-survey",
+      },
+    ],
   },
 ];
 
@@ -96,7 +171,7 @@ const NavigationBar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-black text-white border-t border-b border-yellow-500/30 relative z-50">
+    <nav className="bg-black text-white border-t border-b border-[#fcee16]/30 relative  font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Navigation */}
         <ul className="hidden md:flex z-20 justify-center space-x-8 text-sm relative">
@@ -110,7 +185,7 @@ const NavigationBar: React.FC = () => {
               <Link
                 href={item.href}
                 className={`
-                  flex items-center gap-1 py-2 px-1 font-serif font-medium tracking-wider transition-all duration-300 hover:text-yellow-400
+                  flex items-center gap-1 py-2 px-1 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#fcee16]
                 `}
               >
                 {item.name.toUpperCase()}
@@ -129,7 +204,7 @@ const NavigationBar: React.FC = () => {
                 <div
                   className={`
                   absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 
-                  bg-black border-2 border-yellow-500/30 rounded-lg shadow-xl shadow-yellow-500/10
+                  bg-black border-2 border-[#fcee16] rounded-lg shadow-xl shadow-[#fcee16]/20
                   transition-all duration-300 ease-out group
                   ${
                     activeDropdown === item.name
@@ -139,15 +214,47 @@ const NavigationBar: React.FC = () => {
                 `}
                 >
                   {/* Gold accent line - appears on hover */}
-                  <div className="h-0 group-hover:h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-t-md transition-all duration-300 ease-out"></div>
+                  <div className="h-0 group-hover:h-1 bg-[#fcee16] rounded-t-md transition-all duration-300 ease-out"></div>
 
-                  <div className="py-2">
+                  {/* Scrollable dropdown content */}
+                  <div
+                    className={`py-2 ${
+                      item.name === "Feature"
+                        ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800 hover:scrollbar-thumb-[#fcee16]/80"
+                        : ""
+                    }`}
+                  >
+                    {/* Scroll indicator for Feature dropdown */}
+                    {item.name === "Feature" && (
+                      <div className="px-4 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#fcee16] font-medium font-open-sans">
+                            {item.dropdown?.length} subcategories
+                          </span>
+                          <span className="text-gray-400 flex items-center gap-1 font-open-sans">
+                            <svg
+                              className="w-3 h-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Scroll
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {item.dropdown &&
                       item.dropdown.map((dropdownItem) => (
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href}
-                          className="block px-4 py-3 text-sm font-serif text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/50"
+                          className="block px-4 py-3 text-sm font-open-sans text-gray-300 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/50"
                         >
                           {dropdownItem.name}
                         </Link>
@@ -155,10 +262,10 @@ const NavigationBar: React.FC = () => {
                   </div>
 
                   {/* Bottom accent */}
-                  <div className="px-4 py-2 border-t border-yellow-500/20 bg-yellow-500/5">
+                  <div className="px-4 py-2 border-t border-[#fcee16]/20 bg-[#fcee16]/5 sticky bottom-0">
                     <Link
                       href={item.href}
-                      className="text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors duration-200"
+                      className="text-xs text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 font-open-sans"
                     >
                       View All {item.name} →
                     </Link>
@@ -172,14 +279,14 @@ const NavigationBar: React.FC = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between">
           {/* Logo/Brand */}
-          <div className="text-yellow-500 font-serif font-bold text-lg tracking-wider">
-            NEWS
+          <div className="text-[#fcee16] font-roboto font-bold text-lg tracking-wider">
+            MENU
           </div>
 
           {/* Burger Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200 p-2"
+            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-2"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -208,18 +315,18 @@ const NavigationBar: React.FC = () => {
       {/* Mobile Menu */}
       <div
         className={`
-          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-yellow-500/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
+          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-[#fcee16]/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
           ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Mobile Menu Header */}
-        <div className="flex items-center justify-between p-4 border-b border-yellow-500/30 sticky top-0 bg-black">
-          <span className="text-yellow-500 font-serif font-bold text-xl tracking-wider">
+        <div className="flex items-center justify-between p-4 border-b border-[#fcee16]/30 sticky top-0 bg-black">
+          <span className="text-[#fcee16] font-roboto font-bold text-xl tracking-wider">
             NAVIGATION
           </span>
           <button
             onClick={closeMobileMenu}
-            className="text-yellow-500 hover:text-yellow-400 transition-colors duration-200 p-1"
+            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-1"
           >
             <X size={24} />
           </button>
@@ -231,31 +338,45 @@ const NavigationBar: React.FC = () => {
             {navigationData.map((item, index) => (
               <li key={item.name}>
                 {/* Main Menu Item */}
-                <div
-                  className={`
-                    flex items-center justify-between px-6 py-4 font-serif font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent cursor-pointer
-                    ${
-                      index === 0
-                        ? "bg-yellow-500/10 border-l-yellow-500 text-yellow-500"
-                        : "text-gray-200 hover:bg-yellow-500/5 hover:border-l-yellow-400 hover:text-yellow-300"
-                    }
-                  `}
-                  onClick={() => toggleMobileDropdown(item.name)}
-                >
-                  <span className="flex items-center">
-                    {item.name.toUpperCase()}
-                    {/* Active indicator dot */}
-                    {index === 0 && (
-                      <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full ml-2"></span>
-                    )}
-                  </span>
+                <div className="flex items-center justify-between px-6 py-4">
+                  <Link
+                    href={item.href}
+                    onClick={closeMobileMenu}
+                    className={`
+                      flex-1 font-roboto font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent
+                      ${
+                        index === 0
+                          ? "text-[#fcee16]"
+                          : "text-gray-200 hover:text-[#fcee16]"
+                      }
+                    `}
+                  >
+                    <span className="flex items-center">
+                      {item.name.toUpperCase()}
+                      {/* Active indicator dot */}
+                      {index === 0 && (
+                        <span className="inline-block w-2 h-2 bg-[#fcee16] rounded-full ml-2"></span>
+                      )}
+                    </span>
+                  </Link>
 
-                  <ChevronRight
-                    size={16}
-                    className={`transition-transform duration-200 ${
-                      mobileExpandedItems.has(item.name) ? "rotate-90" : ""
-                    }`}
-                  />
+                  {/* Dropdown Toggle */}
+                  {item.dropdown && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMobileDropdown(item.name);
+                      }}
+                      className="p-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200"
+                    >
+                      <ChevronRight
+                        size={16}
+                        className={`transition-transform duration-200 ${
+                          mobileExpandedItems.has(item.name) ? "rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+                  )}
                 </div>
 
                 {/* Mobile Dropdown Items */}
@@ -265,31 +386,70 @@ const NavigationBar: React.FC = () => {
                     overflow-hidden transition-all duration-300 ease-in-out bg-gray-950/50
                     ${
                       mobileExpandedItems.has(item.name)
-                        ? "max-h-96 opacity-100"
+                        ? item.name === "Feature"
+                          ? "max-h-80 opacity-100"
+                          : "max-h-96 opacity-100"
                         : "max-h-0 opacity-0"
                     }
                   `}
                   >
-                    {item.dropdown &&
-                      item.dropdown.map((dropdownItem) => (
-                        <Link
-                          key={dropdownItem.name}
-                          href={dropdownItem.href}
-                          onClick={closeMobileMenu}
-                          className="block px-10 py-3 text-sm font-serif text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/5 transition-all duration-200 border-l-4 border-transparent hover:border-yellow-500/30"
-                        >
-                          {dropdownItem.name}
-                        </Link>
-                      ))}
+                    {/* Mobile scroll indicator for Feature */}
+                    {item.name === "Feature" &&
+                      mobileExpandedItems.has(item.name) && (
+                        <div className="px-10 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-[#fcee16] font-medium font-open-sans">
+                              {item.dropdown?.length} items
+                            </span>
+                            <span className="text-gray-400 flex items-center gap-1 font-open-sans">
+                              <svg
+                                className="w-3 h-3 animate-bounce"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M15.707 4.293a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L10 8.586l4.293-4.293a1 1 0 011.414 0zm0 6a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L10 14.586l4.293-4.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              Swipe to scroll
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
-                    {/* View All Link */}
-                    <Link
-                      href={item.href}
-                      onClick={closeMobileMenu}
-                      className="block px-10 py-3 text-xs font-serif text-yellow-400 hover:text-yellow-300 border-t border-yellow-500/20 bg-yellow-500/5 transition-colors duration-200"
+                    {/* Scrollable content for Feature category */}
+                    <div
+                      className={
+                        item.name === "Feature"
+                          ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800"
+                          : ""
+                      }
                     >
-                      View All {item.name} →
-                    </Link>
+                      {item.dropdown &&
+                        item.dropdown.map((dropdownItem) => (
+                          <Link
+                            key={dropdownItem.name}
+                            href={dropdownItem.href}
+                            onClick={closeMobileMenu}
+                            className="block px-10 py-3 text-sm font-open-sans text-gray-400 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/30"
+                          >
+                            {dropdownItem.name}
+                          </Link>
+                        ))}
+                    </div>
+
+                    {/* View All Link - sticky at bottom */}
+                    <div className="sticky bottom-0 bg-gray-950/50 border-t border-[#fcee16]/20">
+                      <Link
+                        href={item.href}
+                        onClick={closeMobileMenu}
+                        className="block px-10 py-3 text-xs font-open-sans text-[#fcee16] hover:text-[#fcee16]/80 bg-[#fcee16]/5 transition-colors duration-200"
+                      >
+                        View All {item.name} →
+                      </Link>
+                    </div>
                   </div>
                 )}
               </li>
@@ -297,14 +457,14 @@ const NavigationBar: React.FC = () => {
           </ul>
 
           {/* Mobile Menu Footer */}
-          <div className="mt-8 px-6 py-4 border-t border-yellow-500/20">
-            <p className="text-xs text-gray-400 font-serif">
+          <div className="mt-8 px-6 py-4 border-t border-[#fcee16]/20">
+            <p className="text-xs text-gray-400 font-open-sans">
               Stay informed with the latest news
             </p>
             <div className="flex space-x-1 mt-2">
-              <div className="w-1 h-1 bg-yellow-400 rounded-full"></div>
-              <div className="w-1 h-1 bg-yellow-500 rounded-full"></div>
-              <div className="w-1 h-1 bg-yellow-600 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16] rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16]/80 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#fcee16]/60 rounded-full"></div>
             </div>
           </div>
         </div>
