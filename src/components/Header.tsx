@@ -219,13 +219,13 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               </button>
 
               {/* Mobile Menu Button */}
-              <button
+              {/* <button
                 onClick={toggleMobileMenu}
                 className="lg:hidden text-yellow-400 hover:text-yellow-300 transition-colors duration-200 p-2"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
+              </button> */}
             </div>
 
             {/* Centered Logo - Fully Responsive */}

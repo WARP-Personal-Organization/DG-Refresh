@@ -1,10 +1,16 @@
 // app/page.tsx
 import Header from "@/components/Header";
+import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
+import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
+import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
+import LocalStories from "@/components/HomePageLayouts/LocalStories";
+import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports";
+import OpinionStories from "@/components/HomePageLayouts/OpinionStories";
+import TopStories from "@/components/HomePageLayouts/TopStories";
 import MainContent from "@/components/MainContent";
 import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
 import RightSidebar from "@/components/RightSidebar";
-import TopStories from "@/components/TopStories";
 import EnhancedVideoSection from "@/components/VideosSection";
 import { client } from "../../lib/prismicio";
 import type { BlogPostDocument } from "../../prismicio-types";
@@ -73,8 +79,22 @@ export default async function Home() {
           </div>
         </div>
         <TopStories title={"Top Stories"} stories={posts} />
-        <TopStories title={"Local News"} stories={posts} />
-        <TopStories title={"Negros"} stories={posts} />
+        <LocalStories title={"Local"} stories={posts} />
+        <NegrosAndSportsStories
+        negrosTitle={"Negros"}
+        negrosStories={posts} 
+        sportsTitle={"Sports"}
+        sportsStories={posts.length > 0 ? posts : posts} 
+        />
+        <FeaturesStories title={"Features"} stories={posts} />
+        <InitiativeAndNationStories
+        initiativeTitle={"Initiative"}
+        initiativeStories={posts} 
+        nationTitle={"Nation"}
+        nationStories={posts}  
+        />
+        <EditorialStories title={"Editorial"} stories={posts} />
+        <OpinionStories title={"Opinion"} stories={posts} />
         <OpinionSection />
         <EnhancedVideoSection />
       </div>
