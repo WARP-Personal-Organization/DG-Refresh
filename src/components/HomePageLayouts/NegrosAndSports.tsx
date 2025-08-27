@@ -28,8 +28,7 @@ const PublicationCard = ({
   link?: string;
 }) => (
   <div className="pt-6">
-    {/* === CHANGE APPLIED HERE === */}
-    <h3 className="bg-[#fcee16] text-black text-xs font-bold uppercase px-3 py-1 inline-block mb-3">
+    <h3 className="bg-accent rounded-sm text-black text-xs font-roboto font-bold uppercase px-2 py-1 inline-block mb-3">
       {title}
     </h3>
     <Link href={link} className="block group">
@@ -63,7 +62,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
   const supplementUrl = "/Supplement.PNG";
 
   return (
-    <section className="py-12">
+    <section className="bg-background py-12">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-12">
           {/* === LEFT COLUMN (MAIN CONTENT) === */}
@@ -71,7 +70,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
             {/* --- Negros Featured Story --- */}
             <div className="mb-12">
               <div className="mb-6 pb-3 border-b border-gray-700">
-                <h2 className="text-2xl font-serif font-bold text-white">
+                <h2 className="text-2xl font-roboto font-bold text-foreground">
                   {negrosTitle}
                 </h2>
               </div>
@@ -92,10 +91,10 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                     </div>
                   )}
                   <div className="space-y-2">
-                    <p className="text-[#fcee16] text-sm font-medium uppercase">
+                    <p className="text-accent text-sm font-medium uppercase font-sans">
                       {mainNegrosStory.data.category || "News"}
                     </p>
-                    <h3 className="text-3xl font-serif font-bold text-white leading-tight">
+                    <h3 className="text-3xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainNegrosStory.data.title || "Untitled Article"}
                     </h3>
                   </div>
@@ -107,7 +106,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
             {limitedSportsStories.length > 0 && (
               <div>
                 <div className="mb-6 pb-3 border-b border-gray-700">
-                  <h2 className="text-2xl font-serif font-bold text-white">
+                  <h2 className="text-2xl font-roboto font-bold text-foreground">
                     {sportsTitle}
                   </h2>
                 </div>
@@ -127,11 +126,10 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                             />
                           </div>
                         )}
-                        {/* === CHANGE APPLIED HERE === */}
-                        <p className="text-[#fcee16] text-xs font-semibold uppercase mb-1">
+                        <p className="text-accent text-xs font-semibold uppercase mb-1 font-sans">
                           {story.data.category || "Sports"}
                         </p>
-                        <h4 className="text-lg font-serif font-bold text-white leading-tight">
+                        <h4 className="text-lg font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                           {story.data.title || "Untitled Article"}
                         </h4>
                       </Link>
@@ -149,10 +147,10 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
               {supportingNegrosStories.map((story) => (
                 <article key={story.id} className="group py-5 first:pt-0">
                   <Link href={`/blog/${story.uid}`} className="block">
-                    <h4 className="text-lg font-serif font-bold text-white leading-tight">
+                    <h4 className="text-lg font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                       {story.data.title || "Untitled Article"}
                     </h4>
-                    <p className="text-xs text-gray-400 pt-2">
+                    <p className="text-xs text-gray-400 pt-2 font-sans">
                       By {renderText(story.data.author) || "Staff"}
                     </p>
                   </Link>

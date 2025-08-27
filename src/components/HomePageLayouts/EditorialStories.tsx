@@ -37,10 +37,12 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
   const secondaryStories = stories.length > 2 ? stories.slice(2, 5) : [];
 
   return (
-    <section className="py-16">
+    <section className="bg-background py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-10 pb-4 border-b border-gray-700">
-          <h2 className="text-2xl font-serif font-bold text-white">{title}</h2>
+        <div className="mb-10 pb-4 border-b border-accent">
+          <h2 className="text-2xl font-roboto font-bold text-foreground">
+            {title}
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -48,14 +50,13 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
           <div className="lg:col-span-1">
             <article className="h-full">
               <Link href={`/blog/${mainStory.uid}`} className="block group">
-                {/* === CHANGE APPLIED HERE === */}
-                <h3 className="text-5xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+                <h3 className="text-5xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                   {mainStory.data.title || "Untitled Article"}
                 </h3>
-                <p className="text-gray-300 mt-4 text-base leading-relaxed">
+                <p className="text-gray-300 mt-4 text-base leading-relaxed font-sans">
                   {renderText(mainStory.data.summary)}
                 </p>
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-4">
+                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-4 font-sans">
                   {calculateReadTime(mainStory.data.summary)}
                 </p>
               </Link>
@@ -81,8 +82,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                     />
                   </div>
                 )}
-                {/* === CHANGE APPLIED HERE === */}
-                <h4 className="text-xl font-serif font-bold text-white mt-4 group-hover:text-[#fcee16] transition-colors">
+                <h4 className="text-xl font-bold mt-4 transition-colors duration-200 group-hover:text-[#fcee16]">
                   {heroImageStory.data.title || "Untitled Article"}
                 </h4>
               </Link>
@@ -103,15 +103,13 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                     <Link href={`/blog/${story.uid}`} className="block group">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-grow">
-                          {/* === CHANGE APPLIED HERE === */}
-                          <p className="text-xs text-[#fcee16] font-bold uppercase mb-1">
+                          <p className="text-xs font-bold uppercase mb-1">
                             {story.data.category || "Editorial"}
                           </p>
-                          {/* === CHANGE APPLIED HERE === */}
-                          <h4 className="text-xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+                          <h4 className="text-xl font-bold leading-tight transition-colors duration-200 group-hover:text-[#fcee16]">
                             {story.data.title || "Untitled Article"}
                           </h4>
-                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-3">
+                          <p className="text-xs font-semibold uppercase tracking-wider mt-3">
                             {calculateReadTime(story.data.summary)}
                           </p>
                         </div>

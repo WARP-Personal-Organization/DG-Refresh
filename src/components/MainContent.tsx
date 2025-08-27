@@ -26,8 +26,10 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   if (!heroPost || !featuredPost) {
     return (
-      <main className="lg:col-span-3 w-full bg-[#1b1a1b]">
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+      <main className="lg:col-span-3 w-full bg-background">
+        <div className="text-center py-12 text-gray-400 font-sans">
+          Loading...
+        </div>
       </main>
     );
   }
@@ -36,19 +38,18 @@ const MainContent: React.FC<MainContentProps> = ({
     <main className="lg:col-span-3 w-full">
       {/* === NEW MAIN GRID (Adjusted for a 40/60 split) === */}
       <div className="grid lg:grid-cols-5 gap-8">
-        
         {/* === LEFT COLUMN (MAIN HERO STORY - 2/5 width) === */}
         <div className="lg:col-span-2 flex flex-col justify-between">
           <article>
-            <p className="text-[#fcee16] text-sm font-bold uppercase tracking-wider mb-2 font-open-sans">
+            <p className="text-accent text-sm font-bold uppercase tracking-wider mb-2 font-sans">
               {heroPost.data.category || "News"}
             </p>
             <Link href={`/blog/${heroPost.uid}`} className="block group">
-              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+              <h1 className="text-4xl lg:text-5xl font-roboto font-bold text-foreground leading-tight group-hover:text-accent transition-colors">
                 {heroPost.data.title}
               </h1>
             </Link>
-            <p className="text-lg text-gray-300 mt-4 leading-relaxed font-open-sans">
+            <p className="text-lg text-gray-300 mt-4 leading-relaxed font-sans">
               {renderText(heroPost.data.summary)}
             </p>
           </article>
@@ -58,17 +59,17 @@ const MainContent: React.FC<MainContentProps> = ({
             <article className="pt-6 mt-6 border-t border-gray-800">
               <Link href={`/blog/${editorialPost.uid}`} className="block group">
                 <div className="flex items-start gap-4">
-                  <div className="text-[#fcee16] text-2xl font-serif font-bold">
+                  <div className="text-accent text-2xl font-roboto font-bold">
                     &ldquo;
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-white text-lg group-hover:text-[#fcee16] transition-colors">
-                      <span className="text-gray-400 font-normal">
+                    <p className="font-bold text-foreground text-lg group-hover:text-accent transition-colors font-roboto">
+                      <span className="text-gray-400 font-normal font-sans">
                         The DG View.
                       </span>{" "}
                       {editorialPost.data.title}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 mt-1 font-sans">
                       The editorial board
                     </p>
                   </div>
@@ -94,11 +95,13 @@ const MainContent: React.FC<MainContentProps> = ({
                   />
                 </div>
               )}
-              <p className="text-[#fcee16] text-sm font-bold uppercase tracking-wider mb-2 font-open-sans">
+              <p className="text-accent text-sm font-bold uppercase tracking-wider mb-2 font-sans">
                 {featuredPost.data.category || "Featured"}
               </p>
-              <h2 className="text-3xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
-                <span className="text-gray-400">The Big Read.</span>{" "}
+              <h2 className="text-3xl font-roboto font-bold text-foreground leading-tight group-hover:text-accent transition-colors">
+                <span className="text-gray-400 font-normal font-sans">
+                  The Big Read.
+                </span>{" "}
                 {featuredPost.data.title}
               </h2>
             </Link>

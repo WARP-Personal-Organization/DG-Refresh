@@ -4,100 +4,54 @@ import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 
-// Navigation structure matching your updated Prismic schema
+// Updated navigation structure with correct routing hierarchy
 const navigationData = [
   {
     name: "News",
     href: "/news",
     dropdown: [
       { name: "LOCAL", href: "/subcategory/local" },
-      { name: "HEALTH", href: "/subcategory/health" },
-      { name: "AUTO RACING", href: "/subcategory/auto-racing" },
-      { name: "FACT CHECK NEWS", href: "/subcategory/fact-check-news" },
-      { name: "CEBU", href: "/subcategory/cebu" },
-      { name: "NEGROS", href: "/subcategory/negroes" },
+      { name: "FACT FIRST PH", href: "/subcategory/fact-first-ph" },
+      { name: "CAPIZ", href: "/subcategory/capiz" },
+      { name: "NEGROS", href: "/subcategory/negros" },
     ],
   },
   {
     name: "Feature",
     href: "/feature",
     dropdown: [
-      { name: "HEALTH & WELLNESS", href: "/subcategory/health-wellness" },
-      { name: "MEDICAL FRONTIERS", href: "/subcategory/medical-frontiers" },
+      { name: "HEALTH", href: "/subcategory/health" },
       { name: "TRAVEL", href: "/subcategory/travel" },
-      { name: "DESTINATIONS", href: "/subcategory/destinations" },
       { name: "ENTERTAINMENT", href: "/subcategory/entertainment" },
-      { name: "FILM", href: "/subcategory/film" },
-      { name: "MUSIC", href: "/subcategory/music" },
-      { name: "CELEBRITY NEWS", href: "/subcategory/celebrity-news" },
       { name: "LIFESTYLE", href: "/subcategory/lifestyle" },
-      { name: "FASHION", href: "/subcategory/fashion" },
-      { name: "FOOD", href: "/subcategory/food" },
-      { name: "FRANCHISE LIVING", href: "/subcategory/franchise-living" },
-      { name: "ARTS & CULTURE", href: "/subcategory/arts-culture" },
-      {
-        name: "THERAPEUTIC ARTS",
-        href: "/subcategory/therapeutic-arts-stories",
-      },
-      { name: "CULTURAL EVENTS", href: "/subcategory/cultural-events" },
+      { name: "ARTS AND CULTURE", href: "/subcategory/arts-and-culture" },
       { name: "EDUCATION", href: "/subcategory/education" },
-      { name: "ACADEMIC UPDATES", href: "/subcategory/academic-updates" },
-      { name: "UNIVERSITIES", href: "/subcategory/universities" },
-      { name: "STUDENTS & TEACHERS", href: "/subcategory/students-teachers" },
       { name: "ENVIRONMENT", href: "/subcategory/environment" },
-      { name: "CLIMATE CHANGE", href: "/subcategory/climate-change" },
-      {
-        name: "ENVIRONMENTAL AWARENESS",
-        href: "/subcategory/environmental-awareness",
-      },
-      { name: "GREEN LIFESTYLES", href: "/subcategory/green-lifestyles" },
     ],
   },
   {
     name: "Opinion",
     href: "/opinion",
-    dropdown: [
-      { name: "EDITORIAL", href: "/subcategory/editorial" },
-      { name: "CURRENT EVENTS", href: "/subcategory/current-events" },
-      { name: "POLITICS", href: "/subcategory/politics" },
-      { name: "SPECIAL ISSUES", href: "/subcategory/special-issues" },
-      {
-        name: "FOREIGN POLITICS",
-        href: "/subcategory/foreign-politics-trends",
-      },
-    ],
+    dropdown: [{ name: "EDITORIAL", href: "/subcategory/editorial" }],
   },
   {
-    name: "Industries",
-    href: "/industries",
+    name: "Initiatives",
+    href: "/initiatives",
     dropdown: [
-      { name: "FASHION TRENDS", href: "/subcategory/weekly-fashion-trends" },
+      { name: "FASHION FRIDAYS", href: "/subcategory/fashion-fridays" },
+      { name: "EMPOWER", href: "/subcategory/empower" },
       {
-        name: "FASHION SHOPPING",
-        href: "/subcategory/weekly-fashion-shopping",
+        name: "GLOBAL SHAPERS ILOILO",
+        href: "/subcategory/global-shapers-iloilo",
       },
-      { name: "EXPOSÉ", href: "/subcategory/exposer" },
-      {
-        name: "ENTERTAINMENT & SOCIAL IMPACT",
-        href: "/subcategory/entertainment-social-impact",
-      },
-      {
-        name: "COMMUNITY BUILDING",
-        href: "/subcategory/community-building-advocacy-reporting",
-      },
+      { name: "ZERO DAY", href: "/subcategory/zero-day" },
     ],
   },
   {
     name: "Sports",
     href: "/sports",
     dropdown: [
-      { name: "SPORTS DAY", href: "/subcategory/sports-day" },
-      {
-        name: "FARM RELATED",
-        href: "/subcategory/farm-related-supplies-stories",
-      },
       { name: "LOCAL NEWS", href: "/subcategory/local-news" },
-      { name: "ALL SPORT GAMES", href: "/subcategory/all-sport-games" },
       { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
     ],
   },
@@ -105,15 +59,8 @@ const navigationData = [
     name: "Business",
     href: "/business",
     dropdown: [
-      { name: "BUSINESS", href: "/subcategory/business" },
-      { name: "MOTORING", href: "/subcategory/motoring" },
-      { name: "VEHICLES", href: "/subcategory/vehicles" },
-      { name: "TRANSPORTATION", href: "/subcategory/transportation" },
-      { name: "TECHBARK", href: "/subcategory/techbark" },
-      {
-        name: "INNOVATIONS & GADGETS",
-        href: "/subcategory/innovations-gadgets",
-      },
+      { name: "MONITORING", href: "/subcategory/monitoring" },
+      { name: "TECH TALK", href: "/subcategory/tech-talk" },
     ],
   },
   {
@@ -121,16 +68,7 @@ const navigationData = [
     href: "/other-pages",
     dropdown: [
       { name: "ABOUT US", href: "/subcategory/about-us" },
-      { name: "NEWS MEMBERS & STAFF", href: "/subcategory/news-members-staff" },
       { name: "CONTACT US", href: "/subcategory/contact-us" },
-      {
-        name: "COMPANY DETAILS",
-        href: "/subcategory/company-details-social-platforms",
-      },
-      {
-        name: "PRICING & TERMS",
-        href: "/subcategory/pricing-terms-feedback-survey",
-      },
     ],
   },
 ];
@@ -171,7 +109,7 @@ const NavigationBar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-black text-white border-t border-b border-[#fcee16]/30 relative  font-open-sans">
+    <nav className="bg-[#1a1a1a] text-white border-t border-b border-[#ffe600]/30 relative font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Navigation */}
         <ul className="hidden md:flex z-20 justify-center space-x-8 text-sm relative">
@@ -185,7 +123,7 @@ const NavigationBar: React.FC = () => {
               <Link
                 href={item.href}
                 className={`
-                  flex items-center gap-1 py-2 px-1 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#fcee16]
+                  flex items-center gap-1 py-2 px-1 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600]
                 `}
               >
                 {item.name.toUpperCase()}
@@ -204,7 +142,7 @@ const NavigationBar: React.FC = () => {
                 <div
                   className={`
                   absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 
-                  bg-black border-2 border-[#fcee16] rounded-lg shadow-xl shadow-[#fcee16]/20
+                  bg-[#1a1a1a] border-2 border-[#ffe600] rounded-lg shadow-xl shadow-[#ffe600]/20
                   transition-all duration-300 ease-out group
                   ${
                     activeDropdown === item.name
@@ -214,21 +152,21 @@ const NavigationBar: React.FC = () => {
                 `}
                 >
                   {/* Gold accent line - appears on hover */}
-                  <div className="h-0 group-hover:h-1 bg-[#fcee16] rounded-t-md transition-all duration-300 ease-out"></div>
+                  <div className="h-0 group-hover:h-1 bg-[#ffe600] rounded-t-md transition-all duration-300 ease-out"></div>
 
                   {/* Scrollable dropdown content */}
                   <div
                     className={`py-2 ${
                       item.name === "Feature"
-                        ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800 hover:scrollbar-thumb-[#fcee16]/80"
+                        ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#ffe600] scrollbar-track-gray-800 hover:scrollbar-thumb-[#ffe600]/80"
                         : ""
                     }`}
                   >
                     {/* Scroll indicator for Feature dropdown */}
                     {item.name === "Feature" && (
-                      <div className="px-4 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
+                      <div className="px-4 py-2 border-b border-[#ffe600]/20 bg-[#ffe600]/5 sticky top-0 z-10">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#fcee16] font-medium font-open-sans">
+                          <span className="text-[#ffe600] font-medium font-open-sans">
                             {item.dropdown?.length} subcategories
                           </span>
                           <span className="text-gray-400 flex items-center gap-1 font-open-sans">
@@ -254,7 +192,7 @@ const NavigationBar: React.FC = () => {
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href}
-                          className="block px-4 py-3 text-sm font-open-sans text-gray-300 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/50"
+                          className="block px-4 py-3 text-sm font-open-sans text-gray-300 hover:text-[#ffe600] hover:bg-[#ffe600]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#ffe600]/50"
                         >
                           {dropdownItem.name}
                         </Link>
@@ -262,10 +200,10 @@ const NavigationBar: React.FC = () => {
                   </div>
 
                   {/* Bottom accent */}
-                  <div className="px-4 py-2 border-t border-[#fcee16]/20 bg-[#fcee16]/5 sticky bottom-0">
+                  <div className="px-4 py-2 border-t border-[#ffe600]/20 bg-[#ffe600]/5 sticky bottom-0">
                     <Link
                       href={item.href}
-                      className="text-xs text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 font-open-sans"
+                      className="text-xs text-[#ffe600] hover:text-[#ffe600]/80 font-medium transition-colors duration-200 font-open-sans"
                     >
                       View All {item.name} →
                     </Link>
@@ -279,14 +217,14 @@ const NavigationBar: React.FC = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between">
           {/* Logo/Brand */}
-          <div className="text-[#fcee16] font-roboto font-bold text-lg tracking-wider">
+          <div className="text-[#ffe600] font-roboto font-bold text-lg tracking-wider">
             MENU
           </div>
 
           {/* Burger Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-2"
+            className="text-[#ffe600] hover:text-[#ffe600]/80 transition-colors duration-200 p-2"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -315,18 +253,18 @@ const NavigationBar: React.FC = () => {
       {/* Mobile Menu */}
       <div
         className={`
-          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-black border-l border-[#fcee16]/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
+          md:hidden fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#1a1a1a] border-l border-[#ffe600]/30 transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto
           ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Mobile Menu Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#fcee16]/30 sticky top-0 bg-black">
-          <span className="text-[#fcee16] font-roboto font-bold text-xl tracking-wider">
+        <div className="flex items-center justify-between p-4 border-b border-[#ffe600]/30 sticky top-0 bg-[#1a1a1a]">
+          <span className="text-[#ffe600] font-roboto font-bold text-xl tracking-wider">
             NAVIGATION
           </span>
           <button
             onClick={closeMobileMenu}
-            className="text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200 p-1"
+            className="text-[#ffe600] hover:text-[#ffe600]/80 transition-colors duration-200 p-1"
           >
             <X size={24} />
           </button>
@@ -346,8 +284,8 @@ const NavigationBar: React.FC = () => {
                       flex-1 font-roboto font-medium tracking-wider transition-all duration-200 border-l-4 border-transparent
                       ${
                         index === 0
-                          ? "text-[#fcee16]"
-                          : "text-gray-200 hover:text-[#fcee16]"
+                          ? "text-[#ffe600]"
+                          : "text-gray-200 hover:text-[#ffe600]"
                       }
                     `}
                   >
@@ -355,7 +293,7 @@ const NavigationBar: React.FC = () => {
                       {item.name.toUpperCase()}
                       {/* Active indicator dot */}
                       {index === 0 && (
-                        <span className="inline-block w-2 h-2 bg-[#fcee16] rounded-full ml-2"></span>
+                        <span className="inline-block w-2 h-2 bg-[#ffe600] rounded-full ml-2"></span>
                       )}
                     </span>
                   </Link>
@@ -367,7 +305,7 @@ const NavigationBar: React.FC = () => {
                         e.stopPropagation();
                         toggleMobileDropdown(item.name);
                       }}
-                      className="p-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200"
+                      className="p-2 text-gray-400 hover:text-[#ffe600] transition-colors duration-200"
                     >
                       <ChevronRight
                         size={16}
@@ -396,9 +334,9 @@ const NavigationBar: React.FC = () => {
                     {/* Mobile scroll indicator for Feature */}
                     {item.name === "Feature" &&
                       mobileExpandedItems.has(item.name) && (
-                        <div className="px-10 py-2 border-b border-[#fcee16]/20 bg-[#fcee16]/5 sticky top-0 z-10">
+                        <div className="px-10 py-2 border-b border-[#ffe600]/20 bg-[#ffe600]/5 sticky top-0 z-10">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-[#fcee16] font-medium font-open-sans">
+                            <span className="text-[#ffe600] font-medium font-open-sans">
                               {item.dropdown?.length} items
                             </span>
                             <span className="text-gray-400 flex items-center gap-1 font-open-sans">
@@ -423,7 +361,7 @@ const NavigationBar: React.FC = () => {
                     <div
                       className={
                         item.name === "Feature"
-                          ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#fcee16] scrollbar-track-gray-800"
+                          ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#ffe600] scrollbar-track-gray-800"
                           : ""
                       }
                     >
@@ -433,7 +371,7 @@ const NavigationBar: React.FC = () => {
                             key={dropdownItem.name}
                             href={dropdownItem.href}
                             onClick={closeMobileMenu}
-                            className="block px-10 py-3 text-sm font-open-sans text-gray-400 hover:text-[#fcee16] hover:bg-[#fcee16]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#fcee16]/30"
+                            className="block px-10 py-3 text-sm font-open-sans text-gray-400 hover:text-[#ffe600] hover:bg-[#ffe600]/5 transition-all duration-200 border-l-4 border-transparent hover:border-[#ffe600]/30"
                           >
                             {dropdownItem.name}
                           </Link>
@@ -441,11 +379,11 @@ const NavigationBar: React.FC = () => {
                     </div>
 
                     {/* View All Link - sticky at bottom */}
-                    <div className="sticky bottom-0 bg-gray-950/50 border-t border-[#fcee16]/20">
+                    <div className="sticky bottom-0 bg-gray-950/50 border-t border-[#ffe600]/20">
                       <Link
                         href={item.href}
                         onClick={closeMobileMenu}
-                        className="block px-10 py-3 text-xs font-open-sans text-[#fcee16] hover:text-[#fcee16]/80 bg-[#fcee16]/5 transition-colors duration-200"
+                        className="block px-10 py-3 text-xs font-open-sans text-[#ffe600] hover:text-[#ffe600]/80 bg-[#ffe600]/5 transition-colors duration-200"
                       >
                         View All {item.name} →
                       </Link>
@@ -457,14 +395,14 @@ const NavigationBar: React.FC = () => {
           </ul>
 
           {/* Mobile Menu Footer */}
-          <div className="mt-8 px-6 py-4 border-t border-[#fcee16]/20">
+          <div className="mt-8 px-6 py-4 border-t border-[#ffe600]/20">
             <p className="text-xs text-gray-400 font-open-sans">
               Stay informed with the latest news
             </p>
             <div className="flex space-x-1 mt-2">
-              <div className="w-1 h-1 bg-[#fcee16] rounded-full"></div>
-              <div className="w-1 h-1 bg-[#fcee16]/80 rounded-full"></div>
-              <div className="w-1 h-1 bg-[#fcee16]/60 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#ffe600] rounded-full"></div>
+              <div className="w-1 h-1 bg-[#ffe600]/80 rounded-full"></div>
+              <div className="w-1 h-1 bg-[#ffe600]/60 rounded-full"></div>
             </div>
           </div>
         </div>

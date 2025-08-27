@@ -9,6 +9,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
   --font-sans: "Open Sans", var(--font-geist-sans);
   --font-roboto: "Roboto", sans-serif;
   --font-mono: var(--font-geist-mono);

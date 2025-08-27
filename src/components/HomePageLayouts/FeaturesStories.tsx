@@ -15,10 +15,9 @@ const renderText = (richText: prismic.RichTextField): string => {
   return prismicH.asText(richText);
 };
 
-// Reusable AuthorByline component with updated brand color
+// Reusable AuthorByline component using global CSS variables
 const AuthorByline = ({ story }: { story: BlogPostDocument }) => (
-  // === CHANGE APPLIED HERE ===
-  <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide mt-2">
+  <div className="text-accent text-sm font-medium uppercase tracking-wide mt-2 font-sans">
     {renderText(story.data.author)}
   </div>
 );
@@ -40,10 +39,12 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
   const facebookPostImageUrl = "/DGFacebook.PNG";
 
   return (
-    <section className="py-16">
+    <section className="bg-background py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-10 pb-4 border-b border-gray-700">
-          <h2 className="text-2xl font-serif font-bold text-white">{title}</h2>
+        <div className="mb-10 pb-4 border-b border-accent">
+          <h2 className="text-2xl font-roboto font-bold text-foreground">
+            {title}
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-12">
@@ -55,11 +56,10 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
               {mainStory && (
                 <article>
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
-                    {/* === CHANGE APPLIED HERE === */}
-                    <h3 className="text-4xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+                    <h3 className="text-4xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainStory.data.title || "Untitled Article"}
                     </h3>
-                    <p className="text-gray-300 mt-4 text-lg">
+                    <p className="text-gray-300 mt-4 text-lg font-sans">
                       {renderText(mainStory.data.summary)}
                     </p>
                   </Link>
@@ -86,8 +86,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                         />
                       </div>
                     )}
-                    {/* === CHANGE APPLIED HERE === */}
-                    <h4 className="text-xl font-serif font-bold text-white mt-4 group-hover:text-[#fcee16] transition-colors">
+                    <h4 className="text-xl font-roboto font-bold text-foreground mt-4 transition-colors duration-200 group-hover:text-accent">
                       {heroImageStory.data.title}
                     </h4>
                     {prismicH.asText(heroImageStory.data.author) && (
@@ -107,8 +106,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                       href={`/blog/${story.uid}`}
                       className="block border-t border-gray-700 pt-4"
                     >
-                      {/* === CHANGE APPLIED HERE === */}
-                      <h4 className="text-lg font-serif font-bold text-white group-hover:text-[#fcee16] transition-colors">
+                      <h4 className="text-lg font-roboto font-bold text-foreground transition-colors duration-200 group-hover:text-accent">
                         {story.data.title}
                       </h4>
                       {prismicH.asText(story.data.author) && (
@@ -123,16 +121,15 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
           {/* === SIDEBAR === */}
           <aside className="lg:col-span-1 lg:border-l lg:border-gray-800 lg:pl-8">
-            <h3 className="font-bold text-white mb-4 text-lg">
+            <h3 className="font-roboto font-bold text-foreground mb-4 text-lg">
               More highlights
             </h3>
             <ul className="space-y-4">
               {sidebarLinks.map((link) => (
                 <li key={link} className="border-b border-gray-800 pb-4">
-                  {/* === CHANGE APPLIED HERE === */}
                   <Link
                     href="#"
-                    className="text-white hover:text-[#fcee16] transition-colors"
+                    className="font-sans text-foreground transition-colors duration-200 hover:text-accent"
                   >
                     {link}
                   </Link>

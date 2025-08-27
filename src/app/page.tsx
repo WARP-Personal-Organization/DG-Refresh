@@ -80,17 +80,17 @@ export default async function Home() {
         <TopStories title={"Top Stories"} stories={posts} />
         <LocalStories title={"Local"} stories={posts} />
         <NegrosAndSportsStories
-        negrosTitle={"Negros"}
-        negrosStories={posts} 
-        sportsTitle={"Sports"}
-        sportsStories={posts.length > 0 ? posts : posts} 
+          negrosTitle={"Negros"}
+          negrosStories={posts}
+          sportsTitle={"Sports"}
+          sportsStories={posts.length > 0 ? posts : posts}
         />
         <FeaturesStories title={"Features"} stories={posts} />
         <InitiativeAndNationStories
-        initiativeTitle={"Initiative"}
-        initiativeStories={posts} 
-        nationTitle={"Nation"}
-        nationStories={posts}  
+          initiativeTitle={"Initiative"}
+          initiativeStories={posts}
+          nationTitle={"Nation"}
+          nationStories={posts}
         />
         <EditorialStories title={"Editorial"} stories={posts} />
         <OpinionSection />

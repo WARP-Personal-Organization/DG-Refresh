@@ -1,15 +1,15 @@
 "use client";
 
 import {
+  Flag,
   MessageCircle,
   Reply,
-  ThumbsUp,
-  ThumbsDown,
-  Flag,
-  User,
   Send,
+  ThumbsDown,
+  ThumbsUp,
+  User,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Comment {
   id: string;
@@ -56,23 +56,11 @@ const CommentSection = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load saved user data from localStorage on component mount
-  useEffect(() => {
-    const savedName = localStorage.getItem("commenter_name");
-    const savedEmail = localStorage.getItem("commenter_email");
-
-    if (savedName || savedEmail) {
-      setFormData((prev) => ({
-        ...prev,
-        name: savedName || "",
-        email: savedEmail || "",
-        rememberMe: true,
-      }));
-    }
-
-    // Load mock comments
-    const mockComments: Comment[] = [
+  // Memoize mock comments to prevent recreating on every render
+  const mockComments: Comment[] = useMemo(
+    () => [
       {
         id: "1",
         name: "Maria Santos",
@@ -115,10 +103,35 @@ const CommentSection = ({
         likes: 3,
         dislikes: 2,
       },
-    ];
+    ],
+    []
+  ); // Empty dependency array since this data is static
 
-    setComments(initialComments.length > 0 ? initialComments : mockComments);
-  }, [initialComments]);
+  // Load saved user data and initialize comments only once
+  useEffect(() => {
+    if (isInitialized) return;
+
+    // Load saved user data from localStorage
+    if (typeof window !== "undefined") {
+      const savedName = localStorage.getItem("commenter_name");
+      const savedEmail = localStorage.getItem("commenter_email");
+
+      if (savedName || savedEmail) {
+        setFormData((prev) => ({
+          ...prev,
+          name: savedName || "",
+          email: savedEmail || "",
+          rememberMe: true,
+        }));
+      }
+    }
+
+    // Set initial comments
+    const commentsToUse =
+      initialComments.length > 0 ? initialComments : mockComments;
+    setComments(commentsToUse);
+    setIsInitialized(true);
+  }, []); // Only run once on mount
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
@@ -184,12 +197,14 @@ const CommentSection = ({
     setIsSubmitting(true);
 
     // Save user data if remember me is checked
-    if (formData.rememberMe) {
-      localStorage.setItem("commenter_name", formData.name);
-      localStorage.setItem("commenter_email", formData.email);
-    } else {
-      localStorage.removeItem("commenter_name");
-      localStorage.removeItem("commenter_email");
+    if (typeof window !== "undefined") {
+      if (formData.rememberMe) {
+        localStorage.setItem("commenter_name", formData.name);
+        localStorage.setItem("commenter_email", formData.email);
+      } else {
+        localStorage.removeItem("commenter_name");
+        localStorage.removeItem("commenter_email");
+      }
     }
 
     // Mock API call

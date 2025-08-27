@@ -35,7 +35,7 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
         {/* Section Header with light text and borders */}
         <div className="text-center mb-8 space-y-4">
           <DottedSeparator />
-          <h2 className="text-sm font-semibold text-white uppercase tracking-[0.2em]">
+          <h2 className="text-sm font-roboto font-semibold text-foreground uppercase tracking-[0.2em]">
             {title}
           </h2>
           <DottedSeparator />
@@ -61,13 +61,13 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
 
                 {/* Story Content with light text */}
                 <div className="space-y-2">
-                  {/* Category color changed to be bright and visible (like your original) */}
-                <p className="text-sm font-semibold text-[#fcee16] uppercase">
-                  {story.data.category || "News"}
-                </p>
+                  {/* Category color changed to be bright and visible */}
+                  <p className="text-sm font-semibold text-accent uppercase font-sans">
+                    {story.data.category || "News"}
+                  </p>
 
                   {/* Headline with white text */}
-                  <h3 className="text-xl font-serif font-bold text-white leading-tight">
+                  <h3 className="text-xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h3>
                 </div>
