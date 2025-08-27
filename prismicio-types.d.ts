@@ -70,6 +70,82 @@ type ContentRelationshipFieldWithData<
 }[Exclude<TCustomType[number], string>["id"]];
 
 /**
+ * Content for author_opinion documents
+ */
+interface AuthorOpinionDocumentData {
+  /**
+   * name field in *author_opinion*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: author_opinion.name
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  name: prismic.KeyTextField;
+
+  /**
+   * bio field in *author_opinion*
+   *
+   * - **Field Type**: Rich Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: author_opinion.bio
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/rich-text
+   */
+  bio: prismic.RichTextField;
+
+  /**
+   * avatar field in *author_opinion*
+   *
+   * - **Field Type**: Image
+   * - **Placeholder**: *None*
+   * - **API ID Path**: author_opinion.avatar
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/image
+   */
+  avatar: prismic.ImageField<never>;
+
+  /**
+   * title field in *author_opinion*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: author_opinion.title
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  title: prismic.KeyTextField;
+
+  /**
+   * email field in *author_opinion*
+   *
+   * - **Field Type**: Text
+   * - **Placeholder**: *None*
+   * - **API ID Path**: author_opinion.email
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/text
+   */
+  email: prismic.KeyTextField;
+}
+
+/**
+ * author_opinion document from Prismic
+ *
+ * - **API ID**: `author_opinion`
+ * - **Repeatable**: `true`
+ * - **Documentation**: https://prismic.io/docs/content-modeling
+ *
+ * @typeParam Lang - Language API ID of the document.
+ */
+export type AuthorOpinionDocument<Lang extends string = string> =
+  prismic.PrismicDocumentWithUID<
+    Simplify<AuthorOpinionDocumentData>,
+    "author_opinion",
+    Lang
+  >;
+
+/**
  * Item in *blog_post → Tags*
  */
 export interface BlogPostDocumentDataTagsItem {
@@ -83,11 +159,12 @@ export interface BlogPostDocumentDataTagsItem {
    */
   tag: prismic.SelectField<
     | "local-news"
+    | "capiz-news"
     | "health-wellness"
     | "auto-racing"
     | "fact-check-news"
     | "cebu-news"
-    | "negroes-news"
+    | "negros-news"
     | "medical-frontiers"
     | "travel-destinations"
     | "entertainment"
@@ -209,7 +286,7 @@ interface BlogPostDocumentData {
     | "news"
     | "feature"
     | "opinion"
-    | "industries"
+    | "initiatives"
     | "sports"
     | "business"
     | "other-pages"
@@ -226,60 +303,27 @@ interface BlogPostDocumentData {
    */
   subcategory: prismic.SelectField<
     | "local"
+    | "fact-first-ph"
+    | "capiz"
+    | "negros"
     | "health"
-    | "auto-racing"
-    | "fact-check-news"
-    | "cebu"
-    | "negroes"
-    | "health-wellness"
-    | "medical-frontiers"
     | "travel"
-    | "destinations"
     | "entertainment"
-    | "film"
-    | "music"
-    | "celebrity-news"
     | "lifestyle"
-    | "fashion"
-    | "food"
-    | "franchise-living"
-    | "arts-culture"
-    | "therapeutic-arts-stories"
-    | "cultural-events"
+    | "arts-and-culture"
     | "education"
-    | "academic-updates"
-    | "universities"
-    | "students-teachers"
     | "environment"
-    | "climate-change"
-    | "environmental-awareness"
-    | "green-lifestyles"
     | "editorial"
-    | "current-events"
-    | "politics"
-    | "special-issues"
-    | "foreign-politics-trends"
-    | "weekly-fashion-trends"
-    | "weekly-fashion-shopping"
-    | "exposer"
-    | "entertainment-social-impact"
-    | "community-building-advocacy-reporting"
-    | "sports-day"
-    | "farm-related-supplies-stories"
+    | "fashion-fridays"
+    | "empower"
+    | "global-shapers-iloilo"
+    | "zero-day"
     | "local-news"
-    | "all-sport-games"
     | "national-news"
-    | "business"
-    | "motoring"
-    | "vehicles"
-    | "transportation"
-    | "techbark"
-    | "innovations-gadgets"
+    | "monitoring"
+    | "tech-talk"
     | "about-us"
-    | "news-members-staff"
     | "contact-us"
-    | "company-details-social-platforms"
-    | "pricing-terms-feedback-survey"
   >;
 
   /**
@@ -338,6 +382,18 @@ interface BlogPostDocumentData {
    * - **Documentation**: https://prismic.io/docs/fields/boolean
    */
   editors_pick: prismic.BooleanField;
+
+  /**
+   * banner pick field in *blog_post*
+   *
+   * - **Field Type**: Boolean
+   * - **Placeholder**: *None*
+   * - **Default Value**: false
+   * - **API ID Path**: blog_post.banner_pick
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/boolean
+   */
+  banner_pick: prismic.BooleanField;
 
   /**
    * Tags field in *blog_post*
@@ -401,7 +457,7 @@ export type BlogPostDocument<Lang extends string = string> =
     Lang
   >;
 
-export type AllDocumentTypes = BlogPostDocument;
+export type AllDocumentTypes = AuthorOpinionDocument | BlogPostDocument;
 
 declare module "@prismicio/client" {
   interface CreateClient {
@@ -424,6 +480,8 @@ declare module "@prismicio/client" {
 
   namespace Content {
     export type {
+      AuthorOpinionDocument,
+      AuthorOpinionDocumentData,
       BlogPostDocument,
       BlogPostDocumentData,
       BlogPostDocumentDataTagsItem,

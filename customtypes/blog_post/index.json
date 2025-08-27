@@ -133,6 +133,15 @@
           "default_value": false
         }
       },
+      "banner_pick": {
+        "type": "Boolean",
+        "config": {
+          "label": "banner pick",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      },
       "tags": {
         "type": "Group",
         "config": {

@@ -157,8 +157,16 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                 </article>
               ))}
               {/* Publications */}
-              <PublicationCard title="Today's Paper" imageUrl={todayPaperUrl} />
-              <PublicationCard title="Supplement" imageUrl={supplementUrl} />
+              <PublicationCard
+                title="Today's Paper"
+                imageUrl={todayPaperUrl}
+                link="https://dailyguardian.com.ph/todays-paper/"
+              />
+              <PublicationCard
+                title="Supplement"
+                imageUrl={supplementUrl}
+                link="https://dailyguardian.com.ph/3d-flip-book/supplement/"
+              />
             </div>
           </div>
         </div>

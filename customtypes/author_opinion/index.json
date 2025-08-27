@@ -1,0 +1,144 @@
+{
+  "format": "custom",
+  "id": "author_opinion",
+  "label": "author_opinion",
+  "repeatable": true,
+  "status": true,
+  "json": {
+    "Main": {
+      "uid": {
+        "type": "UID",
+        "config": {
+          "label": "UID"
+        }
+      },
+      "name": {
+        "type": "Text",
+        "config": {
+          "label": "name",
+          "placeholder": ""
+        }
+      },
+      "bio": {
+        "type": "StructuredText",
+        "config": {
+          "label": "bio",
+          "placeholder": "",
+          "allowTargetBlank": true,
+          "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+        }
+      },
+      "avatar": {
+        "type": "Image",
+        "config": {
+          "label": "avatar",
+          "constraint": {},
+          "thumbnails": []
+        }
+      },
+      "title": {
+        "type": "Text",
+        "config": {
+          "label": "title",
+          "placeholder": ""
+        }
+      },
+      "email": {
+        "type": "Text",
+        "config": {
+          "label": "email",
+          "placeholder": ""
+        }
+      },
+      "articles": {
+        "type": "Group",
+        "config": {
+          "label": "articles",
+          "fields": {
+            "article_title": {
+              "type": "Text",
+              "config": {
+                "label": "article_title",
+                "placeholder": ""
+              }
+            },
+            "article_subtitle": {
+              "type": "StructuredText",
+              "config": {
+                "label": "article_subtitle",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "single": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            },
+            "article_image": {
+              "type": "Image",
+              "config": {
+                "label": "article_image",
+                "constraint": {},
+                "thumbnails": []
+              }
+            },
+            "article_content": {
+              "type": "StructuredText",
+              "config": {
+                "label": "article_content",
+                "placeholder": "",
+                "allowTargetBlank": true,
+                "multi": "paragraph,preformatted,heading1,heading2,heading3,heading4,heading5,heading6,strong,em,hyperlink,image,embed,list-item,o-list-item,rtl"
+              }
+            },
+            "article_category": {
+              "type": "Select",
+              "config": {
+                "label": "article_category",
+                "placeholder": "",
+                "options": [
+                  "Opinion",
+                  "Editorial",
+                  "Analysis",
+                  "Business",
+                  "Finance"
+                ]
+              }
+            },
+            "published_date": {
+              "type": "Date",
+              "config": {
+                "label": "published_date",
+                "placeholder": ""
+              }
+            },
+            "is_featured": {
+              "type": "Boolean",
+              "config": {
+                "label": "is_featured",
+                "placeholder_false": "false",
+                "placeholder_true": "true",
+                "default_value": false
+              }
+            }
+          }
+        }
+      },
+      "is_active": {
+        "type": "Boolean",
+        "config": {
+          "label": "is_active",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": true
+        }
+      },
+      "featured_author": {
+        "type": "Boolean",
+        "config": {
+          "label": "featured_author",
+          "placeholder_false": "false",
+          "placeholder_true": "true",
+          "default_value": false
+        }
+      }
+    }
+  }
+}

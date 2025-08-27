@@ -12,8 +12,10 @@ import OpinionSection from "@/components/Opinion";
 import RightSidebar from "@/components/RightSidebar";
 import EnhancedVideoSection from "@/components/VideosSection";
 import { client } from "../../lib/prismicio";
-import type { BlogPostDocument } from "../../prismicio-types";
-
+import type {
+  AuthorOpinionDocument,
+  BlogPostDocument,
+} from "../../prismicio-types";
 export default async function Home() {
   try {
     // Fetch all blog posts
@@ -21,6 +23,15 @@ export default async function Home() {
       orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
     });
     console.log(posts);
+
+    // Fetch all author opinions
+    const authors: AuthorOpinionDocument[] = await client.getAllByType(
+      "author_opinion",
+      {
+        orderings: [{ field: "my.author_opinion.name", direction: "asc" }],
+      }
+    );
+    console.log(authors);
 
     // Handle case where no posts exist
     if (!posts || posts.length === 0) {
@@ -49,15 +60,97 @@ export default async function Home() {
     const businessPosts = posts.filter(
       (post) => post.data.category === "business"
     );
-
     // Select specific posts for each component section with better fallbacks
-    const heroPost = featuredPosts[0] || newsPosts[0] || posts[0];
-    const featuredPost =
-      sportsPosts[0] ||
-      featuredPosts[1] ||
-      businessPosts[0] ||
-      posts[1] ||
-      posts[0];
+    // const heroPost = featuredPosts[0] || newsPosts[0] || posts[0];
+    // const featuredPost =
+    //   sportsPosts[0] ||
+    //   featuredPosts[1] ||
+    //   businessPosts[0] ||
+    //   posts[1] ||
+    //   posts[0];
+
+    // Filter for editor's picks and sort by latest published date
+    const editorsPicks = posts
+      .filter((post) => post.data.editors_pick === true)
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const featuredPicks = posts
+      .filter((post) => post.data.is_featured === true)
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const breakingNews = posts
+      .filter((post) => post.data.is_breaking_news === true)
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const localPicks = posts
+      .filter((post) => post.data.subcategory === "local")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const negrosPicks = posts
+      .filter((post) => post.data.subcategory === "negros")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const sportsPicks = posts
+      .filter((post) => post.data.category === "sports")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const featuredPicksAsCategory = posts
+      .filter((post) => post.data.category === "feature")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const initiativesPicks = posts
+      .filter((post) => post.data.category === "initiatives")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const nationalPicks = posts
+      .filter((post) => post.data.subcategory === "national-news")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+    const editorialPicks = posts
+      .filter((post) => post.data.subcategory === "editorial")
+      .sort((a, b) => {
+        // Sort by published_date in descending order (latest first)
+        const dateA = new Date(a.data.published_date || "");
+        const dateB = new Date(b.data.published_date || "");
+        return dateB.getTime() - dateA.getTime();
+      });
+
     const editorialPost = newsPosts[1] || newsPosts[0] || posts[2];
 
     return (
@@ -70,30 +163,30 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 py-8 pb">
           <div className="grid lg:grid-cols-4 gap-8">
             <MainContent
-              heroPost={heroPost}
-              featuredPost={featuredPost}
+              heroPost={breakingNews[0]}
+              featuredPost={featuredPicks[0]}
               editorialPost={editorialPost}
             />
-            <RightSidebar editorsPicks={posts} />
+            <RightSidebar editorsPicks={editorsPicks} />
           </div>
         </div>
-        <TopStories title={"Top Stories"} stories={posts} />
-        <LocalStories title={"Local"} stories={posts} />
+        <TopStories title={"Top Stories"} stories={featuredPicks} />
+        <LocalStories title={"Local"} stories={localPicks} />
         <NegrosAndSportsStories
           negrosTitle={"Negros"}
-          negrosStories={posts}
+          negrosStories={negrosPicks}
           sportsTitle={"Sports"}
-          sportsStories={posts.length > 0 ? posts : posts}
+          sportsStories={posts.length > 0 ? sportsPicks : sportsPicks}
         />
-        <FeaturesStories title={"Features"} stories={posts} />
+        <FeaturesStories title={"Features"} stories={featuredPicksAsCategory} />
         <InitiativeAndNationStories
           initiativeTitle={"Initiative"}
-          initiativeStories={posts}
+          initiativeStories={initiativesPicks}
           nationTitle={"Nation"}
-          nationStories={posts}
+          nationStories={nationalPicks}
         />
-        <EditorialStories title={"Editorial"} stories={posts} />
-        <OpinionSection />
+        <EditorialStories title={"Editorial"} stories={editorialPicks} />
+        <OpinionSection authors={authors} />
         <EnhancedVideoSection />
       </div>
     );

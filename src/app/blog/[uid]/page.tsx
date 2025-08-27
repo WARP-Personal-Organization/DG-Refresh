@@ -148,40 +148,37 @@ export default async function BlogPost({ params }: BlogPageProps) {
       </header>
 
       <article className="max-w-4xl mx-auto px-4 py-8">
-        {/* === TAGS SECTION MOVED HERE === */}
-        {postTags.length > 0 && (
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-3">
-              {postTags.map((tag, index) => (
-                <Link
-                  key={index}
-                  href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200"
-                >
-                  {tag.replace(/-/g, " ")}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* === COMBINED TAGS AND BADGES SECTION === */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3">
+            {/* Badges with same styling as tags */}
+            {post.data.is_breaking_news && (
+              <span className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200">
+                BREAKING NEWS
+              </span>
+            )}
+            {post.data.is_featured && (
+              <span className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200">
+                FEATURED
+              </span>
+            )}
+            {post.data.editors_pick && (
+              <span className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200">
+                EDITOR&apos;S PICK
+              </span>
+            )}
 
-        {/* Badges Section */}
-        <div className="mb-6">
-          {post.data.is_breaking_news && (
-            <span className="inline-block px-4 py-2 text-sm font-bold tracking-wider uppercase rounded bg-red-600 text-red-100 animate-pulse font-open-sans">
-              BREAKING NEWS
-            </span>
-          )}
-          {post.data.is_featured && (
-            <span className="ml-3 inline-block px-4 py-2 text-sm font-bold tracking-wider uppercase rounded bg-[#fcee16] text-[#1b1a1b] font-open-sans">
-              FEATURED
-            </span>
-          )}
-          {post.data.editors_pick && (
-            <span className="ml-3 inline-block px-4 py-2 text-sm font-bold tracking-wider uppercase rounded bg-green-600 text-green-100 font-open-sans">
-              EDITOR&apos;S PICK
-            </span>
-          )}
+            {/* Tags with same styling */}
+            {postTags.map((tag, index) => (
+              <Link
+                key={index}
+                href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200"
+              >
+                {tag.replace(/-/g, " ")}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Headline */}
