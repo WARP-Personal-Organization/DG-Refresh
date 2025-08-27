@@ -221,16 +221,6 @@ const OpinionSection: React.FC = () => {
             </article>
           ))}
         </div>
-
-        {/* View All Link */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <Link
-            href="/opinion"
-            className="inline-block px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans"
-          >
-            View All Opinion
-          </Link>
-        </div>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Calendar, MapPin, Menu, Search, User, X } from "lucide-react";
+import { Bell, Calendar, MapPin, Search, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import type { BlogPostDocument } from "../../prismicio-types";
@@ -31,16 +31,11 @@ const useWeather = () => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // Using OpenWeatherMap API - you'll need to get a free API key from openweathermap.org
-        // For demo purposes, I'm using a mock API. Replace with your actual API key.
         const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || "demo_key";
-
-        // Coordinates for Iloilo City, Philippines
         const lat = 10.7202;
         const lon = 122.5621;
 
         if (API_KEY === "demo_key") {
-          // Mock data for demo purposes
           setTimeout(() => {
             setWeather({
               temperature: 28,
@@ -83,10 +78,7 @@ const useWeather = () => {
     };
 
     fetchWeather();
-
-    // Refresh weather data every 10 minutes
     const interval = setInterval(fetchWeather, 10 * 60 * 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -110,7 +102,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
     setIsSearchModalOpen(false);
   };
 
-  // Handle keyboard shortcut for search (Ctrl/Cmd + K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
@@ -123,7 +114,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Convert Celsius to Fahrenheit for display
   const getTemperatureDisplay = (celsius: number) => {
     const fahrenheit = Math.round((celsius * 9) / 5 + 32);
     return `${fahrenheit}°F`;
@@ -131,13 +121,13 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-black via-gray-950 to-black border-b-2 border-yellow-500/30 shadow-xl relative font-open-sans">
+      <header className="bg-gradient-to-r from-black via-gray-950 to-black border-b-2 border-[#fcee16]/30 shadow-xl relative font-open-sans">
         <div className="max-w-7xl mx-auto">
-          {/* Top Bar with Date and Weather - Enhanced Responsive */}
+          {/* Top Bar with Date and Weather */}
           <div className="hidden lg:flex justify-between items-center py-2 px-4 border-b border-gray-800 text-xs">
             <div className="flex items-center gap-3 text-gray-400">
               <time className="font-medium flex items-center gap-2 font-open-sans">
-                <Calendar size={12} className="text-yellow-400" />
+                <Calendar size={12} className="text-[#fcee16]" />
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -146,11 +136,14 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 })}
               </time>
               <span className="text-gray-600">|</span>
-              <span className="text-yellow-400 flex items-center gap-1 font-open-sans">
+              {/* === CHANGE APPLIED HERE === */}
+              <span className="text-[#fcee16] flex items-center gap-1 font-open-sans">
                 <MapPin size={12} />
                 {weather.loading
                   ? "Loading weather..."
-                  : `${getTemperatureDisplay(weather.temperature)} ${weather.description}`}
+                  : `${getTemperatureDisplay(weather.temperature)} ${
+                      weather.description
+                    }`}
                 {weather.error && (
                   <span className="text-gray-500 text-xs ml-1">
                     (Iloilo City)
@@ -168,10 +161,10 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
             </div>
           </div>
 
-          {/* Mobile Top Bar - Simplified */}
+          {/* Mobile Top Bar */}
           <div className="lg:hidden flex justify-between items-center py-2 px-4 border-b border-gray-800 text-xs">
             <div className="flex items-center gap-2 text-gray-400">
-              <Calendar size={10} className="text-yellow-400" />
+              <Calendar size={10} className="text-[#fcee16]" />
               <time className="font-medium font-open-sans">
                 {new Date().toLocaleDateString("en-US", {
                   month: "short",
@@ -182,7 +175,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-yellow-400 text-xs font-medium truncate max-w-32 font-open-sans">
+              <span className="text-[#fcee16] text-xs font-medium truncate max-w-32 font-open-sans">
                 {weather.loading
                   ? "Loading..."
                   : `${getTemperatureDisplay(weather.temperature)}`}
@@ -190,120 +183,99 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
             </div>
           </div>
 
-          {/* Main Header - Enhanced Responsive Layout */}
+          {/* Main Header */}
           <div className="flex justify-between items-center py-4 lg:py-6 px-4">
-            {/* Left Section - Responsive */}
+            {/* Left Section */}
             <div className="flex-1 flex items-center gap-2 sm:gap-4">
-              {/* Desktop Search */}
               <button
                 onClick={openSearchModal}
-                className="hidden lg:flex items-center gap-2 text-gray-300 hover:text-yellow-400 transition-colors duration-200 group"
+                className="hidden lg:flex items-center gap-2 text-gray-300 hover:text-[#fcee16] transition-colors duration-200 group"
               >
                 <Search
                   size={18}
                   className="group-hover:scale-110 transition-transform duration-200"
                 />
                 <span className="text-sm font-medium font-roboto">Search</span>
-                <kbd className="hidden xl:inline-flex items-center px-2 py-1 text-xs font-mono text-gray-500 bg-gray-800 border border-gray-700 rounded">
-                  ⌘K
-                </kbd>
               </button>
-
-              {/* Mobile Search Button */}
               <button
                 onClick={openSearchModal}
-                className="lg:hidden text-gray-300 hover:text-yellow-400 transition-colors duration-200 p-2"
+                className="lg:hidden text-gray-300 hover:text-[#fcee16] transition-colors duration-200 p-2"
                 aria-label="Search"
               >
                 <Search size={18} />
               </button>
-
-              {/* Mobile Menu Button */}
-              {/* <button
-                onClick={toggleMobileMenu}
-                className="lg:hidden text-yellow-400 hover:text-yellow-300 transition-colors duration-200 p-2"
-                aria-label="Toggle menu"
-              >
-                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-              </button> */}
             </div>
 
-            {/* Centered Logo - Fully Responsive */}
+            {/* Centered Logo */}
             <div className="flex-1 text-center px-2">
-              <Link href="/" className="group block">
+              <Link href="/" className="block">
                 <div className="relative flex flex-col items-center">
-                  {/* Main Logo Image - Responsive Sizes */}
                   <div className="relative">
                     <img
                       src="/dg-logo.png"
                       alt="Daily Guardian"
-                      className="h-8 sm:h-10 md:h-12 lg:h-16 xl:h-20 w-auto group-hover:scale-105 transition-transform duration-300 drop-shadow-lg"
+                      className="h-10 sm:h-12 md:h-16 lg:h-20 xl:h-24 w-auto drop-shadow-lg"
                     />
                   </div>
                 </div>
               </Link>
             </div>
 
-            {/* Right Section - Enhanced Responsive */}
+            {/* Right Section */}
             <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
-              {/* Mobile Sign In */}
-              <button className="md:hidden text-gray-300 hover:text-yellow-400 transition-colors duration-200 p-2">
+              <button className="md:hidden text-gray-300 hover:text-[#fcee16] transition-colors duration-200 p-2">
                 <User size={18} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Mobile Menu Overlay */}
+        {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 z-50 bg-gradient-to-b from-black via-gray-950 to-black border-b-2 border-yellow-500/30 shadow-2xl">
+          <div className="lg:hidden absolute top-full left-0 right-0 z-50 bg-gradient-to-b from-black via-gray-950 to-black border-b-2 border-[#fcee16]/30 shadow-2xl">
             <div className="max-w-7xl mx-auto px-4 py-6">
-              {/* Search Bar in Mobile Menu */}
               <div className="mb-4">
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     openSearchModal();
                   }}
-                  className="w-full flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700 text-left text-gray-400 hover:text-yellow-400 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700 text-left text-gray-400 hover:text-[#fcee16] transition-colors"
                 >
                   <Search size={18} />
                   <span className="font-open-sans">Search articles...</span>
                 </button>
               </div>
 
-              {/* Weather Widget for Mobile */}
               <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-yellow-400" />
+                    <MapPin size={14} className="text-[#fcee16]" />
                     <span className="text-sm text-gray-400 font-open-sans">
                       Iloilo City
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-yellow-400 font-bold font-roboto">
+                    <div className="text-[#fcee16] font-bold font-roboto">
                       {weather.loading
                         ? "Loading..."
                         : getTemperatureDisplay(weather.temperature)}
                     </div>
-                    <div className="text-xs text-gray-400 font-open-sans">
+                    <div className="text-xs text-[#fcee16] font-open-sans">
                       {weather.loading ? "" : weather.description}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Mobile Navigation Links */}
               <nav className="space-y-4 mb-6">
                 <Link
                   href="/"
-                  className="block py-3 px-4 text-yellow-400 font-roboto font-bold text-lg border-b border-yellow-500/30 bg-yellow-500/5 rounded-lg"
+                  className="block py-3 px-4 text-[#fcee16] font-roboto font-bold text-lg border-b border-[#fcee16]/30 bg-[#fcee16]/5 rounded-lg"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
                 </Link>
-
                 {[
                   "Local News",
                   "Sports",
@@ -315,7 +287,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                   <Link
                     key={item}
                     href={`/${item.toLowerCase().replace(" ", "-")}`}
-                    className="block py-3 px-4 text-gray-300 hover:text-yellow-400 font-roboto font-medium transition-colors duration-200 border-b border-gray-800 hover:bg-yellow-500/5 rounded-lg"
+                    className="block py-3 px-4 text-gray-300 hover:text-[#fcee16] font-roboto font-medium transition-colors duration-200 border-b border-gray-800 hover:bg-[#fcee16]/5 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item}
@@ -323,9 +295,8 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 ))}
               </nav>
 
-              {/* Mobile User Actions */}
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
-                <button className="flex items-center justify-center gap-2 border border-yellow-500/50 text-yellow-400 font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-yellow-500/10">
+                <button className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-[#fcee16] font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10">
                   <Bell size={16} />
                   Alerts
                 </button>
@@ -335,7 +306,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 </button>
               </div>
 
-              {/* Mobile Breaking News */}
               <div className="mt-6 p-4 bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -352,7 +322,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
         )}
       </header>
 
-      {/* Search Modal */}
       <SearchModal
         isOpen={isSearchModalOpen}
         onClose={closeSearchModal}

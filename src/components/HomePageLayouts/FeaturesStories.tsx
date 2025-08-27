@@ -15,22 +15,28 @@ const renderText = (richText: prismic.RichTextField): string => {
   return prismicH.asText(richText);
 };
 
+// Reusable AuthorByline component with updated brand color
 const AuthorByline = ({ story }: { story: BlogPostDocument }) => (
-  <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide mt-2">
+  // === CHANGE APPLIED HERE ===
+  <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide mt-2">
     {renderText(story.data.author)}
   </div>
 );
 
-const FeaturesStories: React.FC<FeaturesStoriesProps> = ({ stories, title }) => {
+const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
+  stories,
+  title,
+}) => {
   if (!stories || stories.length === 0) {
     return null;
   }
 
+  // Assign stories to the new layout structure
   const mainStory = stories[0];
   const heroImageStory = stories.length > 1 ? stories[1] : null;
   const bottomStories = stories.length > 2 ? stories.slice(2, 8) : [];
 
-  const sidebarLinks = ["Moral Money", "Due Diligence", "Cryptocurrencies",];
+  const sidebarLinks = ["Moral Money", "Due Diligence", "Cryptocurrencies"];
   const facebookPostImageUrl = "/DGFacebook.PNG";
 
   return (
@@ -42,16 +48,15 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({ stories, title }) => 
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-12">
           {/* === MAIN CONTENT AREA === */}
-          <div className="lg:col-span-3">
-            {/* This is the master grid for the main content area */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* === FIX: New column wrapper for the left side === */}
-              <div className="flex flex-col gap-8">
-                {/* Top-Left Main Story */}
+          <div className="lg:col-span-3 flex flex-col gap-12">
+            {/* === TOP ROW: Main Story + Landscape Image === */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              {/* Top-Left Main Story */}
+              {mainStory && (
                 <article>
-                  <Link href={`/blog/${mainStory.uid}`} className="block">
-                    <h3 className="text-4xl font-serif font-bold text-white leading-tight">
+                  <Link href={`/blog/${mainStory.uid}`} className="block group">
+                    {/* === CHANGE APPLIED HERE === */}
+                    <h3 className="text-4xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
                       {mainStory.data.title || "Untitled Article"}
                     </h3>
                     <p className="text-gray-300 mt-4 text-lg">
@@ -59,67 +64,93 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({ stories, title }) => 
                     </p>
                   </Link>
                 </article>
+              )}
 
-                {/* Bottom Row of Stories - now guaranteed to be below the main story */}
-                {bottomStories.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 border-t border-gray-800 pt-8">
-                    {bottomStories.map((story) => (
-                      <article key={story.id} className="group">
-                        <Link href={`/blog/${story.uid}`} className="block border-t border-gray-700 pt-4">
-                          <h4 className="text-lg font-serif font-bold text-white">
-                            {story.data.title}
-                          </h4>
-                          {prismicH.asText(story.data.author) && <AuthorByline story={story} />}
-                        </Link>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Central Hero Image - no longer needs row-span */}
+              {/* Top-Right Landscape Image Story */}
               {heroImageStory && (
-                <div>
-                  <Link href={`/blog/${heroImageStory.uid}`} className="block h-full w-full">
+                <article>
+                  <Link
+                    href={`/blog/${heroImageStory.uid}`}
+                    className="block group"
+                  >
                     {heroImageStory.data.featured_image?.url && (
-                      <div className="relative h-full min-h-[450px]">
+                      <div className="relative w-full aspect-[16/10] overflow-hidden rounded-md">
                         <Image
                           src={heroImageStory.data.featured_image.url}
-                          alt={heroImageStory.data.featured_image.alt || "Feature image"}
+                          alt={
+                            heroImageStory.data.featured_image.alt ||
+                            "Feature image"
+                          }
                           fill
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}
+                    {/* === CHANGE APPLIED HERE === */}
+                    <h4 className="text-xl font-serif font-bold text-white mt-4 group-hover:text-[#fcee16] transition-colors">
+                      {heroImageStory.data.title}
+                    </h4>
+                    {prismicH.asText(heroImageStory.data.author) && (
+                      <AuthorByline story={heroImageStory} />
+                    )}
                   </Link>
-                </div>
+                </article>
               )}
             </div>
+
+            {/* === BOTTOM ROW: Grid of smaller stories === */}
+            {bottomStories.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-gray-800 pt-8">
+                {bottomStories.map((story) => (
+                  <article key={story.id} className="group">
+                    <Link
+                      href={`/blog/${story.uid}`}
+                      className="block border-t border-gray-700 pt-4"
+                    >
+                      {/* === CHANGE APPLIED HERE === */}
+                      <h4 className="text-lg font-serif font-bold text-white group-hover:text-[#fcee16] transition-colors">
+                        {story.data.title}
+                      </h4>
+                      {prismicH.asText(story.data.author) && (
+                        <AuthorByline story={story} />
+                      )}
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* === SIDEBAR === */}
-          <div className="lg:col-span-1 lg:border-l lg:border-gray-800 lg:pl-8">
-            <h3 className="font-bold text-yellow mb-4">More highlights</h3>
+          <aside className="lg:col-span-1 lg:border-l lg:border-gray-800 lg:pl-8">
+            <h3 className="font-bold text-white mb-4 text-lg">
+              More highlights
+            </h3>
             <ul className="space-y-4">
-              {sidebarLinks.map(link => (
+              {sidebarLinks.map((link) => (
                 <li key={link} className="border-b border-gray-800 pb-4">
-                  <Link href="#" className="hover:text-yellow-500 transition-colors">{link}</Link>
+                  {/* === CHANGE APPLIED HERE === */}
+                  <Link
+                    href="#"
+                    className="text-white hover:text-[#fcee16] transition-colors"
+                  >
+                    {link}
+                  </Link>
                 </li>
               ))}
             </ul>
             <div className="mt-8">
               <Link href="#" className="block">
-                <div className="relative w-full aspect-[9/16]">
-                  <Image
-                    src={facebookPostImageUrl}
-                    alt="Daily Guardian on Facebook"
-                    fill
-                    className="object-contain object-top"
-                  />
-                </div>
+                <Image
+                  src={facebookPostImageUrl}
+                  alt="Daily Guardian on Facebook"
+                  width={400}
+                  height={710}
+                  className="w-full h-auto"
+                />
               </Link>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </section>

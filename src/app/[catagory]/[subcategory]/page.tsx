@@ -140,13 +140,6 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
-            {/* Article Number Badge */}
-            <div className="absolute top-4 left-4">
-              <span className="bg-[#fcee16] text-[#1b1a1b] px-2 py-1 rounded-full text-xs font-bold">
-                #{index + 1}
-              </span>
-            </div>
-
             {/* Breaking News Badge */}
             {article.data.is_breaking_news && (
               <div className="absolute top-4 right-4">

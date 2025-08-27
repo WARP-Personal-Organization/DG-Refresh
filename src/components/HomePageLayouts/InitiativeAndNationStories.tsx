@@ -19,11 +19,21 @@ const renderText = (richText: prismic.RichTextField): string => {
 };
 
 // A reusable card for displaying individual stories in the grid
-const StoryCard = ({ story, hasTopBorder = false }: { story: BlogPostDocument; hasTopBorder?: boolean }) => (
+const StoryCard = ({
+  story,
+  hasTopBorder = false,
+}: {
+  story: BlogPostDocument;
+  hasTopBorder?: boolean;
+}) => (
   <article className="group">
     <Link href={`/blog/${story.uid}`} className="block">
-      {/* The conditional top border for the "Nation" stories */}
-      <div className={`h-full ${hasTopBorder ? 'border-t-4 border-yellow-500 pt-4' : ''}`}>
+      {/* === CHANGE APPLIED HERE: Border color updated to brand yellow === */}
+      <div
+        className={`h-full ${
+          hasTopBorder ? "border-t-4 border-[#fcee16] pt-4" : ""
+        }`}
+      >
         {story.data.featured_image?.url && (
           <div className="relative aspect-video mb-4 overflow-hidden">
             <Image
@@ -66,11 +76,18 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Intro Column */}
             <div className="lg:pr-8">
-              <h2 className="text-2xl font-serif font-bold text-white mb-3">{initiativeTitle}</h2>
+              <h2 className="text-2xl font-serif font-bold text-white mb-3">
+                {initiativeTitle}
+              </h2>
               <p className="text-gray-300 mb-4">
-                Discover key initiatives and projects making an impact across various sectors.
+                Discover key initiatives and projects making an impact across
+                various sectors.
               </p>
-              <Link href={`/${initiativeTitle.toLowerCase()}`} className="text-yellow-500 font-semibold hover:underline">
+              {/* === CHANGE APPLIED HERE: Link color updated to brand yellow === */}
+              <Link
+                href={`/${initiativeTitle.toLowerCase()}`}
+                className="text-[#fcee16] font-semibold hover:underline"
+              >
                 Explore all initiatives
               </Link>
             </div>
@@ -88,11 +105,18 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-gray-800">
             {/* Intro Column */}
             <div className="lg:pr-8">
-              <h2 className="text-2xl font-serif font-bold text-white mb-3">{nationTitle}</h2>
+              <h2 className="text-2xl font-serif font-bold text-white mb-3">
+                {nationTitle}
+              </h2>
               <p className="text-gray-300 mb-4">
-                Gain access to exclusive coverage and analysis of national developments.
+                Gain access to exclusive coverage and analysis of national
+                developments.
               </p>
-              <Link href={`/${nationTitle.toLowerCase()}`} className="text-yellow-500 font-semibold hover:underline">
+              {/* === CHANGE APPLIED HERE: Link color updated to brand yellow === */}
+              <Link
+                href={`/${nationTitle.toLowerCase()}`}
+                className="text-[#fcee16] font-semibold hover:underline"
+              >
                 Explore national news
               </Link>
             </div>

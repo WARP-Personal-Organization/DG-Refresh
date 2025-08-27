@@ -62,9 +62,9 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
                 {/* Story Content with light text */}
                 <div className="space-y-2">
                   {/* Category color changed to be bright and visible (like your original) */}
-                  <p className="text-sm font-semibold text-yellow-500 uppercase">
-                    {story.data.category || "News"}
-                  </p>
+                <p className="text-sm font-semibold text-[#fcee16] uppercase">
+                  {story.data.category || "News"}
+                </p>
 
                   {/* Headline with white text */}
                   <h3 className="text-xl font-serif font-bold text-white leading-tight">

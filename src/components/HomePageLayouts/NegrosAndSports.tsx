@@ -18,9 +18,18 @@ const renderText = (richText: prismic.RichTextField): string => {
 };
 
 // Reusable Publication Card
-const PublicationCard = ({ title, imageUrl, link = "#" }: { title: string; imageUrl: string; link?: string; }) => (
+const PublicationCard = ({
+  title,
+  imageUrl,
+  link = "#",
+}: {
+  title: string;
+  imageUrl: string;
+  link?: string;
+}) => (
   <div className="pt-6">
-    <h3 className="bg-yellow-500 text-black text-xs font-bold uppercase px-3 py-1 inline-block mb-3">
+    {/* === CHANGE APPLIED HERE === */}
+    <h3 className="bg-[#fcee16] text-black text-xs font-bold uppercase px-3 py-1 inline-block mb-3">
       {title}
     </h3>
     <Link href={link} className="block group">
@@ -35,7 +44,6 @@ const PublicationCard = ({ title, imageUrl, link = "#" }: { title: string; image
   </div>
 );
 
-// I've renamed the component for clarity, you can keep your original name if you prefer.
 const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
   negrosStories,
   negrosTitle,
@@ -48,9 +56,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
 
   const mainNegrosStory = negrosStories[0];
   const supportingNegrosStories = negrosStories.slice(1, 4);
-
-  // *** FIX: Removed the .slice(0, 2) to show ALL sports stories provided ***
-  const allSportsStories = sportsStories;
+  const limitedSportsStories = sportsStories.slice(0, 6);
 
   // Placeholder URLs
   const todayPaperUrl = "/Todays'News.PNG";
@@ -65,7 +71,9 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
             {/* --- Negros Featured Story --- */}
             <div className="mb-12">
               <div className="mb-6 pb-3 border-b border-gray-700">
-                <h2 className="text-2xl font-serif font-bold text-white">{negrosTitle}</h2>
+                <h2 className="text-2xl font-serif font-bold text-white">
+                  {negrosTitle}
+                </h2>
               </div>
               <article className="group">
                 <Link href={`/blog/${mainNegrosStory.uid}`} className="block">
@@ -73,7 +81,10 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                     <div className="relative aspect-video mb-4">
                       <Image
                         src={mainNegrosStory.data.featured_image.url}
-                        alt={mainNegrosStory.data.featured_image.alt || "Story image"}
+                        alt={
+                          mainNegrosStory.data.featured_image.alt ||
+                          "Story image"
+                        }
                         fill
                         className="object-cover"
                         sizes="(max-width: 1024px) 100vw, 66vw"
@@ -81,7 +92,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                     </div>
                   )}
                   <div className="space-y-2">
-                    <p className="text-yellow-500 text-sm font-medium uppercase">
+                    <p className="text-[#fcee16] text-sm font-medium uppercase">
                       {mainNegrosStory.data.category || "News"}
                     </p>
                     <h3 className="text-3xl font-serif font-bold text-white leading-tight">
@@ -93,26 +104,31 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
             </div>
 
             {/* --- Sports Section --- */}
-            {allSportsStories.length > 0 && (
+            {limitedSportsStories.length > 0 && (
               <div>
                 <div className="mb-6 pb-3 border-b border-gray-700">
-                  <h2 className="text-2xl font-serif font-bold text-white">{sportsTitle}</h2>
+                  <h2 className="text-2xl font-serif font-bold text-white">
+                    {sportsTitle}
+                  </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {allSportsStories.map((story) => (
+                  {limitedSportsStories.map((story) => (
                     <article key={story.id} className="group">
                       <Link href={`/blog/${story.uid}`} className="block">
                         {story.data.featured_image?.url && (
                           <div className="relative aspect-[16/10] mb-4">
                             <Image
                               src={story.data.featured_image.url}
-                              alt={story.data.featured_image.alt || "Story image"}
+                              alt={
+                                story.data.featured_image.alt || "Story image"
+                              }
                               fill
                               className="object-cover"
                             />
                           </div>
                         )}
-                        <p className="text-yellow-500 text-xs font-semibold uppercase mb-1">
+                        {/* === CHANGE APPLIED HERE === */}
+                        <p className="text-[#fcee16] text-xs font-semibold uppercase mb-1">
                           {story.data.category || "Sports"}
                         </p>
                         <h4 className="text-lg font-serif font-bold text-white leading-tight">

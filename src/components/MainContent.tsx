@@ -9,6 +9,7 @@ interface MainContentProps {
   heroPost?: BlogPostDocument;
   featuredPost?: BlogPostDocument;
   editorialPost?: BlogPostDocument;
+  // editorsPicks is no longer used in this specific layout
   editorsPicks?: BlogPostDocument[];
 }
 
@@ -18,190 +19,92 @@ const renderText = (richText: prismic.RichTextField): string => {
   return prismicH.asText(richText);
 };
 
-// Clean date formatting
-const formatDate = (dateString: string | null | undefined): string => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInHours = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-  );
-
-  if (diffInHours < 1) return "JUST NOW";
-  if (diffInHours < 24) return `${diffInHours}H AGO`;
-  if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}D AGO`;
-
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
 const MainContent: React.FC<MainContentProps> = ({
   heroPost,
   featuredPost,
   editorialPost,
-  editorsPicks = [],
 }) => {
   if (!heroPost || !featuredPost) {
     return (
-      <main className="lg:col-span-3 w-full bg-[#1b1a1b] font-open-sans">
+      <main className="lg:col-span-3 w-full bg-[#1b1a1b]">
         <div className="text-center py-12 text-gray-400">Loading...</div>
       </main>
     );
   }
 
   return (
-    <main className="lg:col-span-3 w-full font-open-sans">
-      {/* Main Story Grid - FT Style */}
-      <div className="grid lg:grid-cols-5 gap-8 pb-8 border-b border-gray-800">
-        {/* Hero Article - Left Side */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Category Label */}
-          <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
-            {heroPost.data.category || "News"}
-          </div>
+    <main className="lg:col-span-3 w-full">
+      {/* === NEW MAIN GRID (Adjusted for a 40/60 split) === */}
+      <div className="grid lg:grid-cols-5 gap-8">
+        
+        {/* === LEFT COLUMN (MAIN HERO STORY - 2/5 width) === */}
+        <div className="lg:col-span-2 flex flex-col justify-between">
+          <article>
+            <p className="text-[#fcee16] text-sm font-bold uppercase tracking-wider mb-2 font-open-sans">
+              {heroPost.data.category || "News"}
+            </p>
+            <Link href={`/blog/${heroPost.uid}`} className="block group">
+              <h1 className="text-4xl lg:text-5xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+                {heroPost.data.title}
+              </h1>
+            </Link>
+            <p className="text-lg text-gray-300 mt-4 leading-relaxed font-open-sans">
+              {renderText(heroPost.data.summary)}
+            </p>
+          </article>
 
-          {/* Hero Headline */}
-          <Link href={`/blog/${heroPost.uid}`} className="block group">
-            <h1 className="text-4xl lg:text-5xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
-              {heroPost.data.title}
-            </h1>
-          </Link>
-
-          {/* Hero Summary */}
-          <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
-            {renderText(heroPost.data.summary).substring(0, 220)}
-          </p>
-
-          {/* Hero Meta - Clean */}
-          <div className="flex items-center gap-4 text-sm text-gray-500 pt-2 font-open-sans">
-            <span>{renderText(heroPost.data.author) || "Staff"}</span>
-            <span>•</span>
-            <span>{formatDate(heroPost.data.published_date)}</span>
-          </div>
+          {/* Editorial Link */}
+          {editorialPost && (
+            <article className="pt-6 mt-6 border-t border-gray-800">
+              <Link href={`/blog/${editorialPost.uid}`} className="block group">
+                <div className="flex items-start gap-4">
+                  <div className="text-[#fcee16] text-2xl font-serif font-bold">
+                    &ldquo;
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-white text-lg group-hover:text-[#fcee16] transition-colors">
+                      <span className="text-gray-400 font-normal">
+                        The DG View.
+                      </span>{" "}
+                      {editorialPost.data.title}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      The editorial board
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </article>
+          )}
         </div>
 
-        {/* Featured Story - Right Side */}
-        <div className="lg:col-span-2 border-l border-gray-800 pl-8">
-          <Link href={`/blog/${featuredPost.uid}`} className="block group">
-            {/* Featured Image */}
-            {featuredPost.data.featured_image?.url && (
-              <div className="relative aspect-[16/10] mb-4 overflow-hidden">
-                <Image
-                  src={featuredPost.data.featured_image.url}
-                  alt={featuredPost.data.featured_image.alt || "Featured"}
-                  fill
-                  className="object-cover group-hover:opacity-90 transition-opacity duration-200"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                />
-              </div>
-            )}
-
-            {/* Featured Category */}
-            <div className="text-[#fcee16] text-xs font-medium uppercase tracking-wide mb-2 font-open-sans">
-              {featuredPost.data.category || "Featured"}
-            </div>
-
-            {/* Featured Headline */}
-            <h2 className="text-xl font-roboto font-bold text-white leading-tight mb-3 group-hover:text-[#fcee16] transition-colors duration-200">
-              {featuredPost.data.title}
-            </h2>
-
-            {/* Featured Summary */}
-            <p className="text-gray-400 text-sm leading-relaxed mb-3 font-open-sans">
-              {renderText(featuredPost.data.summary).substring(0, 100)}
-            </p>
-
-            {/* Featured Meta */}
-            <div className="flex items-center gap-3 text-xs text-gray-500 font-open-sans">
-              <span>{renderText(featuredPost.data.author) || "Staff"}</span>
-              <span>•</span>
-              <span>{formatDate(featuredPost.data.published_date)}</span>
-            </div>
-          </Link>
+        {/* === RIGHT COLUMN (FEATURED STORY WITH IMAGE - 3/5 width) === */}
+        <div className="lg:col-span-3">
+          <article>
+            <Link href={`/blog/${featuredPost.uid}`} className="block group">
+              {featuredPost.data.featured_image?.url && (
+                <div className="relative w-full aspect-[4/3] mb-4 overflow-hidden">
+                  <Image
+                    src={featuredPost.data.featured_image.url}
+                    alt={
+                      featuredPost.data.featured_image.alt || "Featured Story"
+                    }
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )}
+              <p className="text-[#fcee16] text-sm font-bold uppercase tracking-wider mb-2 font-open-sans">
+                {featuredPost.data.category || "Featured"}
+              </p>
+              <h2 className="text-3xl font-serif font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors">
+                <span className="text-gray-400">The Big Read.</span>{" "}
+                {featuredPost.data.title}
+              </h2>
+            </Link>
+          </article>
         </div>
       </div>
-
-      {/* Editorial Quote Section - FT Style */}
-      {editorialPost && (
-        <div className="py-8 border-b border-gray-800">
-          <Link href={`/blog/${editorialPost.uid}`} className="block group">
-            <div className="border-l-2 border-[#fcee16] pl-6">
-              <blockquote className="text-xl italic text-gray-200 leading-relaxed mb-4 group-hover:text-white transition-colors duration-200 font-open-sans">
-                &quot;{renderText(editorialPost.data.summary).substring(0, 160)}
-                &quot;
-              </blockquote>
-
-              <div className="flex items-center gap-3 text-sm text-gray-500 font-open-sans">
-                <span className="font-medium">
-                  {renderText(editorialPost.data.author) || "Editorial Board"}
-                </span>
-                <span>•</span>
-                <span>{formatDate(editorialPost.data.published_date)}</span>
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
-
-      {/* More Stories Grid - Clean List */}
-      {editorsPicks.length > 0 && (
-        <div className="py-8">
-          <h2 className="text-lg font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
-            More Stories
-          </h2>
-
-          <div className="space-y-6">
-            {editorsPicks.slice(0, 4).map((article: BlogPostDocument) => (
-              <article key={article.id} className="group">
-                <Link href={`/blog/${article.uid}`} className="block">
-                  <div className="grid grid-cols-4 gap-4 pb-6 border-b border-gray-800/50 last:border-b-0">
-                    {/* Article Content */}
-                    <div className="col-span-3 space-y-2">
-                      {/* Category */}
-                      <div className="text-[#fcee16] text-xs font-medium uppercase tracking-wide font-open-sans">
-                        {article.data.category || "News"}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-lg font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
-                        {article.data.title}
-                      </h3>
-
-                      {/* Summary */}
-                      <p className="text-gray-400 text-sm leading-relaxed font-open-sans">
-                        {renderText(article.data.summary).substring(0, 100)}
-                      </p>
-
-                      {/* Meta */}
-                      <div className="flex items-center gap-3 text-xs text-gray-500 font-open-sans">
-                        <span>
-                          {renderText(article.data.author) || "Staff"}
-                        </span>
-                        <span>•</span>
-                        <span>{formatDate(article.data.published_date)}</span>
-                      </div>
-                    </div>
-
-                    {/* Thumbnail */}
-                    {article.data.featured_image?.url && (
-                      <div className="col-span-1">
-                        <div className="relative aspect-square overflow-hidden">
-                          <Image
-                            src={article.data.featured_image.url}
-                            alt={article.data.featured_image.alt || "Article"}
-                            fill
-                            className="object-cover group-hover:opacity-90 transition-opacity duration-200"
-                            sizes="(max-width: 768px) 25vw, 20vw"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </div>
-      )}
     </main>
   );
 };

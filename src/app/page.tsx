@@ -5,7 +5,6 @@ import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
 import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
 import LocalStories from "@/components/HomePageLayouts/LocalStories";
 import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports";
-import OpinionStories from "@/components/HomePageLayouts/OpinionStories";
 import TopStories from "@/components/HomePageLayouts/TopStories";
 import MainContent from "@/components/MainContent";
 import NavigationBar from "@/components/Navigation";
@@ -94,7 +93,6 @@ export default async function Home() {
         nationStories={posts}  
         />
         <EditorialStories title={"Editorial"} stories={posts} />
-        <OpinionStories title={"Opinion"} stories={posts} />
         <OpinionSection />
         <EnhancedVideoSection />
       </div>

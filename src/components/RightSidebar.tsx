@@ -103,13 +103,11 @@ const CategoryBadge: React.FC<{ category: string; size?: "sm" | "xs" }> = ({
 // Refined section header - more elegant newspaper style
 const SectionHeader: React.FC<{
   title: string;
-  icon: React.ElementType;
   href?: string;
-}> = ({ title, icon: Icon, href }) => (
+}> = ({ title, href }) => (
   <div className="mb-6">
     <div className="flex items-center justify-between mb-3">
-      <h3 className="flex items-center gap-2 text-lg font-bold text-white font-roboto tracking-wide">
-        <Icon size={16} className="text-[#fcee16]" />
+      <h3 className="text-lg font-bold text-white font-roboto tracking-wide">
         {title}
       </h3>
       {href && (
@@ -220,7 +218,6 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
         <div className="bg-[#1b1a1b]/60 backdrop-blur-sm border border-gray-800/60 rounded-lg p-5 shadow-2xl">
           <SectionHeader
             title={editorsPicksTitle}
-            icon={Star}
             href={editorsPicksHref}
           />
 
@@ -256,3 +253,4 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
 export default RightSidebar;
 export type { RightSidebarProps };
+

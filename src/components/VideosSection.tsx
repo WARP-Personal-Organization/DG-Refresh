@@ -257,13 +257,6 @@ const EnhancedVideoSection: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* View All Button */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <button className="px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans">
-            View All Episodes
-          </button>
-        </div>
       </div>
     </section>
   );
