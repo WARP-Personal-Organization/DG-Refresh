@@ -1,24 +1,112 @@
-import {
-  ArrowRight,
-  Facebook,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-  Twitter,
-  Youtube,
-} from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
+  const categories = [
+    {
+      name: "News",
+      href: "/news",
+      dropdown: [
+        { name: "LOCAL", href: "/subcategory/local" },
+        { name: "FACT FIRST PH", href: "/subcategory/fact-first-ph" },
+        { name: "CAPIZ", href: "/subcategory/capiz" },
+        { name: "NEGROS", href: "/subcategory/negros" },
+      ],
+    },
+    {
+      name: "Feature",
+      href: "/feature",
+      dropdown: [
+        { name: "HEALTH", href: "/subcategory/health" },
+        { name: "TRAVEL", href: "/subcategory/travel" },
+        { name: "ENTERTAINMENT", href: "/subcategory/entertainment" },
+        { name: "LIFESTYLE", href: "/subcategory/lifestyle" },
+        { name: "ARTS AND CULTURE", href: "/subcategory/arts-and-culture" },
+        { name: "EDUCATION", href: "/subcategory/education" },
+        { name: "ENVIRONMENT", href: "/subcategory/environment" },
+      ],
+    },
+    {
+      name: "Opinion",
+      href: "/opinion",
+      dropdown: [{ name: "EDITORIAL", href: "/subcategory/editorial" }],
+    },
+    {
+      name: "Initiatives",
+      href: "/initiatives",
+      dropdown: [
+        { name: "FASHION FRIDAYS", href: "/subcategory/fashion-fridays" },
+        { name: "EMPOWER", href: "/subcategory/empower" },
+        {
+          name: "GLOBAL SHAPERS ILOILO",
+          href: "/subcategory/global-shapers-iloilo",
+        },
+        { name: "ZERO DAY", href: "/subcategory/zero-day" },
+      ],
+    },
+    {
+      name: "Sports",
+      href: "/sports",
+      dropdown: [
+        { name: "LOCAL NEWS", href: "/subcategory/local-news" },
+        { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
+      ],
+    },
+    {
+      name: "Business",
+      href: "/business",
+      dropdown: [
+        { name: "MONITORING", href: "/subcategory/monitoring" },
+        { name: "TECH TALK", href: "/subcategory/tech-talk" },
+      ],
+    },
+    {
+      name: "Other Pages",
+      href: "/other-pages",
+      dropdown: [
+        { name: "ABOUT US", href: "/subcategory/about-us" },
+        { name: "CONTACT US", href: "/subcategory/contact-us" },
+      ],
+    },
+  ];
+
   return (
-    <footer className="bg-black border-t border-[#fcee16]/20 font-open-sans">
+    <footer className="bg-background border-t border-accent/20 font-sans">
+      {/* Categories Section */}
+      <div className="border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
+            {categories.map((category) => (
+              <div key={category.name} className="space-y-3">
+                <Link
+                  href={category.href}
+                  className="block text-foreground font-roboto font-bold text-sm uppercase hover:text-accent transition-colors duration-200"
+                >
+                  {category.name}
+                </Link>
+                <div className="space-y-2">
+                  {category.dropdown.map((subcategory) => (
+                    <Link
+                      key={subcategory.name}
+                      href={subcategory.href}
+                      className="block text-gray-400 hover:text-accent transition-colors duration-200 text-xs"
+                    >
+                      {subcategory.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="w-full mx-auto px-4 py-12 text-center">
+        <div className="">
           {/* Company Info */}
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="inline-block">
@@ -29,115 +117,69 @@ const Footer: React.FC = () => {
               />
             </Link>
 
-            <p className="text-gray-400 leading-relaxed text-sm max-w-md">
-              The Daily Guardian is Iloilo&apos;s trusted source for local news,
-              serving Western Visayas with award-winning journalism since 2000.
-            </p>
+            <div className="max-w-full">
+              <p className="text-gray-300 leading-relaxed text-base">
+                The Daily Guardian is a renascent Iloilo-based publishing firm
+                and media outfit with bureaus in Kalibo, Boracay, Roxas,
+                Bacolod, Antique, Guimaras, and Manila. Led by Iloilo&apos;s
+                most respected journalists, the Daily Guardian pledges to tell
+                the Ilonggo story as seen through the various lenses of society
+                so that every side may be told.
+              </p>
+            </div>
 
             {/* Social Media */}
             <div className="space-y-3">
-              <h4 className="text-white font-roboto font-semibold">
-                Follow Us
+              <h4 className="text-foreground font-roboto font-semibold">
+                Follow Daily Guardian
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="https://facebook.com/dailyguardian"
+                    className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                    aria-label="Facebook"
+                  >
+                    <Facebook
+                      size={18}
+                      className="text-gray-400 group-hover:text-background"
+                    />
+                  </Link>
+                  <Link
+                    href="https://twitter.com/dailyguardian"
+                    className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                    aria-label="Twitter"
+                  >
+                    <Twitter
+                      size={18}
+                      className="text-gray-400 group-hover:text-background"
+                    />
+                  </Link>
+                  <Link
+                    href="https://instagram.com/dailyguardian"
+                    className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                    aria-label="Instagram"
+                  >
+                    <Instagram
+                      size={18}
+                      className="text-gray-400 group-hover:text-background"
+                    />
+                  </Link>
+                  <Link
+                    href="https://youtube.com/dailyguardian"
+                    className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                    aria-label="YouTube"
+                  >
+                    <Youtube
+                      size={18}
+                      className="text-gray-400 group-hover:text-background"
+                    />
+                  </Link>
+                </div>
               </h4>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="https://facebook.com/dailyguardian"
-                  className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                  aria-label="Facebook"
-                >
-                  <Facebook
-                    size={18}
-                    className="text-gray-400 group-hover:text-[#1b1a1b]"
-                  />
-                </Link>
-                <Link
-                  href="https://twitter.com/dailyguardian"
-                  className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                  aria-label="Twitter"
-                >
-                  <Twitter
-                    size={18}
-                    className="text-gray-400 group-hover:text-[#1b1a1b]"
-                  />
-                </Link>
-                <Link
-                  href="https://instagram.com/dailyguardian"
-                  className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                  aria-label="Instagram"
-                >
-                  <Instagram
-                    size={18}
-                    className="text-gray-400 group-hover:text-[#1b1a1b]"
-                  />
-                </Link>
-                <Link
-                  href="https://youtube.com/dailyguardian"
-                  className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                  aria-label="YouTube"
-                >
-                  <Youtube
-                    size={18}
-                    className="text-gray-400 group-hover:text-[#1b1a1b]"
-                  />
-                </Link>
-              </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-white font-roboto font-semibold text-lg">
-              Quick Links
-            </h4>
-            <div className="space-y-2">
-              {[
-                { name: "Local News", href: "/news" },
-                { name: "Sports", href: "/sports" },
-                { name: "Business", href: "/business" },
-                { name: "Opinion", href: "/opinion" },
-                { name: "About Us", href: "/about" },
-                { name: "Contact", href: "/contact" },
-              ].map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 group text-sm"
-                >
-                  <ArrowRight
-                    size={12}
-                    className="group-hover:translate-x-1 transition-transform duration-200"
-                  />
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-
           {/* Contact Info */}
-          <div className="space-y-4">
-            <h4 className="text-white font-roboto font-semibold text-lg">
-              Contact Us
-            </h4>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-3 text-gray-400">
-                <MapPin
-                  size={16}
-                  className="text-[#fcee16] mt-0.5 flex-shrink-0"
-                />
-                <div>
-                  <p>Iloilo City, Philippines</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-gray-400">
-                <Phone size={16} className="text-[#fcee16] flex-shrink-0" />
-                <span>+63 33 123 4567</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-400">
-                <Mail size={16} className="text-[#fcee16] flex-shrink-0" />
-                <span>news@dailyguardian.com.ph</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -153,13 +195,13 @@ const Footer: React.FC = () => {
             <div className="flex items-center gap-6 text-sm">
               <Link
                 href="/privacy"
-                className="text-gray-500 hover:text-[#fcee16] transition-colors duration-200"
+                className="text-gray-500 hover:text-accent transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/terms"
-                className="text-gray-500 hover:text-[#fcee16] transition-colors duration-200"
+                className="text-gray-500 hover:text-accent transition-colors duration-200"
               >
                 Terms of Service
               </Link>
