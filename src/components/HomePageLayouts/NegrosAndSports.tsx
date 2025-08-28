@@ -17,7 +17,7 @@ const renderText = (richText: prismic.RichTextField): string => {
   return prismicH.asText(richText);
 };
 
-// Reusable Publication Card
+// Reusable Publication Cards
 const PublicationCard = ({
   title,
   imageUrl,

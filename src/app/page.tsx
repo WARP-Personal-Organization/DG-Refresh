@@ -165,6 +165,7 @@ export default async function Home() {
             <MainContent
               heroPost={breakingNews[0]}
               featuredPost={featuredPicks[0]}
+              localposts={localPicks[0]}
               editorialPost={editorialPost}
             />
             <RightSidebar editorsPicks={editorsPicks} />
@@ -175,7 +176,7 @@ export default async function Home() {
         <NegrosAndSportsStories
           negrosTitle={"Negros"}
           negrosStories={negrosPicks}
-          sportsTitle={"Sports"}
+          sportsTitle={"Banner News"}
           sportsStories={posts.length > 0 ? sportsPicks : sportsPicks}
         />
         <FeaturesStories title={"Features"} stories={featuredPicksAsCategory} />

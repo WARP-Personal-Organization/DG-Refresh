@@ -215,17 +215,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                   index={index}
                   isFirst={index === 0}
                 />
-                {/* START OF CHANGE: DUPLICATION LOGIC */}
-                {/* If this is the second item (index 1), render a duplicate of it */}
-                {index === 1 && (
-                  <ArticlePreview
-                    key={`${post.id}-duplicate`} // Use a unique key for the duplicate
-                    post={post} // Use the same post data
-                    index={index + 1} // Give it a different index
-                    isFirst={false} // Ensure it's not styled as the first item
-                  />
-                )}
-                {/* END OF CHANGE */}
+
               </React.Fragment>
             ))}
           </div>

@@ -9,6 +9,7 @@ interface MainContentProps {
   heroPost?: BlogPostDocument;
   featuredPost?: BlogPostDocument;
   editorialPost?: BlogPostDocument;
+  localposts? : BlogPostDocument;
   // editorsPicks is no longer used in this specific layout
   editorsPicks?: BlogPostDocument[];
 }
@@ -23,6 +24,7 @@ const MainContent: React.FC<MainContentProps> = ({
   heroPost,
   featuredPost,
   editorialPost,
+  localposts,
 }) => {
   if (!heroPost || !featuredPost) {
     return (
@@ -81,11 +83,10 @@ const MainContent: React.FC<MainContentProps> = ({
               </article>
             )}
 
-            {/* DUPLICATED Editorial Link for visual testing, remove if there is more data */}
-            {editorialPost && (
+            {featuredPost && (
               <article className="pt-4 mt-4 border-t border-gray-800">
                 <Link
-                  href={`/blog/${editorialPost.uid}`}
+                  href={`/blog/${featuredPost.uid}`}
                   className="block group"
                 >
                   <div className="flex items-start gap-2">
@@ -95,13 +96,12 @@ const MainContent: React.FC<MainContentProps> = ({
                     <div className="flex-1">
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
                         <span className="text-gray-400 font-normal text-sm">
-                          Another Story.
+                          The DG View.
                         </span>{" "}
-                        Cops in Duterte &apos;narco list&apos; ordered
-                        reinstated
+                        {featuredPost.data.title}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Francis Allan L. Angelo
+                        The editorial board
                       </p>
                     </div>
                   </div>
@@ -109,10 +109,11 @@ const MainContent: React.FC<MainContentProps> = ({
               </article>
             )}
 
-            {editorialPost && (
+            
+            {localposts && (
               <article className="pt-4 mt-4 border-t border-gray-800">
                 <Link
-                  href={`/blog/${editorialPost.uid}`}
+                  href={`/blog/${localposts.uid}`}
                   className="block group"
                 >
                   <div className="flex items-start gap-2">
@@ -122,20 +123,18 @@ const MainContent: React.FC<MainContentProps> = ({
                     <div className="flex-1">
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
                         <span className="text-gray-400 font-normal text-sm">
-                          Another Story.
+                          The DG View.
                         </span>{" "}
-                        Cops in Duterte &apos;narco list&apos; ordered
-                        reinstated
+                        {localposts.data.title}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Francis Allan L. Angelo
+                        The editorial board
                       </p>
                     </div>
                   </div>
                 </Link>
               </article>
             )}
-            {/*end of duplicated area*/}
           </div>
         </div>
 

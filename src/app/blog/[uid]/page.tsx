@@ -55,42 +55,6 @@ const estimateReadingTime = (content: prismic.RichTextField): string => {
   return `${minutes} min`;
 };
 
-// Helper function to get category styling
-const getCategoryStyle = (category: string | null) => {
-  const categoryMap: Record<
-    string,
-    { bg: string; text: string; name: string }
-  > = {
-    news: { bg: "bg-red-600", text: "text-red-100", name: "NEWS ANALYSIS" },
-    sports: { bg: "bg-blue-600", text: "text-blue-100", name: "SPORTS" },
-    business: { bg: "bg-green-600", text: "text-green-100", name: "BUSINESS" },
-    feature: {
-      bg: "bg-purple-600",
-      text: "text-purple-100",
-      name: "FEATURE",
-    },
-    opinion: {
-      bg: "bg-orange-600",
-      text: "text-orange-100",
-      name: "OPINION",
-    },
-    industries: {
-      bg: "bg-teal-600",
-      text: "text-teal-100",
-      name: "INDUSTRIES",
-    },
-    "other-pages": {
-      bg: "bg-gray-600",
-      text: "text-gray-100",
-      name: "OTHER",
-    },
-  };
-
-  return category && categoryMap[category]
-    ? categoryMap[category]
-    : categoryMap["news"];
-};
-
 // FIXED: Properly typed function to extract tags
 const extractTagsFromGroup = (
   tagsGroup: BlogPostDocumentDataTagsItem[] | undefined
@@ -106,16 +70,51 @@ const extractTagsFromGroup = (
 // FIXED: Main component with proper params handling
 export default async function BlogPost({ params }: BlogPageProps) {
   let post: BlogPostDocument;
+  let relatedArticles: BlogPostDocument[] = [];
 
   try {
     // FIXED: Await params for Next.js 15+
     const resolvedParams = await params;
     post = await client.getByUID("blog_post", resolvedParams.uid);
-  } catch (error) {
+
+    // Fetch related articles: same category, exclude current post
+    const filters = [
+      prismic.filter.not("my.blog_post.uid", resolvedParams.uid),
+      post.data.category ? prismic.filter.at("my.blog_post.category", post.data.category) : null,
+    ].filter((f): f is string => typeof f === "string");
+    relatedArticles = await client.getAllByType("blog_post", {
+      filters,
+      orderings: {
+        field: "my.blog_post.published_date",
+        direction: "desc",
+      },
+      pageSize: 3,
+    });
+
+    // Fallback: if not enough, fill with featured/editorial
+    if (relatedArticles.length < 3) {
+      const fallbackArticles = await client.getAllByType("blog_post", {
+        filters: [
+          prismic.filter.not("my.blog_post.uid", resolvedParams.uid),
+          prismic.filter.any("my.blog_post.category", ["feature", "editorial"]),
+        ],
+        orderings: {
+          field: "my.blog_post.published_date",
+          direction: "desc",
+        },
+        pageSize: 3 - relatedArticles.length,
+      });
+      // Avoid duplicates
+      const fallbackUids = new Set(relatedArticles.map(a => a.uid));
+      relatedArticles = [
+        ...relatedArticles,
+        ...fallbackArticles.filter(a => !fallbackUids.has(a.uid)),
+      ];
+    }
+  } catch {
     notFound();
   }
 
-  const categoryStyle = getCategoryStyle(post.data.category);
   const readingTime = post.data.reading_time
     ? `${post.data.reading_time} min`
     : estimateReadingTime(post.data.content);
@@ -416,24 +415,62 @@ export default async function BlogPost({ params }: BlogPageProps) {
             Related Articles
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
-            <Link href="/blog/related-article-1" className="block group">
-              <div className="bg-[#1b1a1b]/80 border border-gray-700 hover:border-[#fcee16]/50 rounded-lg p-6 transition-all duration-300">
-                <h4 className="text-lg font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 font-roboto">
-                  Related Article Title
-                </h4>
-                <p className="text-gray-400 mt-2 text-sm font-open-sans">
-                  Brief description of the related article...
-                </p>
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-3 font-open-sans">
-                  <span className="flex items-center gap-1">
-                    <Calendar size={10} />2 days ago
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock size={10} />5 min read
-                  </span>
-                </div>
-              </div>
-            </Link>
+            {relatedArticles.length === 0 && (
+              <div className="text-gray-400 font-open-sans">No related articles found.</div>
+            )}
+            {relatedArticles.map((article) => {
+              const articleUrl = `/blog/${article.uid}`;
+              const articleImage = article.data.featured_image?.url;
+              const articleImageAlt = article.data.featured_image?.alt || article.data.title || "Related article image";
+              const articleTitle = article.data.title || "Untitled";
+              const articleSummary = prismicH.asText(article.data.summary) || "";
+              const articleDate = formatDate(article.data.published_date);
+              const articleReadingTime = article.data.reading_time
+                ? `${article.data.reading_time} min`
+                : estimateReadingTime(article.data.content);
+              return (
+                <Link
+                  key={article.uid}
+                  href={articleUrl}
+                  className="block group focus:outline-none focus:ring-2 focus:ring-[#fcee16] rounded-lg"
+                  aria-label={`Read related article: ${articleTitle}`}
+                  tabIndex={0}
+                >
+                  <div className="bg-[#1b1a1b]/80 border border-gray-700 hover:border-[#fcee16]/50 rounded-lg p-0 overflow-hidden transition-all duration-300 flex flex-col h-full">
+                    {articleImage && (
+                      <div className="relative aspect-[16/10] w-full h-40 overflow-hidden">
+                        <Image
+                          src={articleImage}
+                          alt={articleImageAlt}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          priority={false}
+                        />
+                      </div>
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h4 className="text-lg font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 font-roboto mb-2">
+                        {articleTitle}
+                      </h4>
+                      {articleSummary && (
+                        <p className="text-gray-400 text-sm font-open-sans mb-3 line-clamp-3">
+                          {articleSummary}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto font-open-sans">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={10} />{articleDate}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={10} />{articleReadingTime} read
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </article>
