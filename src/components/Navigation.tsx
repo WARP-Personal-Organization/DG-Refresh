@@ -11,7 +11,7 @@ const navigationData = [
     href: "/news",
     dropdown: [
       { name: "LOCAL", href: "/subcategory/local" },
-      { name: "FACT FIRST PH", href: "/subcategory/fact-first-ph" },
+      { name: "FACTS FIRST PH", href: "/subcategory/fact-first-ph" },
       { name: "CAPIZ", href: "/subcategory/capiz" },
       { name: "NEGROS", href: "/subcategory/negros" },
     ],
