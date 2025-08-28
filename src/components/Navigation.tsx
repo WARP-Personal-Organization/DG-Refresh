@@ -112,7 +112,7 @@ const NavigationBar: React.FC = () => {
     <nav className="bg-[#1a1a1a] text-white border-t border-b border-[#ffe600]/30 relative font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex z-20 justify-center space-x-8 text-sm relative">
+        <ul className="hidden md:flex z-20 justify-center space-x-12 text-sm relative">
           {navigationData.map((item, index) => (
             <li
               key={item.name}
@@ -123,7 +123,7 @@ const NavigationBar: React.FC = () => {
               <Link
                 href={item.href}
                 className={`
-                  flex items-center gap-1 py-2 px-1 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600]
+                  flex items-center gap-1 py-2 px-3 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600]
                 `}
               >
                 {item.name.toUpperCase()}

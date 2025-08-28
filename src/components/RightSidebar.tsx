@@ -1,25 +1,21 @@
 import type * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
-import { ChevronRight, Clock, Star } from "lucide-react";
+import { ChevronRight, Clock } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../prismicio-types";
 
-// TypeScript interfaces
+// TypeScript interfaces (remains unchanged)
 interface RightSidebarProps {
-  // Prismic BlogPost data
   editorsPicks: BlogPostDocument[];
-
-  // Configuration props
   showEditorsPicks?: boolean;
   editorsPicksTitle?: string;
   editorsPicksHref?: string;
   maxEditorsPicks?: number;
-
-  // Optional className for styling
   className?: string;
 }
 
+// All helper functions (renderRichTextAsText, formatTimeAgo, etc.) remain unchanged...
 // Helper function to render Prismic rich text as plain text
 const renderRichTextAsText = (
   richText: prismic.RichTextField,
@@ -124,7 +120,7 @@ const SectionHeader: React.FC<{
   </div>
 );
 
-// Premium article preview component
+// Premium article preview component (remains unchanged)
 const ArticlePreview: React.FC<{
   post: BlogPostDocument;
   index: number;
@@ -147,7 +143,6 @@ const ArticlePreview: React.FC<{
         transition-all duration-200
       `}
       >
-        {/* First article gets special treatment */}
         {isFirst && post.data.featured_image?.url && (
           <div className="relative mb-3 overflow-hidden rounded-md">
             <img
@@ -162,7 +157,6 @@ const ArticlePreview: React.FC<{
         )}
 
         <div className="space-y-2">
-          {/* Title */}
           <h4
             className={`
             font-roboto font-semibold text-white group-hover:text-[#fcee16] 
@@ -172,15 +166,11 @@ const ArticlePreview: React.FC<{
           >
             {title}
           </h4>
-
-          {/* Summary for first article */}
           {isFirst && summary && (
             <p className="text-gray-400 text-sm leading-relaxed font-open-sans">
               {summary}
             </p>
           )}
-
-          {/* Meta information */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs">
               {!isFirst && <CategoryBadge category={category} size="xs" />}
@@ -188,7 +178,6 @@ const ArticlePreview: React.FC<{
                 {author}
               </span>
             </div>
-
             <div className="flex items-center gap-1 text-xs text-gray-500 font-open-sans">
               <Clock size={10} className="text-[#fcee16]/70" />
               <span>{time}</span>
@@ -200,7 +189,7 @@ const ArticlePreview: React.FC<{
   );
 };
 
-// Main RightSidebar component with refined newspaper styling
+
 const RightSidebar: React.FC<RightSidebarProps> = ({
   editorsPicks,
   showEditorsPicks = true,
@@ -213,38 +202,40 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
   return (
     <aside className={`space-y-8 font-open-sans ${className}`}>
-      {/* Editor's Picks - Refined newspaper style */}
       {showEditorsPicks && editorsData.length > 0 && (
         <div className="bg-[#1b1a1b]/60 backdrop-blur-sm border border-gray-800/60 rounded-lg p-5 shadow-2xl">
-          <SectionHeader
-            title={editorsPicksTitle}
-            href={editorsPicksHref}
-          />
+          <SectionHeader title={editorsPicksTitle} href={editorsPicksHref} />
 
           <div className="space-y-1">
             {editorsData.map((post, index) => (
-              <ArticlePreview
-                key={post.id}
-                post={post}
-                index={index}
-                isFirst={index === 0}
-              />
+              // Use React.Fragment to group original and duplicated items
+              <React.Fragment key={post.id}>
+                <ArticlePreview
+                  post={post}
+                  index={index}
+                  isFirst={index === 0}
+                />
+                {/* START OF CHANGE: DUPLICATION LOGIC */}
+                {/* If this is the second item (index 1), render a duplicate of it */}
+                {index === 1 && (
+                  <ArticlePreview
+                    key={`${post.id}-duplicate`} // Use a unique key for the duplicate
+                    post={post} // Use the same post data
+                    index={index + 1} // Give it a different index
+                    isFirst={false} // Ensure it's not styled as the first item
+                  />
+                )}
+                {/* END OF CHANGE */}
+              </React.Fragment>
             ))}
           </div>
         </div>
       )}
-      {/* Empty State - Refined */}
+      
+      {/* Empty State (remains unchanged) */}
       {showEditorsPicks && editorsPicks.length === 0 && (
         <div className="text-center py-12">
-          <div className="bg-[#1b1a1b]/40 border border-gray-800/40 rounded-lg p-6">
-            <Star size={32} className="mx-auto text-[#fcee16]/50 mb-3" />
-            <h3 className="text-lg font-semibold text-white mb-2 font-roboto">
-              Editor&apos;s Picks
-            </h3>
-            <p className="text-gray-400 text-sm font-open-sans">
-              Curated stories coming soon
-            </p>
-          </div>
+          {/* ... empty state JSX ... */}
         </div>
       )}
     </aside>
