@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Filter, Play, Users } from "lucide-react";
+import { Filter, Play, Users } from "lucide-react";
 import React, { useState } from "react";
 
 interface VideoData {
@@ -116,9 +116,9 @@ const EnhancedVideoSection: React.FC = () => {
     <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
-        <div className="mb-12 pb-4 border-b border-gray-800">
+        <div className="mb-12 pb-4 border-b border-[#fcee16]">
           <h2 className="text-3xl font-roboto font-bold text-white mb-2">
-            DGD Documentaries
+            Daily Guardian Documentaries
           </h2>
           <p className="text-gray-400 italic font-open-sans">
             Your Stories Are Us
@@ -242,14 +242,14 @@ const EnhancedVideoSection: React.FC = () => {
                         {video.title}
                       </h5>
 
-                      <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans">
+                      {/* <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans">
                         <span className="flex items-center gap-1">
                           <Clock size={10} />
                           {video.duration}
                         </span>
                         <span>•</span>
                         <span>{video.views} views</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </article>

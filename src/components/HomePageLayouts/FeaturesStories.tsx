@@ -122,7 +122,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
           {/* === SIDEBAR === */}
           <aside className="lg:col-span-1 lg:border-l lg:border-gray-800 lg:pl-8">
             <h3 className="font-roboto font-bold text-foreground mb-4 text-lg">
-              More highlights
+              More Features
             </h3>
             <ul className="space-y-4">
               {sidebarLinks.map((link) => (

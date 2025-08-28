@@ -78,15 +78,12 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
               <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">
                 {initiativeTitle}
               </h2>
-              <p className="text-gray-300 mb-4 font-sans">
-                Discover key initiatives and projects making an impact across
-                various sectors.
-              </p>
+
               <Link
                 href={`/${initiativeTitle.toLowerCase()}`}
                 className="text-accent font-semibold font-sans hover:underline transition-colors duration-200"
               >
-                Explore all initiatives
+                Explore all Initiatives
               </Link>
             </div>
             {/* Story Cards */}

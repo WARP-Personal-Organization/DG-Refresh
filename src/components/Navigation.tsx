@@ -16,8 +16,28 @@ const navigationData = [
       { name: "NEGROS", href: "/subcategory/negros" },
     ],
   },
+    {
+    name: "Opinion",
+    href: "/opinion",
+  },
   {
-    name: "Feature",
+    name: "Business",
+    href: "/business",
+    dropdown: [
+      { name: "MONITORING", href: "/subcategory/monitoring" },
+      { name: "TECH TALK", href: "/subcategory/tech-talk" },
+    ],
+  },
+  {
+    name: "Sports",
+    href: "/sports",
+    dropdown: [
+      { name: "LOCAL NEWS", href: "/subcategory/local-news" },
+      { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
+    ],
+  },
+    {
+    name: "Features",
     href: "/feature",
     dropdown: [
       { name: "HEALTH", href: "/subcategory/health" },
@@ -30,12 +50,7 @@ const navigationData = [
     ],
   },
   {
-    name: "Opinion",
-    href: "/opinion",
-    dropdown: [{ name: "EDITORIAL", href: "/subcategory/editorial" }],
-  },
-  {
-    name: "Initiatives",
+    name: "Initiative",
     href: "/initiatives",
     dropdown: [
       { name: "FASHION FRIDAYS", href: "/subcategory/fashion-fridays" },
@@ -47,24 +62,12 @@ const navigationData = [
       { name: "ZERO DAY", href: "/subcategory/zero-day" },
     ],
   },
-  {
-    name: "Sports",
-    href: "/sports",
-    dropdown: [
-      { name: "LOCAL NEWS", href: "/subcategory/local-news" },
-      { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
-    ],
+    {
+    name: "Policies",
+    href: "/Policies",
   },
   {
-    name: "Business",
-    href: "/business",
-    dropdown: [
-      { name: "MONITORING", href: "/subcategory/monitoring" },
-      { name: "TECH TALK", href: "/subcategory/tech-talk" },
-    ],
-  },
-  {
-    name: "Other Pages",
+    name: "Others",
     href: "/other-pages",
     dropdown: [
       { name: "ABOUT US", href: "/subcategory/about-us" },

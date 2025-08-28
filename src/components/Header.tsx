@@ -184,7 +184,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
           </div>
 
           {/* Main Header */}
-          <div className="flex justify-between items-center py-4 lg:py-6 px-4">
+          <div className="flex justify-between items-center px-4">
             {/* Left Section */}
             <div className="flex-1 flex items-center gap-2 sm:gap-4">
               <button

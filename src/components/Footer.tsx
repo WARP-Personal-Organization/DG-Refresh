@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
       href: "/news",
       dropdown: [
         { name: "LOCAL", href: "/subcategory/local" },
-        { name: "FACT FIRST PH", href: "/subcategory/fact-first-ph" },
+        { name: "FACTS FIRST PH", href: "/subcategory/fact-first-ph" },
         { name: "CAPIZ", href: "/subcategory/capiz" },
         { name: "NEGROS", href: "/subcategory/negros" },
       ],
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
       ],
     },
     {
-      name: "Other Pages",
+      name: "Others",
       href: "/other-pages",
       dropdown: [
         { name: "ABOUT US", href: "/subcategory/about-us" },
@@ -104,75 +104,59 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Footer Content */}
-      <div className="w-full mx-auto px-4 py-12 text-center">
-        {/* Company Info - Restored to original structure */}
-        <div className="space-y-6 max-w-3xl mx-auto">
+      {/* Main Footer Content - REVISED FOR COMPACTNESS */}
+      <div className="max-w-7xl w-full mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <Link href="/" className="inline-block">
             <img
               src="/dg-logo.png" // Assuming this is your logo path
               alt="Daily Guardian"
-              className="h-12 w-auto mx-auto" // Adjusted height and centered
+              className="h-20 w-auto" // Adjusted height
             />
           </Link>
 
-          <p className="text-gray-300 leading-relaxed text-base">
-            The Daily Guardian is a renascent Iloilo-based publishing firm and
-            media outfit with bureaus in Kalibo, Boracay, Roxas, Bacolod,
-            Antique, Guimaras, and Manila. Led by Iloilo&apos;s most respected
-            journalists, the Daily Guardian pledges to tell the Ilonggo story as
-            seen through the various lenses of society so that every side may be
-            told.
-          </p>
-
-          {/* Social Media - CORRECTED SECTION */}
-          <div className="space-y-3">
-            <h4 className="text-foreground font-roboto font-semibold">
-              Follow Daily Guardian
-            </h4>
-            {/* Icons are now OUTSIDE the h4 tag, and centered */}
-            <div className="flex items-center justify-center gap-3">
-              <Link
-                href="https://facebook.com/dailyguardian"
-                className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                aria-label="Facebook"
-              >
-                <Facebook
-                  size={18}
-                  className="text-gray-400 group-hover:text-background"
-                />
-              </Link>
-              <Link
-                href="https://twitter.com/dailyguardian"
-                className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                aria-label="Twitter"
-              >
-                <Twitter
-                  size={18}
-                  className="text-gray-400 group-hover:text-background"
-                />
-              </Link>
-              <Link
-                href="https://instagram.com/dailyguardian"
-                className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                aria-label="Instagram"
-              >
-                <Instagram
-                  size={18}
-                  className="text-gray-400 group-hover:text-background"
-                />
-              </Link>
-              <Link
-                href="https://youtube.com/dailyguardian"
-                className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                aria-label="YouTube"
-              >
-                <Youtube
-                  size={18}
-                  className="text-gray-400 group-hover:text-background"
-                />
-              </Link>
-            </div>
+          {/* Social Media Icons */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="https://facebook.com/dailyguardian"
+              className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+              aria-label="Facebook"
+            >
+              <Facebook
+                size={18}
+                className="text-gray-400 group-hover:text-background"
+              />
+            </Link>
+            <Link
+              href="https://twitter.com/dailyguardian"
+              className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+              aria-label="Twitter"
+            >
+              <Twitter
+                size={18}
+                className="text-gray-400 group-hover:text-background"
+              />
+            </Link>
+            <Link
+              href="https://instagram.com/dailyguardian"
+              className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+              aria-label="Instagram"
+            >
+              <Instagram
+                size={18}
+                className="text-gray-400 group-hover:text-background"
+              />
+            </Link>
+            <Link
+              href="https://youtube.com/dailyguardian"
+              className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
+              aria-label="YouTube"
+            >
+              <Youtube
+                size={18}
+                className="text-gray-400 group-hover:text-background"
+              />
+            </Link>
           </div>
         </div>
       </div>

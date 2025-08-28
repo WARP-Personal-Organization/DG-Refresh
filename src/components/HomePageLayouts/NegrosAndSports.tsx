@@ -69,7 +69,7 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
           <div className="lg:col-span-2 mb-10 lg:mb-0">
             {/* --- Negros Featured Story --- */}
             <div className="mb-12">
-              <div className="mb-6 pb-3 border-b border-gray-700">
+              <div className="mb-6 pb-3 border-b border-[#fcee16]">
                 <h2 className="text-2xl font-roboto font-bold text-foreground">
                   {negrosTitle}
                 </h2>
@@ -105,9 +105,10 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
             {/* --- Sports Section --- */}
             {limitedSportsStories.length > 0 && (
               <div>
-                <div className="mb-6 pb-3 border-b border-gray-700">
+                <div className="mb-6 pb-3 border-b border-[#fcee16]">
                   <h2 className="text-2xl font-roboto font-bold text-foreground">
-                    {sportsTitle}
+                    {/* {sportsTitle} */}
+                    Sports
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

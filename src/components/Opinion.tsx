@@ -23,7 +23,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
     <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
-        <div className="mb-12 pb-4 border-b border-gray-800">
+        <div className="mb-12 pb-4 border-b border-[#fcee16]">
           <h2 className="text-3xl font-roboto font-bold text-white">
             Opinions
           </h2>

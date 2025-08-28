@@ -358,10 +358,10 @@ export default async function SubCategoryPage({
               </h1>
               <div className="flex items-center gap-4">
                 <div className="h-1 w-24 bg-[#fcee16]"></div>
-                <span className="text-lg text-gray-300">
+                {/* <span className="text-lg text-gray-300">
                   {allPosts.length} article{allPosts.length !== 1 ? "s" : ""}{" "}
                   available
-                </span>
+                </span> */}
               </div>
             </div>
           </div>

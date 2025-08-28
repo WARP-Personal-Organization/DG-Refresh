@@ -65,7 +65,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
     // Section is transparent, inheriting the black background from page.tsx
     <section className="max-w-7xl mx-auto px-4 py-8">
       {/* Title with a light-colored bottom border */}
-      <div className="mb-6 pb-2 border-b border-gray-700">
+      <div className="mb-6 pb-2 border-b border-[#fcee16]">
         <h2 className="text-lg font-roboto font-semibold text-foreground uppercase tracking-widest">
           {title}
         </h2>

@@ -164,7 +164,7 @@ const MainContent: React.FC<MainContentProps> = ({
               {/* === START: HEADLINE CHANGE === */}
               {/* The separate <p> tag is removed and the headline is now combined */}
               <h2 className="text-3xl lg:text-4xl font-roboto text-foreground leading-tight max-w-2xl break-words text-left">
-                <span className="font-bold">The Big Read.</span>{" "}
+                {/* <span className="font-bold">The Big Read.</span>{" "} */}
                 {featuredPost.data.title}
               </h2>
               {/* === END: HEADLINE CHANGE === */}

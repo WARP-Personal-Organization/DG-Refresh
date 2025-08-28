@@ -17,7 +17,7 @@ const renderText = (richText: prismic.RichTextField): string => {
 
 // Separator adapted for a dark background
 const DottedSeparator = () => (
-  <div className="w-full border-t border-dotted border-gray-700" />
+  <div className="w-full border-t border-dotted border-[#fcee16]" />
 );
 
 const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
