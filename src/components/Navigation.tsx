@@ -17,7 +17,7 @@ const navigationData = [
     ],
   },
   {
-    name: "Opinion",
+    name: "Voices",
     href: "/opinion",
   },
   {
@@ -74,6 +74,7 @@ const navigationData = [
       { name: "CONTACT US", href: "/subcategory/contact-us" },
     ],
   },
+  { name: "CONTACT US", href: "/subcategory/contact-us" },
 ];
 
 const NavigationBar: React.FC = () => {
@@ -115,7 +116,7 @@ const NavigationBar: React.FC = () => {
     <nav className="bg-[#1a1a1a] text-white border-t border-b border-[#ffe600]/30 relative font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-3">
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex z-20 justify-center space-x-12 text-sm relative">
+        <ul className="hidden md:flex z-20 justify-center space-x-12 text-xs relative">
           {navigationData.map((item, index) => (
             <li
               key={item.name}

@@ -44,9 +44,9 @@ const OpinionStories: React.FC<OpinionStoriesProps> = ({ stories, title }) => {
   }
 
   return (
-    <section className="py-12 border-t border-gray-800">
+    <section className="py-12 border-t border-default">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-8 pb-4 border-b border-gray-800">
+        <div className="mb-8 pb-4 border-b border-default">
           <h2 className="text-2xl font-serif font-bold text-white">{title}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -76,7 +76,7 @@ const OpinionStories: React.FC<OpinionStoriesProps> = ({ stories, title }) => {
                       {renderText(story.data.summary).substring(0, 100)}...
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-gray-800/50">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-default/50">
                     <span>{renderText(story.data.author) || "Staff"}</span>
                     <span>•</span>
                     <span>{formatTimeAgo(story.data.published_date)}</span>
@@ -86,7 +86,7 @@ const OpinionStories: React.FC<OpinionStoriesProps> = ({ stories, title }) => {
             </article>
           ))}
         </div>
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
+        <div className="text-center mt-12 pt-8 border-t border-default">
           <Link
             href={`/${title.toLowerCase()}`}
             className="inline-block px-6 py-3 text-yellow-500 hover:text-yellow-400 font-medium transition-colors duration-200 border border-yellow-500 hover:border-yellow-400 rounded"

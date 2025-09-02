@@ -138,8 +138,8 @@ const ArticlePreview: React.FC<{
     <Link href={`/blog/${post.uid}`} className="block group">
       <article
         className={`
-        ${isFirst ? "pb-4 mb-4 border-b border-gray-800/50" : "py-3"}
-        ${!isFirst ? "border-b border-gray-800/30 last:border-b-0" : ""}
+        ${isFirst ? "pb-4 mb-4 border-b border-default/50" : "py-3"}
+        ${!isFirst ? "border-b border-default/30 last:border-b-0" : ""}
         transition-all duration-200
       `}
       >
@@ -189,7 +189,6 @@ const ArticlePreview: React.FC<{
   );
 };
 
-
 const RightSidebar: React.FC<RightSidebarProps> = ({
   editorsPicks,
   showEditorsPicks = true,
@@ -203,7 +202,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   return (
     <aside className={`space-y-8 font-open-sans ${className}`}>
       {showEditorsPicks && editorsData.length > 0 && (
-        <div className="bg-[#1b1a1b]/60 backdrop-blur-sm border border-gray-800/60 rounded-lg p-5 shadow-2xl">
+        <div className="bg-[#1b1a1b]/60 backdrop-blur-sm border border-default/60 rounded-lg p-5 shadow-2xl">
           <SectionHeader title={editorsPicksTitle} href={editorsPicksHref} />
 
           <div className="space-y-1">
@@ -215,18 +214,15 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
                   index={index}
                   isFirst={index === 0}
                 />
-
               </React.Fragment>
             ))}
           </div>
         </div>
       )}
-      
+
       {/* Empty State (remains unchanged) */}
       {showEditorsPicks && editorsPicks.length === 0 && (
-        <div className="text-center py-12">
-          {/* ... empty state JSX ... */}
-        </div>
+        <div className="text-center py-12">{/* ... empty state JSX ... */}</div>
       )}
     </aside>
   );
@@ -234,4 +230,3 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
 
 export default RightSidebar;
 export type { RightSidebarProps };
-

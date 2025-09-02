@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../../prismicio-types";
-
 interface LocalStoriesProps {
   stories: BlogPostDocument[];
   title: string;
@@ -92,7 +91,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                       </p>
                     )}
                   </div>
-                  <div className="mt-4 pt-2 border-t border-gray-700">
+                  <div className="mt-4 pt-2 border-t border-default">
                     <span className="text-xs font-medium text-gray-400 font-sans">
                       {renderText(mainStory.data.author) || "Staff"}
                     </span>
@@ -117,7 +116,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
 
         {/* Secondary Stories List (Right Side) */}
         {/* A light-colored left border provides separation */}
-        <div className="lg:col-span-4 lg:border-l lg:border-gray-700 lg:pl-8">
+        <div className="lg:col-span-4 lg:border-l lg:border-default lg:pl-8">
           <div className="space-y-6">
             {otherStories.map((story) => (
               <article key={story.id} className="group">
@@ -126,7 +125,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                   <h4 className="text-base font-roboto font-bold text-foreground uppercase -mt-3 transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h4>
-                  <div className="mt-2 pt-2 border-t border-gray-700">
+                  <div className="mt-2 pt-2 border-t border-default">
                     <span className="text-xs font-medium text-gray-400 font-sans">
                       By {renderText(story.data.author) || "Staff"}
                     </span>

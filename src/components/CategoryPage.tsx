@@ -1,5 +1,4 @@
 // app/category/[slug]/CategoryPageComponent.tsx
-import { Calendar, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -54,7 +53,7 @@ const formatDate = (dateString: string | null): string => {
 // Clean article card
 const ArticleCard: React.FC<{ article: BlogPostDocument }> = ({ article }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
-    <article className="pb-6 border-b border-gray-800/50 last:border-b-0">
+    <article className="pb-6 border-b border-default/50 last:border-b-0">
       {/* Article Image */}
       {article.data.featured_image?.url && (
         <div className="relative aspect-[16/10] mb-4 overflow-hidden">
@@ -99,7 +98,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
     <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Clean Category Header */}
-        <div className="mb-12 pb-4 border-b border-gray-800">
+        <div className="mb-12 pb-4 border-b border-default">
           <h1 className="text-4xl font-roboto font-bold text-white">
             {categoryName}
           </h1>
@@ -110,7 +109,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
           <div className="lg:col-span-3">
             {/* Featured Article - Clean Layout */}
             {featuredArticle && (
-              <section className="mb-12 pb-8 border-b border-gray-800">
+              <section className="mb-12 pb-8 border-b border-default">
                 <Link
                   href={`/blog/${featuredArticle.uid}`}
                   className="block group"
@@ -168,7 +167,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             {/* Latest Articles */}
             {newsArticles.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-default">
                   Latest {categoryName}
                 </h2>
 
@@ -183,7 +182,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
             {/* Related Stories */}
             {opinionArticles.length > 0 && (
               <section>
-                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                <h2 className="text-2xl font-roboto font-bold text-white mb-6 pb-3 border-b border-default">
                   Related Stories
                 </h2>
 
@@ -197,11 +196,11 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
           </div>
 
           {/* Clean Sidebar */}
-          <div className="lg:col-span-1 border-l border-gray-800 pl-8">
+          <div className="lg:col-span-1 border-l border-default pl-8">
             <div className="sticky top-8">
               {recommendedArticles.length > 0 && (
                 <section>
-                  <h3 className="text-lg font-roboto font-bold text-white mb-6 pb-3 border-b border-gray-800">
+                  <h3 className="text-lg font-roboto font-bold text-white mb-6 pb-3 border-b border-default">
                     Recommended
                   </h3>
 
@@ -209,7 +208,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                     {recommendedArticles.slice(0, 5).map((article, index) => (
                       <article
                         key={article.id}
-                        className="pb-4 border-b border-gray-800/50 last:border-b-0"
+                        className="pb-4 border-b border-default/50 last:border-b-0"
                       >
                         <Link
                           href={`/blog/${article.uid}`}

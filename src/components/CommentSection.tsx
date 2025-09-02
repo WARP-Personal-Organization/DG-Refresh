@@ -539,7 +539,7 @@ const CommentSection = ({
   );
 
   return (
-    <div className="mt-16 pt-8 border-t border-gray-800">
+    <div className="mt-16 pt-8 border-t border-default">
       {/* Comments Header */}
       <div className="flex items-center gap-3 mb-8">
         <MessageCircle size={24} className="text-[#fcee16]" />

@@ -124,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
       <header className="bg-gradient-to-r from-black via-gray-950 to-black border-b-2 border-[#fcee16]/30 shadow-xl relative font-open-sans">
         <div className="max-w-7xl mx-auto">
           {/* Top Bar with Date and Weather */}
-          <div className="hidden lg:flex justify-between items-center py-2 px-4 border-b border-gray-800 text-xs">
+          <div className="hidden lg:flex justify-between items-center py-2 px-4 border-b border-default text-xs">
             <div className="flex items-center gap-3 text-gray-400">
               <time className="font-medium flex items-center gap-2 font-open-sans">
                 <Calendar size={12} className="text-[#fcee16]" />
@@ -162,7 +162,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
           </div>
 
           {/* Mobile Top Bar */}
-          <div className="lg:hidden flex justify-between items-center py-2 px-4 border-b border-gray-800 text-xs">
+          <div className="lg:hidden flex justify-between items-center py-2 px-4 border-b border-default text-xs">
             <div className="flex items-center gap-2 text-gray-400">
               <Calendar size={10} className="text-[#fcee16]" />
               <time className="font-medium font-open-sans">
@@ -287,7 +287,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                   <Link
                     key={item}
                     href={`/${item.toLowerCase().replace(" ", "-")}`}
-                    className="block py-3 px-4 text-gray-300 hover:text-[#fcee16] font-roboto font-medium transition-colors duration-200 border-b border-gray-800 hover:bg-[#fcee16]/5 rounded-lg"
+                    className="block py-3 px-4 text-gray-300 hover:text-[#fcee16] font-roboto font-medium transition-colors duration-200 border-b border-default hover:bg-[#fcee16]/5 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item}
@@ -295,7 +295,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 ))}
               </nav>
 
-              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-default">
                 <button className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-[#fcee16] font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10">
                   <Bell size={16} />
                   Alerts

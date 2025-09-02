@@ -97,7 +97,7 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
 
         {/* === NATION STORIES ROW === */}
         {nationItems.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-gray-800">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-default">
             {/* Intro Column */}
             <div className="lg:pr-8">
               <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">

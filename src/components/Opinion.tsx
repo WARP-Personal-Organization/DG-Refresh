@@ -20,7 +20,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
   const bottomAuthors = authors.slice(5, 11);
 
   return (
-    <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
+    <section className="py-12 border-t border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-[#fcee16]">
@@ -45,7 +45,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                     href={`/author/${featuredAuthor.uid}`}
                     className="block group"
                   >
-                    <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-gray-800">
+                    <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-default">
                       {/* Content */}
                       <div className="space-y-4">
                         <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
@@ -100,7 +100,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
 
               {/* Sidebar - 1 column */}
               {sidebarAuthors.length > 0 && (
-                <div className="lg:col-span-1 border-l border-gray-800 pl-8">
+                <div className="lg:col-span-1 border-l border-default pl-8">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-roboto font-bold text-white">
@@ -117,7 +117,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                     {sidebarAuthors.map((author) => (
                       <article
                         key={author.id}
-                        className="pb-4 border-b border-gray-800/50 last:border-b-0"
+                        className="pb-4 border-b border-default/50 last:border-b-0"
                       >
                         <Link
                           href={`/author/${author.uid}`}
@@ -168,7 +168,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
 
             {/* Bottom Authors Grid */}
             {bottomAuthors.length > 0 && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-gray-800">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-default">
                 {bottomAuthors.map((author) => (
                   <article key={author.id} className="group">
                     <Link href={`/author/${author.uid}`} className="block">
@@ -203,7 +203,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                           </p>
                         )}
 
-                        <div className="text-xs text-gray-500 border-t border-gray-800/50 pt-3 font-open-sans">
+                        <div className="text-xs text-gray-500 border-t border-default/50 pt-3 font-open-sans">
                           View Profile
                         </div>
                       </div>

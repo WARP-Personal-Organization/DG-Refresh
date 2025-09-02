@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-background border-t border-accent/20 font-sans">
       {/* Categories Section */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-default">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
             {categories.map((category) => (
@@ -162,7 +162,7 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
+      <div className="border-t border-default">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">

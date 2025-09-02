@@ -99,7 +99,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
             {/* === BOTTOM ROW: Grid of smaller stories === */}
             {bottomStories.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-gray-800 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-default pt-8">
                 {bottomStories.map((story) => (
                   <article key={story.id} className="group">
                     <Link
@@ -120,13 +120,13 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
           </div>
 
           {/* === SIDEBAR === */}
-          <aside className="lg:col-span-1 lg:border-l lg:border-gray-800 lg:pl-8">
+          <aside className="lg:col-span-1 lg:border-l lg:border-default lg:pl-8">
             <h3 className="font-roboto font-bold text-foreground mb-4 text-lg">
               More Features
             </h3>
             <ul className="space-y-4">
               {sidebarLinks.map((link) => (
-                <li key={link} className="border-b border-gray-800 pb-4">
+                <li key={link} className="border-b border-default pb-4">
                   <Link
                     href="#"
                     className="font-sans text-foreground transition-colors duration-200 hover:text-accent"

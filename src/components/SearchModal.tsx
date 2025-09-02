@@ -1,10 +1,10 @@
 // components/SearchModal.tsx
 "use client";
 
-import { X, Search, Clock, Tag, Calendar, ArrowRight } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import * as prismicH from "@prismicio/helpers";
+import { ArrowRight, Calendar, Clock, Search, Tag, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import type { BlogPostDocument } from "../../prismicio-types";
 
 interface SearchModalProps {
@@ -224,9 +224,9 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
 
       {/* Modal */}
       <div className="relative flex items-start justify-center min-h-screen pt-16 px-4">
-        <div className="w-full max-w-2xl bg-[#1b1a1b] rounded-xl border border-gray-800 shadow-2xl">
+        <div className="w-full max-w-2xl bg-[#1b1a1b] rounded-xl border border-default shadow-2xl">
           {/* Header */}
-          <div className="flex items-center gap-4 p-6 border-b border-gray-800">
+          <div className="flex items-center gap-4 p-6 border-b border-default">
             <div className="relative flex-1">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -319,7 +319,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
                       key={post.id}
                       href={`/blog/${post.uid}`}
                       onClick={() => handleResultClick(post)}
-                      className="block p-4 rounded-lg border border-gray-800 hover:border-[#fcee16]/50 hover:bg-gray-800/50 transition-all duration-200 group"
+                      className="block p-4 rounded-lg border border-default hover:border-[#fcee16]/50 hover:bg-gray-800/50 transition-all duration-200 group"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">

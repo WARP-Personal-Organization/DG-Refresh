@@ -58,7 +58,7 @@ const MainContent: React.FC<MainContentProps> = ({
           <div>
             {/* Editorial Link */}
             {editorialPost && (
-              <article className="pt-4 mt-4 border-t border-gray-800">
+              <article className="pt-4 mt-4 border-t border-default">
                 <Link
                   href={`/blog/${editorialPost.uid}`}
                   className="block group"
@@ -84,7 +84,7 @@ const MainContent: React.FC<MainContentProps> = ({
             )}
 
             {featuredPost && (
-              <article className="pt-4 mt-4 border-t border-gray-800">
+              <article className="pt-4 mt-4 border-t border-default">
                 <Link
                   href={`/blog/${featuredPost.uid}`}
                   className="block group"
@@ -110,7 +110,7 @@ const MainContent: React.FC<MainContentProps> = ({
             )}
 
             {localposts && (
-              <article className="pt-4 mt-4 border-t border-gray-800">
+              <article className="pt-4 mt-4 border-t border-default">
                 <Link href={`/blog/${localposts.uid}`} className="block group">
                   <div className="flex items-start gap-2">
                     <div className="text-accent text-lg font-roboto font-bold">

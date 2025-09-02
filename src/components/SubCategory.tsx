@@ -99,7 +99,7 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
         {/* Navigation Tabs and Search */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
           {/* Tabs */}
-          <div className="flex border-b border-gray-800">
+          <div className="flex border-b border-default">
             {tabs.map((tab) => (
               <button
                 key={tab}
@@ -151,7 +151,7 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
                   href={`/blog/${article.uid}`}
                   className="block group"
                 >
-                  <article className="grid grid-cols-1 lg:grid-cols-12 gap-6 py-6 border-b border-gray-800 hover:border-gray-700 transition-all duration-300">
+                  <article className="grid grid-cols-1 lg:grid-cols-12 gap-6 py-6 border-b border-default hover:border-gray-700 transition-all duration-300">
                     {/* Date Column */}
                     <div className="lg:col-span-2">
                       <time className="text-sm text-gray-400 font-medium">
@@ -222,7 +222,7 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
           ) : (
             /* Empty State */
             <div className="text-center py-16">
-              <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 border-2 border-gray-800 rounded-xl p-8 max-w-md mx-auto">
+              <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 border-2 border-default rounded-xl p-8 max-w-md mx-auto">
                 <Search size={48} className="mx-auto text-yellow-400/50 mb-4" />
                 <h3 className="text-xl font-bold text-white mb-2">
                   No Articles Found
@@ -248,7 +248,7 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
         {/* Load More Button */}
         {filteredArticles.length > 0 && (
           <div className="flex justify-center mt-12">
-            <button className="group inline-flex items-center gap-3 bg-gradient-to-r from-black via-gray-950 to-black border-2 border-gray-800 hover:border-yellow-500/60 rounded-xl px-8 py-4 transition-all duration-500 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-105">
+            <button className="group inline-flex items-center gap-3 bg-gradient-to-r from-black via-gray-950 to-black border-2 border-default hover:border-yellow-500/60 rounded-xl px-8 py-4 transition-all duration-500 hover:shadow-2xl hover:shadow-yellow-500/20 hover:scale-105">
               <span className="text-lg font-bold text-white group-hover:text-yellow-200 transition-colors duration-300 font-serif tracking-wide">
                 LOAD MORE ARTICLES
               </span>

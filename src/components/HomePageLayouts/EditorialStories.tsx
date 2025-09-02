@@ -97,7 +97,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                   <article
                     key={story.id}
                     className={`py-6 ${
-                      index > 0 ? "border-t border-gray-800" : "pt-0"
+                      index > 0 ? "border-t border-default" : "pt-0"
                     }`}
                   >
                     <Link href={`/blog/${story.uid}`} className="block group">

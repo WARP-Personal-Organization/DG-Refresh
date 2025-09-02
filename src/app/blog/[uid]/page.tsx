@@ -80,7 +80,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
     // Fetch related articles: same category, exclude current post
     const filters = [
       prismic.filter.not("my.blog_post.uid", resolvedParams.uid),
-      post.data.category ? prismic.filter.at("my.blog_post.category", post.data.category) : null,
+      post.data.category
+        ? prismic.filter.at("my.blog_post.category", post.data.category)
+        : null,
     ].filter((f): f is string => typeof f === "string");
     relatedArticles = await client.getAllByType("blog_post", {
       filters,
@@ -105,10 +107,10 @@ export default async function BlogPost({ params }: BlogPageProps) {
         pageSize: 3 - relatedArticles.length,
       });
       // Avoid duplicates
-      const fallbackUids = new Set(relatedArticles.map(a => a.uid));
+      const fallbackUids = new Set(relatedArticles.map((a) => a.uid));
       relatedArticles = [
         ...relatedArticles,
-        ...fallbackArticles.filter(a => !fallbackUids.has(a.uid)),
+        ...fallbackArticles.filter((a) => !fallbackUids.has(a.uid)),
       ];
     }
   } catch {
@@ -130,7 +132,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
 
   return (
     <div className="bg-[#1b1a1b] min-h-screen font-open-sans">
-      <header className="bg-[#1b1a1b] border-b border-gray-800 sticky top-0 z-10">
+      <header className="bg-[#1b1a1b] border-b border-default sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <nav className="text-sm font-bold tracking-wider text-white uppercase flex items-center gap-2.5">
             <Link href="/" className="hover:text-[#fcee16] transition-colors">
@@ -241,7 +243,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
         )}
 
         {/* Author and Date Info */}
-        <div className="flex flex-wrap items-center gap-6 mb-8 pb-6 border-b border-gray-800">
+        <div className="flex flex-wrap items-center gap-6 mb-8 pb-6 border-b border-default">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#fcee16] rounded-full flex items-center justify-center">
               <User size={18} className="text-[#1b1a1b]" />
@@ -356,7 +358,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
 
         {/* Share Section */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
+        <div className="mt-12 pt-8 border-t border-default">
           <div className="space-y-3">
             <h4 className="text-white font-roboto font-semibold">
               Share this article
@@ -410,20 +412,26 @@ export default async function BlogPost({ params }: BlogPageProps) {
         <CommentSection postId={post.uid} />
 
         {/* Related Articles */}
-        <div className="mt-16 pt-8 border-t border-gray-800">
+        <div className="mt-16 pt-8 border-t border-default">
           <h3 className="text-2xl font-bold text-white mb-6 font-roboto">
             Related Articles
           </h3>
           <div className="grid md:grid-cols-2 gap-6">
             {relatedArticles.length === 0 && (
-              <div className="text-gray-400 font-open-sans">No related articles found.</div>
+              <div className="text-gray-400 font-open-sans">
+                No related articles found.
+              </div>
             )}
             {relatedArticles.map((article) => {
               const articleUrl = `/blog/${article.uid}`;
               const articleImage = article.data.featured_image?.url;
-              const articleImageAlt = article.data.featured_image?.alt || article.data.title || "Related article image";
+              const articleImageAlt =
+                article.data.featured_image?.alt ||
+                article.data.title ||
+                "Related article image";
               const articleTitle = article.data.title || "Untitled";
-              const articleSummary = prismicH.asText(article.data.summary) || "";
+              const articleSummary =
+                prismicH.asText(article.data.summary) || "";
               const articleDate = formatDate(article.data.published_date);
               const articleReadingTime = article.data.reading_time
                 ? `${article.data.reading_time} min`
@@ -460,10 +468,12 @@ export default async function BlogPost({ params }: BlogPageProps) {
                       )}
                       <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto font-open-sans">
                         <span className="flex items-center gap-1">
-                          <Calendar size={10} />{articleDate}
+                          <Calendar size={10} />
+                          {articleDate}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock size={10} />{articleReadingTime} read
+                          <Clock size={10} />
+                          {articleReadingTime} read
                         </span>
                       </div>
                     </div>
