@@ -127,7 +127,7 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
 
   return (
     <Link href={`/blog/${article.uid}`} className="block group">
-      <article className="bg-[#1b1a1b] border border-gray-800 hover:border-[#fcee16]/50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-[#fcee16]/10">
+      <article className="bg-[#1b1a1b] border border-default hover:border-[#fcee16]/50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-[#fcee16]/10">
         {/* Article Image */}
         {article.data.featured_image?.url && (
           <div className="relative aspect-[16/10] overflow-hidden">
@@ -201,7 +201,7 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
 
           {/* Tags */}
           {tags && (
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-800">
+            <div className="flex items-center gap-2 pt-2 border-t border-default">
               <Tag size={12} className="text-gray-500" />
               <span className="text-xs text-gray-500 truncate">{tags}</span>
             </div>
@@ -433,7 +433,7 @@ export default async function SubCategoryPage({
               <div className="sticky top-8 space-y-8">
                 {/* Editor's Picks */}
                 {editorsPicks.length > 0 && (
-                  <section className="bg-gradient-to-b from-[#1b1a1b] to-black border border-gray-800 rounded-lg p-6">
+                  <section className="bg-gradient-to-b from-[#1b1a1b] to-black border border-default rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-6">
                       <TrendingUp className="text-[#fcee16]" size={20} />
                       <h3 className="text-xl font-roboto font-bold text-white">

@@ -14,7 +14,13 @@
   --font-roboto: "Roboto", sans-serif;
   --font-mono: var(--font-geist-mono);
 }
+:root {
+  --border-color: #1f2937;
+}
 
+.border-default {
+  border-color: var(--border-color) !important;
+}
 body {
   background: var(--background);
   color: var(--foreground);

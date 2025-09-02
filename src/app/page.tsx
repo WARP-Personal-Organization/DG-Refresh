@@ -4,7 +4,9 @@ import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
 import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
 import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
 import LocalStories from "@/components/HomePageLayouts/LocalStories";
-import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports";
+import NegrosAndSportsStories, {
+  PublicationCard,
+} from "@/components/HomePageLayouts/NegrosAndSports";
 import TopStories from "@/components/HomePageLayouts/TopStories";
 import MainContent from "@/components/MainContent";
 import NavigationBar from "@/components/Navigation";
@@ -16,6 +18,7 @@ import type {
   AuthorOpinionDocument,
   BlogPostDocument,
 } from "../../prismicio-types";
+import "./globals.css";
 export default async function Home() {
   try {
     // Fetch all blog posts
@@ -168,7 +171,12 @@ export default async function Home() {
               localposts={localPicks[0]}
               editorialPost={editorialPost}
             />
-            <RightSidebar editorsPicks={editorsPicks} />
+            {/* <RightSidebar editorsPicks={editorsPicks} /> */}
+            <PublicationCard
+              title="Today's Paper"
+              imageUrl={"/Todays'News.PNG"}
+              link="https://dailyguardian.com.ph/todays-paper/"
+            />
           </div>
         </div>
         <TopStories title={"Top Stories"} stories={featuredPicks} />

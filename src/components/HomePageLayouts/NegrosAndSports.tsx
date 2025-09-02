@@ -1,8 +1,9 @@
+import { client } from "../../../lib/prismicio";
+import RightSidebar from "@/components/RightSidebar";
 import type * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import type { BlogPostDocument } from "../../../prismicio-types";
 
 interface RegionalStoriesProps {
@@ -18,7 +19,7 @@ const renderText = (richText: prismic.RichTextField): string => {
 };
 
 // Reusable Publication Cards
-const PublicationCard = ({
+export const PublicationCard = ({
   title,
   imageUrl,
   link = "#",
@@ -43,12 +44,13 @@ const PublicationCard = ({
   </div>
 );
 
-const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
+// NOTE: no "use client" — this stays a Server Component and can be async
+export default async function NegrosAndSportsStories({
   negrosStories,
   negrosTitle,
   sportsStories,
   sportsTitle,
-}) => {
+}: RegionalStoriesProps) {
   if (!negrosStories || negrosStories.length === 0) {
     return null;
   }
@@ -56,6 +58,24 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
   const mainNegrosStory = negrosStories[0];
   const supportingNegrosStories = negrosStories.slice(1, 4);
   const limitedSportsStories = sportsStories.slice(0, 6);
+
+  // Optional: fetch editor's picks here (server-side)
+  let editorsPicks: BlogPostDocument[] = [];
+  try {
+    const posts: BlogPostDocument[] = await client.getAllByType("blog_post", {
+      orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
+    });
+
+    editorsPicks = posts
+      .filter((post) => post.data?.editors_pick === true)
+      .sort((a, b) => {
+        const dateA = new Date(a.data?.published_date || "").getTime() || 0;
+        const dateB = new Date(b.data?.published_date || "").getTime() || 0;
+        return dateB - dateA; // latest first
+      });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+  }
 
   // Placeholder URLs
   const todayPaperUrl = "/Todays'News.PNG";
@@ -157,12 +177,16 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
                   </Link>
                 </article>
               ))}
+
               {/* Publications */}
-              <PublicationCard
+              {/* <PublicationCard
                 title="Today's Paper"
                 imageUrl={todayPaperUrl}
                 link="https://dailyguardian.com.ph/todays-paper/"
-              />
+              /> */}
+
+              <RightSidebar editorsPicks={editorsPicks} />
+
               <PublicationCard
                 title="Supplement"
                 imageUrl={supplementUrl}
@@ -174,6 +198,4 @@ const NegrosAndSportsStories: React.FC<RegionalStoriesProps> = ({
       </div>
     </section>
   );
-};
-
-export default NegrosAndSportsStories;
+}

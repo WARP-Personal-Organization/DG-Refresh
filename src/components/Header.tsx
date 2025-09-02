@@ -280,7 +280,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                   "Local News",
                   "Sports",
                   "Business",
-                  "Opinion",
+                  "voices",
                   "Community",
                   "Events",
                 ].map((item) => (

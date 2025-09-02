@@ -9,7 +9,7 @@ interface MainContentProps {
   heroPost?: BlogPostDocument;
   featuredPost?: BlogPostDocument;
   editorialPost?: BlogPostDocument;
-  localposts? : BlogPostDocument;
+  localposts?: BlogPostDocument;
   // editorsPicks is no longer used in this specific layout
   editorsPicks?: BlogPostDocument[];
 }
@@ -109,13 +109,9 @@ const MainContent: React.FC<MainContentProps> = ({
               </article>
             )}
 
-            
             {localposts && (
               <article className="pt-4 mt-4 border-t border-gray-800">
-                <Link
-                  href={`/blog/${localposts.uid}`}
-                  className="block group"
-                >
+                <Link href={`/blog/${localposts.uid}`} className="block group">
                   <div className="flex items-start gap-2">
                     <div className="text-accent text-lg font-roboto font-bold">
                       &ldquo;

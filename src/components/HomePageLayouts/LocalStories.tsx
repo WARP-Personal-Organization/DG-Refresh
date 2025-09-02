@@ -80,9 +80,9 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                 {/* Text Content - now with light colors */}
                 <div className="flex flex-col">
                   <div className="flex-grow">
-                    <span className="text-5xl text-gray-500 leading-none font-sans">
+                    {/* <span className="text-5xl text-gray-500 leading-none font-sans">
                       &quot;
-                    </span>
+                    </span> */}
                     <h3 className="text-3xl font-roboto font-bold text-foreground -mt-4 transition-colors duration-200 group-hover:text-accent">
                       {mainStory.data.title || "Untitled Article"}
                     </h3>
@@ -122,9 +122,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
             {otherStories.map((story) => (
               <article key={story.id} className="group">
                 <Link href={`/blog/${story.uid}`} className="block">
-                  <span className="text-4xl text-gray-500 leading-none font-sans">
-                    &quot;
-                  </span>
+                  <span className="text-4xl text-gray-500 leading-none font-sans"></span>
                   <h4 className="text-base font-roboto font-bold text-foreground uppercase -mt-3 transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h4>

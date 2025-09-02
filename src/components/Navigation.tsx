@@ -16,7 +16,7 @@ const navigationData = [
       { name: "NEGROS", href: "/subcategory/negros" },
     ],
   },
-    {
+  {
     name: "Opinion",
     href: "/opinion",
   },
@@ -36,7 +36,7 @@ const navigationData = [
       { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
     ],
   },
-    {
+  {
     name: "Features",
     href: "/feature",
     dropdown: [
@@ -62,7 +62,7 @@ const navigationData = [
       { name: "ZERO DAY", href: "/subcategory/zero-day" },
     ],
   },
-    {
+  {
     name: "Policies",
     href: "/Policies",
   },
