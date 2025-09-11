@@ -167,7 +167,7 @@ const EnhancedVideoSection: React.FC = () => {
                 {selectedVideo.description}
               </p>
 
-              <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-default/50 font-open-sans">
+              <div className="flex items-center gap-6 text-sm text-gray-500 pt-2 border-t border-default font-open-sans">
                 <span className="flex items-center gap-2">
                   <Users size={14} />
                   {selectedVideo.views} views
@@ -215,7 +215,7 @@ const EnhancedVideoSection: React.FC = () => {
                 <article
                   key={video.id}
                   onClick={() => handleVideoSelect(video)}
-                  className={`cursor-pointer pb-4 border-b border-default/50 last:border-b-0 group ${
+                  className={`cursor-pointer pb-4 border-b border-default last:border-b-0 group ${
                     selectedVideo.id === video.id
                       ? "opacity-100"
                       : "opacity-70 hover:opacity-100"

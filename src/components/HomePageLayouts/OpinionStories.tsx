@@ -76,7 +76,7 @@ const OpinionStories: React.FC<OpinionStoriesProps> = ({ stories, title }) => {
                       {renderText(story.data.summary).substring(0, 100)}...
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-default/50">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-default">
                     <span>{renderText(story.data.author) || "Staff"}</span>
                     <span>•</span>
                     <span>{formatTimeAgo(story.data.published_date)}</span>

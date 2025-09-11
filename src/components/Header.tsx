@@ -121,13 +121,13 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-black via-gray-950 to-black border-b-2 border-[#fcee16]/30 shadow-xl relative font-open-sans">
+      <header className=" bg-[#fbd203] to-black border-b-2 border-[#fcee16]/30 shadow-xl relative font-open-sans">
         <div className="max-w-7xl mx-auto">
           {/* Top Bar with Date and Weather */}
           <div className="hidden lg:flex justify-between items-center py-2 px-4 border-b border-default text-xs">
-            <div className="flex items-center gap-3 text-gray-400">
+            <div className="flex items-center gap-3 text-black font-bold">
               <time className="font-medium flex items-center gap-2 font-open-sans">
-                <Calendar size={12} className="text-[#fcee16]" />
+                <Calendar size={12} className="text-black" />
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -135,9 +135,9 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                   day: "numeric",
                 })}
               </time>
-              <span className="text-gray-600">|</span>
+              <span className="text-black">|</span>
               {/* === CHANGE APPLIED HERE === */}
-              <span className="text-[#fcee16] flex items-center gap-1 font-open-sans">
+              <span className="text-black flex items-center gap-1 font-open-sans">
                 <MapPin size={12} />
                 {weather.loading
                   ? "Loading weather..."
@@ -145,17 +145,15 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                       weather.description
                     }`}
                 {weather.error && (
-                  <span className="text-gray-500 text-xs ml-1">
-                    (Iloilo City)
-                  </span>
+                  <span className="text-black text-xs ml-1">(Iloilo City)</span>
                 )}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-gray-400">
+            <div className="flex items-center gap-3 text-black">
               <span className="font-semibold font-roboto">Breaking News</span>
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-white font-medium font-open-sans">
+              <span className="text-black font-medium font-open-sans">
                 Local Election Results Tonight
               </span>
             </div>
@@ -163,8 +161,8 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
           {/* Mobile Top Bar */}
           <div className="lg:hidden flex justify-between items-center py-2 px-4 border-b border-default text-xs">
-            <div className="flex items-center gap-2 text-gray-400">
-              <Calendar size={10} className="text-[#fcee16]" />
+            <div className="flex items-center gap-2 text-black">
+              <Calendar size={10} className="text-black" />
               <time className="font-medium font-open-sans">
                 {new Date().toLocaleDateString("en-US", {
                   month: "short",
@@ -175,7 +173,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-[#fcee16] text-xs font-medium truncate max-w-32 font-open-sans">
+              <span className="text-black text-xs font-medium truncate max-w-32 font-open-sans">
                 {weather.loading
                   ? "Loading..."
                   : `${getTemperatureDisplay(weather.temperature)}`}
@@ -189,7 +187,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
             <div className="flex-1 flex items-center gap-2 sm:gap-4">
               <button
                 onClick={openSearchModal}
-                className="hidden lg:flex items-center gap-2 text-gray-300 hover:text-[#fcee16] transition-colors duration-200 group"
+                className="hidden lg:flex items-center gap-2 text-black hover:text-[#fcee16] transition-colors duration-200 group"
               >
                 <Search
                   size={18}
@@ -199,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               </button>
               <button
                 onClick={openSearchModal}
-                className="lg:hidden text-gray-300 hover:text-[#fcee16] transition-colors duration-200 p-2"
+                className="lg:hidden text-black hover:text-[#fcee16] transition-colors duration-200 p-2"
                 aria-label="Search"
               >
                 <Search size={18} />
@@ -212,7 +210,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 <div className="relative flex flex-col items-center">
                   <div className="relative">
                     <img
-                      src="/dg-logo.png"
+                      src="/black_dg.png"
                       alt="Daily Guardian"
                       className="h-10 sm:h-12 md:h-16 lg:h-20 xl:h-24 w-auto drop-shadow-lg"
                     />
@@ -223,7 +221,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
 
             {/* Right Section */}
             <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
-              <button className="md:hidden text-gray-300 hover:text-[#fcee16] transition-colors duration-200 p-2">
+              <button className="md:hidden text-black hover:text-[#fcee16] transition-colors duration-200 p-2">
                 <User size={18} />
               </button>
             </div>
@@ -240,7 +238,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                     setIsMobileMenuOpen(false);
                     openSearchModal();
                   }}
-                  className="w-full flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700 text-left text-gray-400 hover:text-[#fcee16] transition-colors"
+                  className="w-full flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700 text-left text-black hover:text-[#fcee16] transition-colors"
                 >
                   <Search size={18} />
                   <span className="font-open-sans">Search articles...</span>
@@ -250,18 +248,18 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MapPin size={14} className="text-[#fcee16]" />
-                    <span className="text-sm text-gray-400 font-open-sans">
+                    <MapPin size={14} className="text-black" />
+                    <span className="text-sm text-black font-open-sans">
                       Iloilo City
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="text-[#fcee16] font-bold font-roboto">
+                    <div className="text-black font-bold font-roboto">
                       {weather.loading
                         ? "Loading..."
                         : getTemperatureDisplay(weather.temperature)}
                     </div>
-                    <div className="text-xs text-[#fcee16] font-open-sans">
+                    <div className="text-xs text-black font-open-sans">
                       {weather.loading ? "" : weather.description}
                     </div>
                   </div>
@@ -271,7 +269,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               <nav className="space-y-4 mb-6">
                 <Link
                   href="/"
-                  className="block py-3 px-4 text-[#fcee16] font-roboto font-bold text-lg border-b border-[#fcee16]/30 bg-[#fcee16]/5 rounded-lg"
+                  className="block py-3 px-4 text-black font-roboto font-bold text-lg border-b border-[#fcee16]/30 bg-[#fcee16]/5 rounded-lg"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
@@ -287,7 +285,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                   <Link
                     key={item}
                     href={`/${item.toLowerCase().replace(" ", "-")}`}
-                    className="block py-3 px-4 text-gray-300 hover:text-[#fcee16] font-roboto font-medium transition-colors duration-200 border-b border-default hover:bg-[#fcee16]/5 rounded-lg"
+                    className="block py-3 px-4 text-black hover:text-[#fcee16] font-roboto font-medium transition-colors duration-200 border-b border-default hover:bg-[#fcee16]/5 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item}
@@ -296,11 +294,11 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               </nav>
 
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-default">
-                <button className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-[#fcee16] font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10">
+                <button className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10">
                   <Bell size={16} />
                   Alerts
                 </button>
-                <button className="flex items-center justify-center gap-2 border border-gray-600 text-gray-300 font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-gray-700/50">
+                <button className="flex items-center justify-center gap-2 border border-gray-600 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-gray-700/50">
                   <User size={16} />
                   Sign In
                 </button>
@@ -313,7 +311,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                     BREAKING NEWS
                   </span>
                 </div>
-                <p className="text-white text-sm font-open-sans">
+                <p className="text-black text-sm font-open-sans">
                   Local Election Results Tonight
                 </p>
               </div>

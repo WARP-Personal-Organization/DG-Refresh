@@ -53,7 +53,7 @@ const formatDate = (dateString: string | null): string => {
 // Clean article card
 const ArticleCard: React.FC<{ article: BlogPostDocument }> = ({ article }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
-    <article className="pb-6 border-b border-default/50 last:border-b-0">
+    <article className="pb-6 border-b border-default last:border-b-0">
       {/* Article Image */}
       {article.data.featured_image?.url && (
         <div className="relative aspect-[16/10] mb-4 overflow-hidden">
@@ -208,7 +208,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                     {recommendedArticles.slice(0, 5).map((article, index) => (
                       <article
                         key={article.id}
-                        className="pb-4 border-b border-default/50 last:border-b-0"
+                        className="pb-4 border-b border-default last:border-b-0"
                       >
                         <Link
                           href={`/blog/${article.uid}`}

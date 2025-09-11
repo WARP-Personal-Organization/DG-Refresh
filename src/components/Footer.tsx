@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-
+import Image from "next/image";
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <Link href="/" className="inline-block">
             <img
-              src="/dg-logo.png" // Assuming this is your logo path
+              src="/black_dg.png" // Assuming this is your logo path
               alt="Daily Guardian"
               className="h-20 w-auto" // Adjusted height
             />

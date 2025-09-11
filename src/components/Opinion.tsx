@@ -24,9 +24,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-[#fcee16]">
-          <h2 className="text-3xl font-roboto font-bold text-white">
-            Opinions
-          </h2>
+          <h2 className="text-3xl font-roboto font-bold text-white">Voices</h2>
         </div>
 
         {/* Show message if no authors */}
@@ -117,7 +115,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                     {sidebarAuthors.map((author) => (
                       <article
                         key={author.id}
-                        className="pb-4 border-b border-default/50 last:border-b-0"
+                        className="pb-4 border-b border-default last:border-b-0"
                       >
                         <Link
                           href={`/author/${author.uid}`}
@@ -203,7 +201,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                           </p>
                         )}
 
-                        <div className="text-xs text-gray-500 border-t border-default/50 pt-3 font-open-sans">
+                        <div className="text-xs text-gray-500 border-t border-default pt-3 font-open-sans">
                           View Profile
                         </div>
                       </div>

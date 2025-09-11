@@ -64,9 +64,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   className="block group"
                 >
                   <div className="flex items-start gap-2">
-                    <div className="text-accent text-lg font-roboto font-bold">
-                      &ldquo;
-                    </div>
+                    <div className="text-accent text-lg font-roboto font-bold"></div>
                     <div className="flex-1">
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
                         <span className="text-gray-400 font-normal text-sm">
@@ -90,9 +88,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   className="block group"
                 >
                   <div className="flex items-start gap-2">
-                    <div className="text-accent text-lg font-roboto font-bold">
-                      &ldquo;
-                    </div>
+                    <div className="text-accent text-lg font-roboto font-bold"></div>
                     <div className="flex-1">
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
                         <span className="text-gray-400 font-normal text-sm">
@@ -113,9 +109,7 @@ const MainContent: React.FC<MainContentProps> = ({
               <article className="pt-4 mt-4 border-t border-default">
                 <Link href={`/blog/${localposts.uid}`} className="block group">
                   <div className="flex items-start gap-2">
-                    <div className="text-accent text-lg font-roboto font-bold">
-                      &ldquo;
-                    </div>
+                    <div className="text-accent text-lg font-roboto font-bold"></div>
                     <div className="flex-1">
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
                         <span className="text-gray-400 font-normal text-sm">
