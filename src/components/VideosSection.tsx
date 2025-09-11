@@ -113,7 +113,7 @@ const EnhancedVideoSection: React.FC = () => {
   };
 
   return (
-    <section className="py-12 border-t border-default bg-[#1b1a1b] font-open-sans">
+    <section className="py-12  border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-default]">

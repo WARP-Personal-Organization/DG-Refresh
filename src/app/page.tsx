@@ -180,21 +180,21 @@ export default async function Home() {
           </div>
         </div>
         <TopStories title={"Top Stories"} stories={featuredPicks} />
-        <LocalStories title={"Local"} stories={localPicks} />
+        <LocalStories title={"LOCAL"} stories={localPicks} />
         <NegrosAndSportsStories
-          negrosTitle={"Negros"}
+          negrosTitle={"NEGROS"}
           negrosStories={negrosPicks}
           sportsTitle={"Banner News"}
           sportsStories={posts.length > 0 ? sportsPicks : sportsPicks}
         />
-        <FeaturesStories title={"Features"} stories={featuredPicksAsCategory} />
+        <FeaturesStories title={"FEATURES"} stories={featuredPicksAsCategory} />
         <InitiativeAndNationStories
-          initiativeTitle={"Initiative"}
+          initiativeTitle={"INITIATIVES"}
           initiativeStories={initiativesPicks}
-          nationTitle={"Nation"}
+          nationTitle={"NATION"}
           nationStories={nationalPicks}
         />
-        <EditorialStories title={"Editorial"} stories={editorialPicks} />
+        <EditorialStories title={"EDITORIAL"} stories={editorialPicks} />
         <OpinionSection authors={authors} />
         <EnhancedVideoSection />
       </div>

@@ -20,11 +20,11 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
   const bottomAuthors = authors.slice(5, 11);
 
   return (
-    <section className="py-12 border-t border-default bg-[#1b1a1b] font-open-sans">
+    <section className="py-12 border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-[#fcee16]">
-          <h2 className="text-3xl font-roboto font-bold text-white">Voices</h2>
+          <h2 className="text-3xl font-roboto font-bold text-white">VOICES</h2>
         </div>
 
         {/* Show message if no authors */}
