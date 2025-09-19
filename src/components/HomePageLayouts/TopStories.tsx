@@ -34,11 +34,11 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Header with light text and borders */}
         <div className="text-center mb-8 space-y-4">
-          <DottedSeparator />
+          <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
           <h2 className="text-sm font-roboto font-semibold text-foreground uppercase tracking-[0.2em]">
             {title}
           </h2>
-          <DottedSeparator />
+          <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
         </div>
 
         {/* Stories Grid with light vertical separators */}

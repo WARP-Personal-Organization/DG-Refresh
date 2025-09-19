@@ -104,8 +104,8 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Main Footer Content - REVISED FOR COMPACTNESS */}
-      <div className="  max-w-7xl w-full mx-auto px-4 py-8">
-        <div className="bg-acccent flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className=" bg-accent    px-4 py-8">
+        <div className="bg-acccent mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6">
           <Link href="/" className="inline-block">
             <img
               src="/black_dg.png" // Assuming this is your logo path

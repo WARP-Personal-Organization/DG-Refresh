@@ -163,7 +163,9 @@ export default async function Home() {
         <NavigationBar /> */}
 
         {/* Overall Layout Structure */}
+
         <div className="max-w-7xl mx-auto px-4 py-8 pb">
+          {/* <Header  posts={posts}/> */}
           <div className="grid lg:grid-cols-4 gap-8">
             <MainContent
               heroPost={breakingNews[0]}

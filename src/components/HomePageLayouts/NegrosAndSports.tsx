@@ -128,7 +128,7 @@ export default async function NegrosAndSportsStories({
                 <div className="mb-6 pb-3 border-b border-[#fcee16]">
                   <h2 className="text-2xl font-roboto font-bold text-foreground">
                     {/* {sportsTitle} */}
-                    Sports
+                    SPORTS
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

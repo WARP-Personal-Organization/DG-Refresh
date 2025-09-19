@@ -284,6 +284,61 @@ export default async function BlogPost({ params }: BlogPageProps) {
           <PrismicRichText
             field={post.data.content}
             components={{
+              /* --- your existing mappers (paragraph, headings, etc.) --- */
+
+              // 1) IMAGES (supports "image links" via node.linkTo)
+              image: ({ node }) => {
+                // Prefer Next/Image if you like, but plain <img> is fine too.
+                const Img = (
+                  <img
+                    src={node.url}
+                    alt={node.alt ?? ""}
+                    width={node.dimensions?.width}
+                    height={node.dimensions?.height}
+                    loading="lazy"
+                    className="my-6 rounded-lg border border-gray-700"
+                  />
+                );
+
+                // If the image is clickable, Prismic puts the link on node.linkTo
+                const href = node.linkTo ? prismicH.asLink(node.linkTo) : null;
+
+                return href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-block"
+                  >
+                    {Img}
+                  </a>
+                ) : (
+                  Img
+                );
+              },
+
+              // 2) EMBEDS (YouTube, Vimeo, tweets, etc.)
+              embed: ({ node }) => {
+                const html = node?.oembed?.html ?? "";
+                if (!html) return null;
+
+                // Responsive 16:9 wrapper; change paddingTop if you want a different ratio
+                return (
+                  <div className="my-8">
+                    <div
+                      className="relative w-full"
+                      style={{ paddingTop: "56.25%" }}
+                    >
+                      <div
+                        className="absolute inset-0 [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:rounded-lg [&>iframe]:border [&>iframe]:border-gray-700"
+                        dangerouslySetInnerHTML={{ __html: html }}
+                      />
+                    </div>
+                  </div>
+                );
+              },
+
+              /* --- keep the rest of your mappers --- */
               paragraph: ({ children }) => (
                 <p className="mb-6 text-gray-200 leading-relaxed text-lg font-open-sans">
                   {children}
