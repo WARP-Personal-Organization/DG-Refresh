@@ -310,7 +310,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
                 <div className="mb-4">
                   <p className="text-sm text-gray-400 font-open-sans">
                     {results.length} result{results.length !== 1 ? "s" : ""} for
-                    "{query}"
+                    &quot;{query}&quot;
                   </p>
                 </div>
                 <div className="space-y-4">

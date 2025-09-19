@@ -225,7 +225,7 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                 ) : (
                   <>
                     {filteredResults.length} result
-                    {filteredResults.length !== 1 ? "s" : ""} for "{query}"
+                    {filteredResults.length !== 1 ? "s" : ""} for &quot;{query}&quot;
                   </>
                 )}
               </p>
@@ -251,11 +251,11 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                   className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm font-open-sans"
                 >
                   <option value="all">All Categories</option>
-                  {categories.map((category) => (
+                  {/* {categories.map((category) => (
                     <option key={category} value={category}>
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </option>
-                  ))}
+                  ))} */}
                 </select>
               </div>
             )}
@@ -330,7 +330,7 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                         )}
                         {post.data.editors_pick && (
                           <span className="px-2 py-1 text-xs font-bold bg-green-600 text-white rounded uppercase">
-                            Editor's Pick
+                            Editor&apos;s Pick
                           </span>
                         )}
                       </div>
