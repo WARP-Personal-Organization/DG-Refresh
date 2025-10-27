@@ -4,14 +4,12 @@ import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
 import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
 import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
 import LocalStories from "@/components/HomePageLayouts/LocalStories";
-import NegrosAndSportsStories, {
-  PublicationCard,
-} from "@/components/HomePageLayouts/NegrosAndSports";
+import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports";
 import TopStories from "@/components/HomePageLayouts/TopStories";
 import MainContent from "@/components/MainContent";
 import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
-import RightSidebar from "@/components/RightSidebar";
+import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
 import { client } from "../../lib/prismicio";
 import type {
@@ -166,7 +164,7 @@ export default async function Home() {
 
         <div className="max-w-7xl mx-auto px-4 py-8 pb">
           {/* <Header  posts={posts}/> */}
-          <div className="grid lg:grid-cols-4 gap-8">
+          <div className="grid lg:grid-cols-4 gap-8 items-start">
             <MainContent
               heroPost={breakingNews[0]}
               featuredPost={featuredPicks[0]}
@@ -176,7 +174,7 @@ export default async function Home() {
             {/* <RightSidebar editorsPicks={editorsPicks} /> */}
             <PublicationCard
               title="Today's Paper"
-              imageUrl={"/Todays'News.PNG"}
+              imageUrl={"/todaysnewspaper.png"}
               link="https://dailyguardian.com.ph/todays-paper/"
             />
           </div>

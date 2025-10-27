@@ -1,11 +1,10 @@
 import type * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
-import { ChevronRight, Clock } from "lucide-react";
+import { ChevronRight, Clock, Star } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../prismicio-types";
 
-// TypeScript interfaces (remains unchanged)
 interface RightSidebarProps {
   editorsPicks: BlogPostDocument[];
   showEditorsPicks?: boolean;
@@ -15,7 +14,6 @@ interface RightSidebarProps {
   className?: string;
 }
 
-// All helper functions (renderRichTextAsText, formatTimeAgo, etc.) remain unchanged...
 // Helper function to render Prismic rich text as plain text
 const renderRichTextAsText = (
   richText: prismic.RichTextField,
@@ -36,7 +34,7 @@ const renderRichTextAsText = (
   }
 };
 
-// Helper function to format time ago - Updated for newspaper style
+// Helper function to format time ago
 const formatTimeAgo = (dateString: string | null): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -45,24 +43,20 @@ const formatTimeAgo = (dateString: string | null): string => {
     (now.getTime() - date.getTime()) / (1000 * 60 * 60)
   );
 
-  if (diffInHours < 1) {
-    return "Just now";
-  } else if (diffInHours < 24) {
-    return `${diffInHours}h ago`;
-  } else {
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays === 1) return "Yesterday";
-    if (diffInDays <= 7) return `${diffInDays} days ago`;
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
 
-    // For older articles, show the actual date
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  }
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays === 1) return "Yesterday";
+  if (diffInDays <= 7) return `${diffInDays} days ago`;
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 };
 
-// Updated category display for newspaper style
+// Updated category display
 const getCategoryDisplayName = (
   category: string | null | undefined
 ): string => {
@@ -75,52 +69,59 @@ const getCategoryDisplayName = (
     industries: "Industry",
     "other-pages": "Other",
   };
-
   return category && categoryMap[category] ? categoryMap[category] : "News";
 };
 
-// Refined category badge - more newspaper-like
+// Premium Category Badge
 const CategoryBadge: React.FC<{ category: string; size?: "sm" | "xs" }> = ({
   category,
   size = "xs",
 }) => {
   const sizeClasses =
-    size === "sm" ? "px-2 py-1 text-xs" : "px-1.5 py-0.5 text-xs";
+    size === "sm" ? "px-3 py-1.5 text-xs" : "px-2 py-1 text-xs";
 
   return (
     <span
-      className={`inline-block bg-[#fcee16] text-[#1b1a1b] font-semibold tracking-wide uppercase rounded-sm ${sizeClasses} backdrop-blur-sm font-open-sans`}
+      className={`inline-flex items-center bg-gradient-to-r from-accent to-accent/90 text-background font-bold tracking-wider uppercase rounded-md ${sizeClasses} shadow-sm font-roboto`}
     >
       {category}
     </span>
   );
 };
 
-// Refined section header - more elegant newspaper style
+// Compact Section Header
 const SectionHeader: React.FC<{
   title: string;
   href?: string;
 }> = ({ title, href }) => (
-  <div className="mb-6">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-lg font-bold text-white font-roboto tracking-wide">
-        {title}
-      </h3>
+  <div className="mb-4">
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 bg-accent/20 rounded-md flex items-center justify-center">
+          <Star size={12} className="text-accent" />
+        </div>
+        <h3 className="text-lg font-bold text-foreground font-roboto">
+          {title}
+        </h3>
+      </div>
       {href && (
         <Link
           href={href}
-          className="text-[#fcee16] hover:text-[#fcee16]/80 text-sm font-medium flex items-center gap-1 transition-colors duration-200 font-open-sans"
+          className="group flex items-center gap-1 text-accent hover:text-accent/80 text-xs font-bold uppercase tracking-wider transition-all duration-300 font-roboto"
         >
-          More <ChevronRight size={12} />
+          <span>More</span>
+          <ChevronRight
+            size={12}
+            className="transform group-hover:translate-x-1 transition-transform duration-300"
+          />
         </Link>
       )}
     </div>
-    {/* Subtle divider line */}
-    <div className="h-px bg-[#fcee16]/40"></div>
+    <div className="h-px bg-accent/30"></div>
   </div>
 );
 
-// Premium article preview component (remains unchanged)
+// Compact Article Preview
 const ArticlePreview: React.FC<{
   post: BlogPostDocument;
   index: number;
@@ -132,54 +133,54 @@ const ArticlePreview: React.FC<{
   const time = formatTimeAgo(
     post.data.published_date || post.data.updated_date
   );
-  const summary = renderRichTextAsText(post.data.summary, 120);
+  const summary = renderRichTextAsText(post.data.summary, 80);
 
   return (
     <Link href={`/blog/${post.uid}`} className="block group">
       <article
-        className={`
-        ${isFirst ? "pb-4 mb-4 border-b border-default" : "py-3"}
-        ${!isFirst ? "border-b border-default last:border-b-0" : ""}
-        transition-all duration-200
-      `}
+        className={`transition-all duration-300 hover:bg-accent/5 rounded-lg p-3 -m-3 ${isFirst ? "mb-3 pb-3 border-b border-accent/20" : "mb-2"}`}
       >
+        {/* Featured image for first article only */}
         {isFirst && post.data.featured_image?.url && (
-          <div className="relative mb-3 overflow-hidden rounded-md">
+          <div className="relative mb-3 overflow-hidden rounded-lg">
             <img
               src={post.data.featured_image.url}
               alt={post.data.featured_image.alt || title}
-              className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute top-2 left-2">
-              <CategoryBadge category={category} size="sm" />
+              <CategoryBadge category={category} size="xs" />
             </div>
           </div>
         )}
 
         <div className="space-y-2">
+          {/* Article number and category for non-first articles */}
+          {!isFirst && (
+            <div className="flex items-center gap-2">
+              <span className="w-4 h-4 bg-accent/10 rounded text-xs font-bold text-accent flex items-center justify-center">
+                {index + 1}
+              </span>
+              <CategoryBadge category={category} size="xs" />
+            </div>
+          )}
+
           <h4
-            className={`
-            font-roboto font-semibold text-white group-hover:text-[#fcee16] 
-            transition-colors duration-200 leading-tight
-            ${isFirst ? "text-base" : "text-sm"}
-          `}
+            className={`font-roboto font-bold text-foreground group-hover:text-accent transition-colors duration-300 leading-tight ${isFirst ? "text-base" : "text-sm"}`}
           >
             {title}
           </h4>
+
           {isFirst && summary && (
-            <p className="text-gray-400 text-sm leading-relaxed font-open-sans">
+            <p className="text-gray-300 text-sm leading-relaxed font-sans">
               {summary}
             </p>
           )}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs">
-              {!isFirst && <CategoryBadge category={category} size="xs" />}
-              <span className="text-gray-500 font-medium font-open-sans">
-                {author}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-500 font-open-sans">
-              <Clock size={10} className="text-[#fcee16]/70" />
+
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-400 font-medium">{author}</span>
+            <div className="flex items-center gap-1 text-gray-500">
+              <Clock size={10} className="text-accent/70" />
               <span>{time}</span>
             </div>
           </div>
@@ -200,29 +201,42 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   const editorsData = editorsPicks.slice(0, maxEditorsPicks);
 
   return (
-    <aside className={`space-y-8 font-open-sans ${className}`}>
+    <aside className={`space-y-6 ${className}`}>
       {showEditorsPicks && editorsData.length > 0 && (
-        <div className="bg-[#1b1a1b]/60 backdrop-blur-sm border border-default rounded-lg p-5 shadow-2xl">
-          <SectionHeader title={editorsPicksTitle} href={editorsPicksHref} />
+        <div className="bg-gradient-to-b from-background via-background/98 to-background/95 backdrop-blur-xl border border-accent/20 rounded-xl p-5 shadow-xl overflow-hidden">
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-accent/5"></div>
+          </div>
 
-          <div className="space-y-1">
-            {editorsData.map((post, index) => (
-              // Use React.Fragment to group original and duplicated items
-              <React.Fragment key={post.id}>
+          {/* Content */}
+          <div className="relative z-10">
+            <SectionHeader title={editorsPicksTitle} href={editorsPicksHref} />
+
+            <div className="space-y-1">
+              {editorsData.map((post, index) => (
                 <ArticlePreview
+                  key={post.id}
                   post={post}
                   index={index}
                   isFirst={index === 0}
                 />
-              </React.Fragment>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Empty State (remains unchanged) */}
+      {/* Compact Empty State */}
       {showEditorsPicks && editorsPicks.length === 0 && (
-        <div className="text-center py-12">{/* ... empty state JSX ... */}</div>
+        <div className="text-center py-8 bg-background/50 rounded-xl border border-accent/10">
+          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <Star size={20} className="text-accent/50" />
+          </div>
+          <p className="text-gray-400 text-sm font-medium">
+            No editor&apos;s picks available
+          </p>
+        </div>
       )}
     </aside>
   );

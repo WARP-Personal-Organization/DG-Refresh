@@ -11,10 +11,12 @@
     "codegen": "prismic-ts-codegen"
   },
   "dependencies": {
+    "@google-cloud/text-to-speech": "^6.3.1",
     "@prismicio/client": "^7.20.1",
     "@prismicio/helpers": "^2.3.9",
     "@prismicio/next": "^2.0.1",
     "@prismicio/react": "^3.2.1",
+    "framer-motion": "^12.23.19",
     "lucide-react": "^0.540.0",
     "next": "15.4.6",
     "react": "19.1.0",
@@ -22,7 +24,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@slicemachine/adapter-next": "^0.3.83",
+    "@slicemachine/adapter-next": "^0.3.84",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.11",
     "@types/react": "^19",
@@ -30,7 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "prismic-ts-codegen": "^0.1.27",
-    "slice-machine-ui": "^2.18.1",
+    "slice-machine-ui": "^2.18.2",
     "tailwindcss": "^4",
     "tsx": "^4.20.5",
     "typescript": "^5"

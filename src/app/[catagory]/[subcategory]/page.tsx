@@ -429,50 +429,7 @@ export default async function SubCategoryPage({
             </div>
 
             {/* Enhanced Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-8 space-y-8">
-                {/* Editor's Picks */}
-                {editorsPicks.length > 0 && (
-                  <section className="bg-gradient-to-b from-[#1b1a1b] to-black border border-default rounded-lg p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <TrendingUp className="text-[#fcee16]" size={20} />
-                      <h3 className="text-xl font-roboto font-bold text-white">
-                        Editor&apos;s Picks
-                      </h3>
-                    </div>
-
-                    <div className="space-y-6">
-                      {editorsPicks
-                        .slice(0, 5)
-                        .map((article: BlogPostDocument, index: number) => (
-                          <Link
-                            key={article.id}
-                            href={`/blog/${article.uid}`}
-                            className="block group"
-                          >
-                            <div className="flex gap-4">
-                              <span className="flex-shrink-0 w-8 h-8 bg-[#fcee16] text-[#1b1a1b] font-bold rounded-full flex items-center justify-center text-sm">
-                                {index + 1}
-                              </span>
-                              <div className="space-y-2">
-                                <h4 className="text-white group-hover:text-[#fcee16] transition-colors text-sm font-semibold leading-tight font-open-sans">
-                                  {renderText(article.data.title) ||
-                                    "Untitled Article"}
-                                </h4>
-                                <p className="text-gray-400 text-xs">
-                                  {formatDate(article.data.published_date)}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Enhanced Category Stats */}
-              </div>
-            </div>
+            <div className="lg:col-span-1"></div>
           </div>
         </div>
       </div>

@@ -50,7 +50,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
           <div className="lg:col-span-1">
             <article className="h-full">
               <Link href={`/blog/${mainStory.uid}`} className="block group">
-                <h3 className="text-5xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                <h3 className="text-5xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
                   {mainStory.data.title || "Untitled Article"}
                 </h3>
                 <p className="text-gray-300 mt-4 text-base leading-relaxed font-sans">

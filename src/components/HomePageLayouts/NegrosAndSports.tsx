@@ -1,9 +1,10 @@
-import { client } from "../../../lib/prismicio";
+import { PublicationCard } from "@/components/PublicationCard";
 import RightSidebar from "@/components/RightSidebar";
 import type * as prismic from "@prismicio/client";
 import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
+import { client } from "../../../lib/prismicio";
 import type { BlogPostDocument } from "../../../prismicio-types";
 
 interface RegionalStoriesProps {
@@ -19,30 +20,6 @@ const renderText = (richText: prismic.RichTextField): string => {
 };
 
 // Reusable Publication Cards
-export const PublicationCard = ({
-  title,
-  imageUrl,
-  link = "#",
-}: {
-  title: string;
-  imageUrl: string;
-  link?: string;
-}) => (
-  <div className="pt-6">
-    <h3 className="bg-accent rounded-sm text-black text-xs font-roboto font-bold uppercase px-2 py-1 inline-block mb-3">
-      {title}
-    </h3>
-    <Link href={link} className="block group">
-      <Image
-        src={imageUrl}
-        alt={title}
-        width={400}
-        height={520}
-        className="w-full h-auto object-cover transition-opacity duration-300 group-hover:opacity-90"
-      />
-    </Link>
-  </div>
-);
 
 // NOTE: no "use client" — this stays a Server Component and can be async
 export default async function NegrosAndSportsStories({
@@ -114,7 +91,7 @@ export default async function NegrosAndSportsStories({
                     <p className="text-accent text-sm font-medium uppercase font-sans">
                       {mainNegrosStory.data.category || "News"}
                     </p>
-                    <h3 className="text-3xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <h3 className="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainNegrosStory.data.title || "Untitled Article"}
                     </h3>
                   </div>
@@ -178,20 +155,14 @@ export default async function NegrosAndSportsStories({
                 </article>
               ))}
 
-              {/* Publications */}
-              {/* <PublicationCard
-                title="Today's Paper"
-                imageUrl={todayPaperUrl}
-                link="https://dailyguardian.com.ph/todays-paper/"
-              /> */}
-
               <RightSidebar editorsPicks={editorsPicks} />
-
-              <PublicationCard
-                title="Supplement"
-                imageUrl={supplementUrl}
-                link="https://dailyguardian.com.ph/3d-flip-book/supplement/"
-              />
+              <div className="pt-40">
+                <PublicationCard
+                  title="Supplement"
+                  imageUrl={"/Supplement.PNG"}
+                  link="https://dailyguardian.com.ph/3d-flip-book/supplement/"
+                />
+              </div>
             </div>
           </div>
         </div>

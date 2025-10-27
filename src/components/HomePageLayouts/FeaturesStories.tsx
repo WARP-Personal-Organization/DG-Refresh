@@ -56,7 +56,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
               {mainStory && (
                 <article>
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
-                    <h3 className="text-4xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <h3 className="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainStory.data.title || "Untitled Article"}
                     </h3>
                     <p className="text-gray-300 mt-4 text-lg font-sans">
