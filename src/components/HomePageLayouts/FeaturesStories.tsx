@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../../prismicio-types";
+import AnimatedHeadline from "../AnimatedHeadline";
 
 interface FeaturesStoriesProps {
   stories: BlogPostDocument[];
@@ -56,9 +57,9 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
               {mainStory && (
                 <article>
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
-                    <h3 className="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <AnimatedHeadline as="h3" extraClassName="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainStory.data.title || "Untitled Article"}
-                    </h3>
+                    </AnimatedHeadline>
                     <p className="text-gray-300 mt-4 text-lg font-sans">
                       {renderText(mainStory.data.summary)}
                     </p>

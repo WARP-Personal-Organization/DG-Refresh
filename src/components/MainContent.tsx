@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../prismicio-types";
+import AnimatedHeadline from "./AnimatedHeadline";
 
 interface MainContentProps {
   heroPost?: BlogPostDocument;
@@ -57,9 +58,9 @@ const MainContent: React.FC<MainContentProps> = ({
               {heroPost.data.category || "News"}
             </p>
             <Link href={`/blog/${heroPost.uid}`} className="block group">
-              <h1 className="text-2xl text-accent lg:text-3xl font-roboto font-bold leading-snug group-hover:text-accent transition-colors">
+              <AnimatedHeadline as="h1" extraClassName="text-2xl lg:text-3xl font-roboto font-bold leading-snug">
                 {heroPost.data.title}
-              </h1>
+              </AnimatedHeadline>
             </Link>
             <p className="text-base text-gray-300 mt-2 leading-snug font-sans">
               {renderText(heroPost.data.summary)}

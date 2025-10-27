@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { client } from "../../../lib/prismicio";
 import type { BlogPostDocument } from "../../../prismicio-types";
+import AnimatedHeadline from "../AnimatedHeadline";
 
 interface RegionalStoriesProps {
   negrosStories: BlogPostDocument[];
@@ -91,9 +92,9 @@ export default async function NegrosAndSportsStories({
                     <p className="text-accent text-sm font-medium uppercase font-sans">
                       {mainNegrosStory.data.category || "News"}
                     </p>
-                    <h3 className="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <AnimatedHeadline as="h3" extraClassName="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
                       {mainNegrosStory.data.title || "Untitled Article"}
-                    </h3>
+                    </AnimatedHeadline>
                   </div>
                 </Link>
               </article>

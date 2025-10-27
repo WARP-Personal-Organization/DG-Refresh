@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { BlogPostDocument } from "../../../prismicio-types";
+import AnimatedHeadline from "../AnimatedHeadline";
 interface LocalStoriesProps {
   stories: BlogPostDocument[];
   title: string;
@@ -82,9 +83,9 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                     {/* <span className="text-5xl text-gray-500 leading-none font-sans">
                       &quot;
                     </span> */}
-                    <h3 className="text-3xl text-accent font-roboto font-bold -mt-4 transition-colors duration-200 group-hover:text-accent">
+                    <AnimatedHeadline as="h3" extraClassName="text-3xl text-accent font-roboto font-bold -mt-4">
                       {mainStory.data.title || "Untitled Article"}
-                    </h3>
+                    </AnimatedHeadline>
                     {mainStory.data.summary && (
                       <p className="text-gray-300 mt-4 text-sm leading-relaxed font-sans">
                         {renderText(mainStory.data.summary)}
