@@ -70,6 +70,85 @@ type ContentRelationshipFieldWithData<
 }[Exclude<TCustomType[number], string>["id"]];
 
 /**
+ * Item in *blog_post → Tags*
+ */
+export interface BlogPostDocumentDataTagsItem {
+  /**
+   * Tag field in *blog_post → Tags*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: Select a tag
+   * - **API ID Path**: blog_post.tags[].tag
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  tag: prismic.SelectField<
+    | "local-news"
+    | "health-wellness"
+    | "auto-racing"
+    | "fact-check-news"
+    | "cebu-news"
+    | "negroes-news"
+    | "medical-frontiers"
+    | "travel-destinations"
+    | "entertainment"
+    | "film-reviews"
+    | "music-news"
+    | "celebrity-updates"
+    | "lifestyle-trends"
+    | "fashion-style"
+    | "food-dining"
+    | "franchise-business"
+    | "arts-culture"
+    | "therapeutic-arts"
+    | "cultural-events"
+    | "education-news"
+    | "academic-updates"
+    | "university-news"
+    | "student-life"
+    | "teacher-stories"
+    | "environment-news"
+    | "climate-change"
+    | "green-living"
+    | "environmental-awareness"
+    | "editorial-opinion"
+    | "current-events"
+    | "politics-news"
+    | "special-issues"
+    | "foreign-politics"
+    | "fashion-trends"
+    | "fashion-shopping"
+    | "investigative-journalism"
+    | "social-impact"
+    | "community-building"
+    | "advocacy-reporting"
+    | "sports-day"
+    | "farming-agriculture"
+    | "all-sports"
+    | "national-news"
+    | "business-news"
+    | "automotive"
+    | "vehicles"
+    | "transportation"
+    | "technology"
+    | "innovations"
+    | "gadgets"
+    | "company-news"
+    | "staff-updates"
+    | "contact-info"
+  >;
+
+  /**
+   * Tag Priority field in *blog_post → Tags*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.tags[].priority
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  priority: prismic.SelectField<"primary" | "secondary" | "tertiary">;
+}
+
+/**
  * Content for blog_post documents
  */
 interface BlogPostDocumentData {
@@ -126,7 +205,82 @@ interface BlogPostDocumentData {
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/fields/select
    */
-  category: prismic.SelectField<"sports" | "featured" | "news" | "business">;
+  category: prismic.SelectField<
+    | "news"
+    | "feature"
+    | "opinion"
+    | "industries"
+    | "sports"
+    | "business"
+    | "other-pages"
+  >;
+
+  /**
+   * subcategory field in *blog_post*
+   *
+   * - **Field Type**: Select
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.subcategory
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/select
+   */
+  subcategory: prismic.SelectField<
+    | "local"
+    | "health"
+    | "auto-racing"
+    | "fact-check-news"
+    | "cebu"
+    | "negroes"
+    | "health-wellness"
+    | "medical-frontiers"
+    | "travel"
+    | "destinations"
+    | "entertainment"
+    | "film"
+    | "music"
+    | "celebrity-news"
+    | "lifestyle"
+    | "fashion"
+    | "food"
+    | "franchise-living"
+    | "arts-culture"
+    | "therapeutic-arts-stories"
+    | "cultural-events"
+    | "education"
+    | "academic-updates"
+    | "universities"
+    | "students-teachers"
+    | "environment"
+    | "climate-change"
+    | "environmental-awareness"
+    | "green-lifestyles"
+    | "editorial"
+    | "current-events"
+    | "politics"
+    | "special-issues"
+    | "foreign-politics-trends"
+    | "weekly-fashion-trends"
+    | "weekly-fashion-shopping"
+    | "exposer"
+    | "entertainment-social-impact"
+    | "community-building-advocacy-reporting"
+    | "sports-day"
+    | "farm-related-supplies-stories"
+    | "local-news"
+    | "all-sport-games"
+    | "national-news"
+    | "business"
+    | "motoring"
+    | "vehicles"
+    | "transportation"
+    | "techbark"
+    | "innovations-gadgets"
+    | "about-us"
+    | "news-members-staff"
+    | "contact-us"
+    | "company-details-social-platforms"
+    | "pricing-terms-feedback-survey"
+  >;
 
   /**
    * author field in *blog_post*
@@ -186,26 +340,49 @@ interface BlogPostDocumentData {
   editors_pick: prismic.BooleanField;
 
   /**
-   * tags field in *blog_post*
+   * Tags field in *blog_post*
+   *
+   * - **Field Type**: Group
+   * - **Placeholder**: *None*
+   * - **API ID Path**: blog_post.tags[]
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/repeatable-group
+   */
+  tags: prismic.GroupField<Simplify<BlogPostDocumentDataTagsItem>>;
+
+  /**
+   * Estimated Reading Time (minutes) field in *blog_post*
+   *
+   * - **Field Type**: Number
+   * - **Placeholder**: Auto-calculated if left empty
+   * - **API ID Path**: blog_post.reading_time
+   * - **Tab**: Main
+   * - **Documentation**: https://prismic.io/docs/fields/number
+   */
+  reading_time: prismic.NumberField;
+
+  /**
+   * Meta Description field in *blog_post*
    *
    * - **Field Type**: Text
-   * - **Placeholder**: *None*
-   * - **API ID Path**: blog_post.tags
+   * - **Placeholder**: SEO meta description
+   * - **API ID Path**: blog_post.meta_description
    * - **Tab**: Main
    * - **Documentation**: https://prismic.io/docs/fields/text
    */
-  tags: prismic.KeyTextField;
+  meta_description: prismic.KeyTextField;
 
   /**
-   * subcategory field in *blog_post*
+   * Breaking News field in *blog_post*
    *
-   * - **Field Type**: Select
+   * - **Field Type**: Boolean
    * - **Placeholder**: *None*
-   * - **API ID Path**: blog_post.subcategory
+   * - **Default Value**: false
+   * - **API ID Path**: blog_post.is_breaking_news
    * - **Tab**: Main
-   * - **Documentation**: https://prismic.io/docs/fields/select
+   * - **Documentation**: https://prismic.io/docs/fields/boolean
    */
-  subcategory: prismic.SelectField<"localnews" | "Fact First">;
+  is_breaking_news: prismic.BooleanField;
 }
 
 /**
@@ -224,62 +401,7 @@ export type BlogPostDocument<Lang extends string = string> =
     Lang
   >;
 
-/**
- * Content for category documents
- */
-interface CategoryDocumentData {
-  /**
-   * name field in *category*
-   *
-   * - **Field Type**: Text
-   * - **Placeholder**: *None*
-   * - **API ID Path**: category.name
-   * - **Tab**: Main
-   * - **Documentation**: https://prismic.io/docs/fields/text
-   */
-  name: prismic.KeyTextField;
-
-  /**
-   * hasSubcategories field in *category*
-   *
-   * - **Field Type**: Boolean
-   * - **Placeholder**: *None*
-   * - **Default Value**: false
-   * - **API ID Path**: category.hassubcategories
-   * - **Tab**: Main
-   * - **Documentation**: https://prismic.io/docs/fields/boolean
-   */
-  hassubcategories: prismic.BooleanField;
-
-  /**
-   * subcategories field in *category*
-   *
-   * - **Field Type**: Select
-   * - **Placeholder**: *None*
-   * - **API ID Path**: category.subcategories
-   * - **Tab**: Main
-   * - **Documentation**: https://prismic.io/docs/fields/select
-   */
-  subcategories: prismic.SelectField<"1" | "2">;
-}
-
-/**
- * category document from Prismic
- *
- * - **API ID**: `category`
- * - **Repeatable**: `true`
- * - **Documentation**: https://prismic.io/docs/content-modeling
- *
- * @typeParam Lang - Language API ID of the document.
- */
-export type CategoryDocument<Lang extends string = string> =
-  prismic.PrismicDocumentWithUID<
-    Simplify<CategoryDocumentData>,
-    "category",
-    Lang
-  >;
-
-export type AllDocumentTypes = BlogPostDocument | CategoryDocument;
+export type AllDocumentTypes = BlogPostDocument;
 
 declare module "@prismicio/client" {
   interface CreateClient {
@@ -304,8 +426,7 @@ declare module "@prismicio/client" {
     export type {
       BlogPostDocument,
       BlogPostDocumentData,
-      CategoryDocument,
-      CategoryDocumentData,
+      BlogPostDocumentDataTagsItem,
       AllDocumentTypes,
     };
   }

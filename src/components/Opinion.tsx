@@ -1,4 +1,4 @@
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -19,46 +19,6 @@ interface Article {
   slug: string;
 }
 
-// Gold category badge component (matching your existing style)
-const CategoryBadge: React.FC<{ category: string; size?: "sm" | "xs" }> = ({
-  category,
-  size = "xs",
-}) => {
-  const sizeClasses =
-    size === "sm" ? "px-2 py-1 text-xs" : "px-2 py-0.5 text-xs";
-
-  return (
-    <span
-      className={`inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-bold tracking-wide uppercase rounded shadow-lg ${sizeClasses}`}
-    >
-      {category}
-    </span>
-  );
-};
-
-// Section header component (matching your existing style)
-const SectionHeader: React.FC<{
-  title: string;
-  icon: React.ElementType;
-  href?: string;
-}> = ({ title, icon: Icon, href }) => (
-  <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 relative">
-    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
-    <h3 className="flex items-center gap-2 text-lg font-bold text-white font-serif">
-      <Icon size={18} className="text-yellow-400 drop-shadow-sm" />
-      {title}
-    </h3>
-    {href && (
-      <Link
-        href={href}
-        className="text-yellow-400 hover:text-yellow-300 text-sm font-medium flex items-center gap-1 transition-all duration-200 hover:drop-shadow-sm"
-      >
-        More <ChevronRight size={14} />
-      </Link>
-    )}
-  </div>
-);
-
 const OpinionSection: React.FC = () => {
   const featuredArticle: Article = {
     id: "1",
@@ -74,46 +34,39 @@ const OpinionSection: React.FC = () => {
   const sidebarArticles: Article[] = [
     {
       id: "2",
-      title: "The future of remote work",
+      title: "The future of remote work in a post-pandemic world",
       author: { name: "Marcus Johnson" },
       category: "Business",
       slug: "future-remote-work",
     },
     {
       id: "3",
-      title: "The Tech View",
+      title: "Why the tech sector needs new leadership",
       author: { name: "Editorial Board" },
       category: "Editorial",
       slug: "tech-view",
     },
     {
       id: "4",
-      title: "Innovation Insights",
+      title: "Innovation without regulation is dangerous",
       author: { name: "Tech Team" },
       category: "Analysis",
       slug: "innovation-insights",
     },
     {
       id: "5",
-      title: "Market Watch",
+      title: "Market volatility and startup funding",
       author: { name: "Financial Desk" },
       category: "Finance",
       slug: "market-watch",
-    },
-    {
-      id: "6",
-      title: "Future Trends",
-      author: { name: "Research Team" },
-      category: "Research",
-      slug: "future-trends",
     },
   ];
 
   const bottomArticles: Article[] = [
     {
       id: "7",
-      title: "The startup revolution",
-      author: { name: "Alex Rivera", avatar: "/api/placeholder/40/40" },
+      title: "The startup revolution that never came",
+      author: { name: "Alex Rivera" },
       slug: "startup-revolution",
     },
     {
@@ -125,8 +78,8 @@ const OpinionSection: React.FC = () => {
     },
     {
       id: "9",
-      title: "Cryptocurrency in the digital age",
-      author: { name: "David Kim", avatar: "/api/placeholder/40/40" },
+      title: "Cryptocurrency in the digital age: Promise vs reality",
+      author: { name: "David Kim" },
       slug: "cryptocurrency-digital-age",
     },
     {
@@ -143,136 +96,143 @@ const OpinionSection: React.FC = () => {
     },
     {
       id: "12",
-      title: "Blockchain beyond cryptocurrency",
-      author: { name: "Maria Rodriguez", avatar: "/api/placeholder/40/40" },
+      title: "Blockchain beyond cryptocurrency: Real-world applications",
+      author: { name: "Maria Rodriguez" },
       slug: "blockchain-beyond-crypto",
     },
   ];
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-16"></div>
-        <div className="flex items-center justify-center mb-6">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
-          <div className="px-8">
-            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 tracking-wider font-serif">
-              Opinion
-            </h2>
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-yellow-500 to-transparent"></div>
+    <section className="py-12 border-t border-gray-800 bg-[#1b1a1b] font-open-sans">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Clean Section Header */}
+        <div className="mb-12 pb-4 border-b border-gray-800">
+          <h2 className="text-3xl font-roboto font-bold text-white">Opinion</h2>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-12">
-          {/* Featured Article - Takes 3 columns on xl screens */}
-          <div className="xl:col-span-3">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center bg-gradient-to-b from-black via-gray-950 to-black border-2 border-gray-800 hover:border-yellow-500/40 rounded-lg p-8 hover:shadow-xl hover:shadow-yellow-500/10 transition-all duration-300">
-              {/* Left Quote and Text */}
-              <div className="lg:text-right space-y-6">
-                <h2 className="text-2xl md:text-3xl font-bold leading-tight text-white font-serif">
-                  {featuredArticle.title}
-                </h2>
-                <p className="text-gray-300 text-base leading-relaxed">
-                  {featuredArticle.subtitle}
-                </p>
-                <p className="text-yellow-400 font-medium text-lg drop-shadow-sm">
-                  {featuredArticle.author.name}
-                </p>
-              </div>
+        <div className="grid lg:grid-cols-4 gap-8 mb-12">
+          {/* Featured Article - 3 columns */}
+          <div className="lg:col-span-3">
+            <Link
+              href={`/opinion/${featuredArticle.slug}`}
+              className="block group"
+            >
+              <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-gray-800">
+                {/* Content */}
+                <div className="space-y-4">
+                  <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
+                    Opinion
+                  </div>
 
-              {/* Center Image */}
-              <div className="relative">
-                <div className="aspect-[4/5] relative rounded-lg overflow-hidden border border-gray-700 hover:border-yellow-500/50 transition-all duration-200">
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-black/60 z-10"></div>
-                  <Image
-                    src={featuredArticle.image || "/api/placeholder/400/500"}
-                    alt={featuredArticle.title}
-                    fill
-                    className="object-cover"
-                  />
+                  <h1 className="text-3xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
+                    {featuredArticle.title}
+                  </h1>
+
+                  <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
+                    {featuredArticle.subtitle}
+                  </p>
+
+                  <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
+                    <span className="font-medium">
+                      {featuredArticle.author.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Right Quote */}
-              <div className="lg:text-left"></div>
-            </div>
+                {/* Image */}
+                {featuredArticle.image && (
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={featuredArticle.image}
+                      alt={featuredArticle.title}
+                      fill
+                      className="object-cover group-hover:opacity-90 transition-opacity duration-200"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  </div>
+                )}
+              </article>
+            </Link>
           </div>
 
-          {/* Sidebar - Takes 1 column on xl screens */}
-          <div className="xl:col-span-1">
-            <div className="bg-gradient-to-b from-black via-gray-950 to-black border-2 border-gray-800 hover:border-yellow-500/40 rounded-lg p-6 hover:shadow-xl hover:shadow-yellow-500/10 transition-all duration-300">
-              <SectionHeader title="More Opinion" icon={Star} href="/opinion" />
-              <div className="space-y-4">
-                {sidebarArticles.map((article) => (
+          {/* Sidebar - 1 column */}
+          <div className="lg:col-span-1 border-l border-gray-800 pl-8">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-roboto font-bold text-white">
+                  More Opinion
+                </h3>
+                <Link
+                  href="/opinion"
+                  className="text-[#fcee16] hover:text-[#fcee16]/80 text-sm flex items-center gap-1 transition-colors duration-200 font-open-sans"
+                >
+                  More <ChevronRight size={14} />
+                </Link>
+              </div>
+
+              {sidebarArticles.map((article) => (
+                <article
+                  key={article.id}
+                  className="pb-4 border-b border-gray-800/50 last:border-b-0"
+                >
                   <Link
-                    key={article.id}
                     href={`/opinion/${article.slug}`}
                     className="block group"
                   >
-                    <div className="p-3 rounded-lg bg-black hover:bg-black transition-all duration-300 border border-gray-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/10">
-                      {article.category && (
-                        <div className="mb-2">
-                          <CategoryBadge
-                            category={article.category}
-                            size="xs"
-                          />
-                        </div>
-                      )}
-                      <h4 className="font-semibold text-white text-sm leading-tight mb-2 group-hover:text-yellow-200 transition-colors duration-200 line-clamp-2 drop-shadow-sm">
-                        {article.title}
-                      </h4>
-                      <p className="text-yellow-400 font-medium text-xs">
-                        {article.author.name}
-                      </p>
+                    {article.category && (
+                      <div className="text-[#fcee16] text-xs font-medium uppercase tracking-wide mb-2 font-open-sans">
+                        {article.category}
+                      </div>
+                    )}
+
+                    <h4 className="font-roboto font-semibold text-white text-sm leading-tight mb-2 group-hover:text-[#fcee16] transition-colors duration-200">
+                      {article.title}
+                    </h4>
+
+                    <div className="text-xs text-gray-500 font-open-sans">
+                      {article.author.name}
                     </div>
                   </Link>
-                ))}
-              </div>
+                </article>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Bottom Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-gray-800">
           {bottomArticles.map((article) => (
-            <Link
-              key={article.id}
-              href={`/opinion/${article.slug}`}
-              className="block group"
-            >
-              <article className="bg-black hover:bg-black transition-all duration-300 border border-gray-800 hover:border-yellow-500/30 hover:shadow-lg hover:shadow-yellow-500/10 rounded-lg p-4 relative overflow-hidden">
-                {/* Top accent line */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-500"></div>
-
-                <div className="text-3xl text-yellow-400 font-serif mb-3 drop-shadow-sm">
+            <article key={article.id} className="group">
+              <Link href={`/opinion/${article.slug}`} className="block">
+                {/* Quote marker */}
+                <div className="text-4xl text-[#fcee16] font-roboto mb-3 leading-none">
                   &quot;
                 </div>
-                <h3 className="font-bold text-base mb-4 leading-tight text-white group-hover:text-yellow-200 transition-colors duration-200 drop-shadow-sm font-serif">
+
+                <h3 className="font-roboto font-bold text-lg text-white leading-tight mb-4 group-hover:text-[#fcee16] transition-colors duration-200">
                   {article.title}
                 </h3>
-                <div className="flex items-center gap-3">
-                  {article.author.avatar && (
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-700 group-hover:border-yellow-500/50">
-                      <Image
-                        src={article.author.avatar}
-                        alt={article.author.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  <p className="text-yellow-400 font-medium text-sm drop-shadow-sm">
-                    {article.author.name}
-                  </p>
+
+                <div className="text-sm text-gray-500 border-t border-gray-800/50 pt-3 font-open-sans">
+                  {article.author.name}
                 </div>
-              </article>
-            </Link>
+              </Link>
+            </article>
           ))}
         </div>
+
+        {/* View All Link */}
+        <div className="text-center mt-12 pt-8 border-t border-gray-800">
+          <Link
+            href="/opinion"
+            className="inline-block px-6 py-3 text-[#fcee16] hover:text-[#fcee16]/80 font-medium transition-colors duration-200 border border-[#fcee16] hover:border-[#fcee16]/80 rounded font-open-sans"
+          >
+            View All Opinion
+          </Link>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
