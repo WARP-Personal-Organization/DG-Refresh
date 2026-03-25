@@ -1,4 +1,4 @@
-("use client");
+"use client";
 
 import { Search, Calendar, Tag, Clock, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -27,7 +27,7 @@ export default function SearchResults({ posts }: SearchResultsProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const initialQuery = searchParams.get("q") || "";
+  const initialQuery = searchParams?.get("q") || "";
 
   useEffect(() => {
     if (initialQuery) {
