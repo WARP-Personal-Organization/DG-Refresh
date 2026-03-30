@@ -34,7 +34,7 @@ const renderRichTextAsText = (
   }
 };
 
-// Helper function to format time ago
+// Helper function to format time ago - Updated for newspaper style
 const formatTimeAgo = (dateString: string | null): string => {
   if (!dateString) return "";
   const date = new Date(dateString);

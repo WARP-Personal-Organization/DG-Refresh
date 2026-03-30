@@ -412,6 +412,60 @@ export default async function BlogPost({ params }: BlogPageProps) {
           />
         </div>
 
+        {/* Article Meta Information */}
+        <div className="mt-8 p-6 bg-[#1b1a1b]/80 rounded-lg border border-gray-800">
+          <h3 className="text-lg font-bold text-white mb-4 font-roboto">
+            Article Information
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-open-sans">Category:</span>
+                <span className="text-white capitalize font-open-sans">
+                  {post.data.category || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-open-sans">
+                  Subcategory:
+                </span>
+                <span className="text-white capitalize font-open-sans">
+                  {post.data.subcategory?.replace(/-/g, " ") || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-open-sans">
+                  Reading Time:
+                </span>
+                <span className="text-white font-open-sans">{readingTime}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-open-sans">Published:</span>
+                <span className="text-white font-open-sans">{publishDate}</span>
+              </div>
+              {updateDate && updateDate !== publishDate && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400 font-open-sans">Updated:</span>
+                  <span className="text-white font-open-sans">
+                    {updateDate}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-400 font-open-sans">Tags:</span>
+                <span className="text-white font-open-sans">
+                  {postTags.length}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* COMMENT SECTION - Using post.uid as the unique identifier */}
+        <CommentSection postId={post.uid} />
+
         {/* Share Section */}
         <div className="mt-12 pt-8 border-t border-default">
           <div className="space-y-3">

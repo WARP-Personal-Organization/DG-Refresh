@@ -145,7 +145,7 @@ const NavigationBar: React.FC = () => {
               {item.dropdown && (
                 <div
                   className={`
-                  absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 
+                  absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56
                   bg-[#1a1a1a] border-2 border-[#ffe600] rounded-lg shadow-xl shadow-[#ffe600]/20
                   transition-all duration-300 ease-out group
                   ${
