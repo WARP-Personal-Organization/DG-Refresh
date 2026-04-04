@@ -2,6 +2,7 @@
 import Header from "@/components/Header";
 import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
 import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
+import HubAndSpokeSection from "@/components/HomePageLayouts/HubAndSpokeSection";
 import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
 import LocalStories from "@/components/HomePageLayouts/LocalStories";
 import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports";
@@ -180,6 +181,7 @@ export default async function Home() {
           </div>
         </div>
         <TopStories title={"Top Stories"} stories={featuredPicks} />
+        <HubAndSpokeSection />
         <LocalStories title={"LOCAL"} stories={localPicks} />
         <NegrosAndSportsStories
           negrosTitle={"NEGROS"}
