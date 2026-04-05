@@ -68,8 +68,8 @@ export default function HubAndSpokeSection() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-gray-300">
-                Explore in-depth coverage, community initiatives, and special
-                projects from Daily Guardian.
+                Premium automotive stories—from luxury cars and performance
+                builds to vintage icons and modern driving culture.
               </p>
 
               <span className="mt-4 inline-block text-sm font-semibold text-yellow-400">
