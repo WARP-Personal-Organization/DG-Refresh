@@ -54,7 +54,7 @@ export default function HubAndSpokeSection() {
 
           {/* DG DRIVE */}
           <Link
-            href="/dg-drive"
+            href="/dgdrive-site"
             className="group flex h-full flex-col overflow-hidden rounded-lg border border-yellow-500/30 bg-[#111111] transition-all duration-300 hover:border-yellow-400"
           >
             {/* TEXT TOP */}

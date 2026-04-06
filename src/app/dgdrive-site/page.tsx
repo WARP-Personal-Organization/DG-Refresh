@@ -3,15 +3,29 @@
 import { ArrowRight, Calendar, ChevronDown, Menu, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi';
 import { ImageWithFallback } from './ImageWithFallback';
 
 function Header() {
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
+
   const router = useRouter();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,40 +37,44 @@ function Header() {
   };
 
   return (
-    <header className="border-b border-gray-200 bg-white shadow-sm">
+    <header className={`sticky top-0 z-50 border-b bg-white/95 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'border-gray-200 shadow-lg' : 'border-gray-200 shadow-sm'}`}>
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between py-4">
+
+          {/* Logo */}
           <div className="flex items-center gap-12">
-            <Link href="/" className="flex flex-col">
-              <span className="text-2xl font-bold tracking-tight text-[#fbd203]">DG DRIVE</span>
+            <Link href="/" className="flex flex-col group">
+              <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent transition-all group-hover:scale-105">DG DRIVE</span>
               <span className="text-xs text-gray-500 tracking-wider uppercase">by Daily Guardian</span>
             </Link>
 
-            <nav className={`hidden md:flex items-center gap-8 ${isSearchOpen ? 'md:hidden lg:flex' : ''}`}>
-              <Link href="/" className="text-sm uppercase tracking-wider text-gray-700 hover:text-[#fbd203] transition-colors">Home</Link>
-              <Link href="/reviews" className="text-sm uppercase tracking-wider text-gray-700 hover:text-[#fbd203] transition-colors">Reviews</Link>
+            {/* Desktop Navigation */}
+            <nav className={`hidden md:flex items-center gap-8 ${isSearchOpen ? 'lg:flex md:hidden' : ''}`}>
+              <Link href="/" className="text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 relative after:absolute after:bottom-[-8px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-yellow-400 after:via-yellow-500 after:to-yellow-600 hover:after:w-full after:transition-all after:duration-300">Home</Link>
+              <Link href="/reviews" className="text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 relative after:absolute after:bottom-[-8px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-yellow-400 after:via-yellow-500 after:to-yellow-600 hover:after:w-full after:transition-all after:duration-300">Reviews</Link>
 
+              {/* Desktop Categories Dropdown */}
               <div
                 className="relative"
                 onMouseEnter={() => setIsCategoriesOpen(true)}
                 onMouseLeave={() => setIsCategoriesOpen(false)}
               >
-                <button className="flex items-center gap-1 text-sm uppercase tracking-wider text-gray-700 hover:text-[#fbd203] transition-colors">
+                <button className="flex items-center gap-1 text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 relative after:absolute after:bottom-[-8px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-yellow-400 after:via-yellow-500 after:to-yellow-600 hover:after:w-full after:transition-all after:duration-300">
                   Categories
-                  <ChevronDown className="w-3 h-3" />
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isCategoriesOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isCategoriesOpen && (
-                  <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 min-w-[200px] shadow-xl z-50 rounded-lg overflow-hidden">
+                  <div className="absolute top-full left-0 mt-2 bg-white/95 backdrop-blur-md border border-gray-200 min-w-[200px] shadow-2xl z-50 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                     <Link
                       href="/categories/family-cars"
-                      className="block px-6 py-3 text-sm uppercase tracking-wider text-gray-700 hover:bg-[#fbd203] hover:text-white transition-colors border-b border-gray-100"
+                      className="block px-6 py-3 text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:text-white transition-all duration-300 border-b border-gray-100 transform hover:translate-x-1"
                     >
                       Family Cars
                     </Link>
                     <Link
                       href="/categories/sports-cars"
-                      className="block px-6 py-3 text-sm uppercase tracking-wider text-gray-700 hover:bg-[#fbd203] hover:text-white transition-colors"
+                      className="block px-6 py-3 text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:text-white transition-all duration-300 transform hover:translate-x-1"
                     >
                       Sports Cars
                     </Link>
@@ -64,25 +82,28 @@ function Header() {
                 )}
               </div>
 
-              <Link href="/comparisons" className="text-sm uppercase tracking-wider text-gray-700 hover:text-[#fbd203] transition-colors">Comparisons</Link>
-              <Link href="/stories" className="text-sm uppercase tracking-wider text-gray-700 hover:text-[#fbd203] transition-colors">Stories</Link>
+              <Link href="/comparisons" className="text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 relative after:absolute after:bottom-[-8px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-yellow-400 after:via-yellow-500 after:to-yellow-600 hover:after:w-full after:transition-all after:duration-300">Comparisons</Link>
+              <Link href="/stories" className="text-sm uppercase tracking-wider text-gray-700 hover:bg-gradient-to-r hover:from-yellow-400 hover:via-yellow-500 hover:to-yellow-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 relative after:absolute after:bottom-[-8px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-yellow-400 after:via-yellow-500 after:to-yellow-600 hover:after:w-full after:transition-all after:duration-300">Stories</Link>
             </nav>
           </div>
 
+          {/* Right Side Actions (Search & Mobile Toggle) */}
           <div className="flex items-center gap-4">
+
+            {/* Search Bar / Button */}
             {isSearchOpen ? (
               <form onSubmit={handleSearch} className="flex items-center animate-in fade-in slide-in-from-right-4 duration-300">
                 <input
                   type="text"
-                  placeholder="Search cars, reviews..."
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-l-md focus:outline-none focus:border-[#fbd203] text-gray-800 w-48 md:w-64"
+                  placeholder="Search reviews..."
+                  className="px-4 py-1.5 text-sm border-2 border-r-0 border-gray-200 rounded-l-full focus:outline-none focus:border-yellow-400 text-gray-800 w-48 md:w-64 transition-colors bg-gray-50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
                 />
                 <button
                   type="submit"
-                  className="p-1.5 bg-[#fbd203] text-white border border-[#fbd203] rounded-r-md hover:bg-yellow-500 transition-colors"
+                  className="p-1.5 px-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white border-2 border-l-0 border-yellow-400 hover:border-yellow-500 rounded-r-full hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-sm"
                 >
                   <Search className="w-5 h-5" />
                 </button>
@@ -97,18 +118,89 @@ function Header() {
             ) : (
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-gray-700 hover:text-[#fbd203] transition-colors"
+                className="p-2 text-gray-700 hover:text-yellow-500 transition-all duration-300 hover:scale-110 hover:rotate-12"
               >
                 <Search className="w-5 h-5" />
               </button>
             )}
 
-            <button className="p-2 text-gray-700 hover:text-[#fbd203] transition-colors md:hidden">
-              <Menu className="w-6 h-6" />
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-700 hover:text-yellow-500 transition-all duration-300 hover:scale-110 md:hidden"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl animate-in slide-in-from-top-2">
+          <nav className="flex flex-col px-6 py-4 space-y-4">
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm uppercase tracking-wider text-gray-700 hover:text-yellow-500 font-medium"
+            >
+              Home
+            </Link>
+            <Link
+              href="/reviews"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm uppercase tracking-wider text-gray-700 hover:text-yellow-500 font-medium"
+            >
+              Reviews
+            </Link>
+
+            {/* Mobile Categories Accordion */}
+            <div className="flex flex-col">
+              <button
+                onClick={() => setIsMobileCategoriesOpen(!isMobileCategoriesOpen)}
+                className="flex items-center justify-between text-sm uppercase tracking-wider text-gray-700 hover:text-yellow-500 font-medium w-full text-left"
+              >
+                Categories
+                <ChevronDown className={`w-4 h-4 transition-transform ${isMobileCategoriesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isMobileCategoriesOpen && (
+                <div className="flex flex-col pl-4 mt-3 space-y-3 border-l-2 border-yellow-400">
+                  <Link
+                    href="/categories/family-cars"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm uppercase tracking-wider text-gray-600 hover:text-yellow-500"
+                  >
+                    Family Cars
+                  </Link>
+                  <Link
+                    href="/categories/sports-cars"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm uppercase tracking-wider text-gray-600 hover:text-yellow-500"
+                  >
+                    Sports Cars
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/comparisons"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm uppercase tracking-wider text-gray-700 hover:text-yellow-500 font-medium"
+            >
+              Comparisons
+            </Link>
+            <Link
+              href="/stories"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm uppercase tracking-wider text-gray-700 hover:text-yellow-500 font-medium"
+            >
+              Stories
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
@@ -120,34 +212,37 @@ function Hero() {
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1639922195938-611119f7f307?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUb3lvdGElMjBGb3J0dW5lciUyMFNVViUyMFBoaWxpcHBpbmVzJTIwcm9hZHxlbnwxfHx8fDE3NzUxODkwMzl8MA&ixlib=rb-4.1.0&q=80&w=1080"
           alt="Toyota Fortuner on Philippine road"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover scale-105 animate-fade-in"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-6 h-full flex items-end pb-16">
         <div className="max-w-3xl space-y-6">
-          <div className="inline-block px-4 py-2 border-2 border-[#fbd203] bg-[#fbd203]/20 backdrop-blur-sm rounded-lg">
-            <span className="text-[#fbd203] uppercase tracking-widest text-sm font-bold">Feature</span>
+          <div className="inline-block px-4 py-2 border-2 border-yellow-500 bg-gradient-to-r from-yellow-400/20 via-yellow-500/20 to-yellow-600/20 backdrop-blur-sm rounded-lg animate-fade-up">
+            <span className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent uppercase tracking-widest text-sm font-bold">Feature</span>
           </div>
-          <h1 className="text-4xl md:text-6xl leading-tight text-white font-bold">
+          <h1 className="text-4xl md:text-6xl leading-tight text-white font-bold animate-fade-up delay-100">
             Drive Stories That Matter
           </h1>
-          <p className="text-lg md:text-xl text-white/90 leading-relaxed">
+          <p className="text-lg md:text-xl text-white/90 leading-relaxed animate-fade-up delay-200">
             Finding the Perfect Family SUV for Philippine Roads
           </p>
-          <div className="flex items-center gap-4 pt-4">
+          <div className="flex items-center gap-4 pt-4 animate-fade-up delay-300">
             <span className="text-sm text-white/70">By Carlos Mendoza • 8 min read</span>
           </div>
-          <div className="flex items-center gap-4">
+
+
+          <div className="flex items-center gap-4 animate-fade-up delay-400">
             <Link
               href="/dgdrive-site/reviews/fortuner-2026"
-              className="px-8 py-3 border-2 border-[#fbd203] text-[#fbd203] hover:bg-[#fbd203] hover:text-white transition-all uppercase tracking-wider text-sm font-bold flex items-center gap-2 group rounded-lg"
+              className="group px-8 py-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white hover:shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 uppercase tracking-wider text-sm font-bold flex items-center gap-2 rounded-lg hover:scale-105"
             >
               Read Review
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform duration-300" />
             </Link>
           </div>
+
         </div>
       </div>
     </section>
@@ -586,14 +681,13 @@ function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>© 2026 DG Drive. A sub-brand of Daily Guardian. All rights reserved.</p>
-          <p className="uppercase tracking-wider">Powered by automotive excellence</p>
         </div>
       </div>
     </footer>
   );
 }
 
-// 3. THIS IS THE MAIN EXPORT THAT RENDERS EVERYTHING
+
 export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
