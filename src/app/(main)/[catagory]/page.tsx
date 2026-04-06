@@ -1,8 +1,8 @@
 import { createClient } from "@/prismicio";
 import * as prismic from "@prismicio/client";
 import { notFound } from "next/navigation";
-import { BlogPostDocument } from "../../../prismicio-types";
-import CategoryPageComponent from "../../components/CategoryPage";
+import { BlogPostDocument } from "../../../../prismicio-types";
+import CategoryPageComponent from "../../../components/CategoryPage";
 
 // FIXED: Changed to Promise type for Next.js 15+
 type Props = {

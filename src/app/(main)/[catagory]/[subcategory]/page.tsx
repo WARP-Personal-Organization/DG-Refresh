@@ -1,7 +1,7 @@
 import {
   formatSubcategoryName,
   slugToSubcategory,
-} from "@/app/[catagory]/[subcategory]/types";
+} from "@/app/(main)/[catagory]/[subcategory]/types";
 import { createClient } from "@/prismicio";
 import * as prismic from "@prismicio/client";
 import {
@@ -16,7 +16,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { BlogPostDocument } from "../../../../prismicio-types";
+import type { BlogPostDocument } from "../../../../../prismicio-types";
 
 // FIXED: Changed to Promise type for Next.js 15+
 type Params = Promise<{ subcategory: string }>;

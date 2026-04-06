@@ -21,6 +21,9 @@
 .border-default {
   border-color: var(--border-color) !important;
 }
+html {
+  background-color: #1b1a1b;
+}
 body {
   background: var(--background);
   color: var(--foreground);

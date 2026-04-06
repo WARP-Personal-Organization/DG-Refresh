@@ -1,12 +1,12 @@
 "use client";
 
-import { Search, Calendar, Tag, Clock, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import * as prismicH from "@prismicio/helpers";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import { ArrowLeft, Calendar, Search, Tag } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { BlogPostDocument } from "../../../../prismicio-types";
 
 interface SearchResult extends BlogPostDocument {
   relevanceScore: number;

@@ -12,11 +12,11 @@ import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
-import { client } from "../../lib/prismicio";
+import { client } from "../../../lib/prismicio";
 import type {
   AuthorOpinionDocument,
   BlogPostDocument,
-} from "../../prismicio-types";
+} from "../../../prismicio-types";
 import "./globals.css";
 export default async function Home() {
   try {

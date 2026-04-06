@@ -21,11 +21,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { client } from "../../../../lib/prismicio";
+import { client } from "../../../../../lib/prismicio";
 import type {
   BlogPostDocument,
   BlogPostDocumentDataTagsItem,
-} from "../../../../prismicio-types";
+} from "../../../../../prismicio-types";
 
 // FIXED: Proper interface for params (Next.js 15+ compatibility)
 interface BlogPageProps {
