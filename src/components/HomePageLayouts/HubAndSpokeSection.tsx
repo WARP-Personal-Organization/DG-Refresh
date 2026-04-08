@@ -7,16 +7,15 @@ export default function HubAndSpokeSection() {
         {/* HEADER */}
         <div className="mb-8">
           <p className="text-xs font-semibold tracking-[0.25em] text-yellow-400 uppercase">
-            Special Features
+            Daily Guardian Storylines
           </p>
 
           <h2 className="mt-2 text-3xl font-bold text-white">
-            Explore Daily Guardian
+            Discover Our Stories
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm text-gray-300">
-            Curated sections featuring stories, destinations, and special
-            coverage across Western Visayas.
+            Curated storylines featuring local culture, destinations, and special coverage across Western Visayas.
           </p>
         </div>
 
@@ -36,7 +35,7 @@ export default function HubAndSpokeSection() {
             {/* TEXT BOTTOM */}
             <div className="flex flex-1 flex-col p-6">
               <p className="text-xs uppercase tracking-[0.2em] text-yellow-400">
-                Feature
+                Storyline 1
               </p>
 
               <h3 className="mt-2 text-2xl font-bold text-white transition group-hover:text-yellow-300">
@@ -62,7 +61,7 @@ export default function HubAndSpokeSection() {
             {/* TEXT TOP */}
             <div className="flex flex-1 flex-col p-6">
               <p className="text-xs uppercase tracking-[0.2em] text-yellow-400">
-                Special Project
+                Storyline 2
               </p>
 
               <h3 className="mt-2 text-2xl font-bold text-white transition group-hover:text-yellow-300">
