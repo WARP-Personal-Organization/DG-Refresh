@@ -23,7 +23,9 @@ export default function HubAndSpokeSection() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* FOOD MAPS */}
           <Link
-            href="/food-maps"
+            href="https://food-maps-revamp.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group flex h-full flex-col overflow-hidden rounded-lg border border-yellow-500/30 bg-[#111111] transition-all duration-300 hover:border-yellow-400"
           >
             {/* IMAGE TOP */}
