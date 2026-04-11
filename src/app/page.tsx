@@ -13,17 +13,18 @@ import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
-import { getAllAuthors, getAllPosts } from "../../lib/wordpress";
+import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
+import { getAllPosts } from "../../lib/wordpress";
 import type { Post } from "../../lib/wordpress";
 import "./globals.css";
 
 export default async function Home() {
   try {
     // Fetch all posts from WordPress REST API
-    const posts: Post[] = await getAllPosts();
-
-    // Fetch authors for the Opinion/Voices section
-    const authors = await getAllAuthors().catch(() => []);
+    const [posts, youtubeVideos]: [Post[], Awaited<ReturnType<typeof getChannelVideos>>] = await Promise.all([
+      getAllPosts(),
+      getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
+    ]);
 
     if (!posts || posts.length === 0) {
       return (
@@ -115,6 +116,14 @@ export default async function Home() {
           new Date(a.data.published_date).getTime()
       );
 
+    const voicesPicks = posts
+      .filter((p) => p.data.category === "voices" || p.data.category === "opinion")
+      .sort(
+        (a, b) =>
+          new Date(b.data.published_date).getTime() -
+          new Date(a.data.published_date).getTime()
+      );
+
     // Hero / featured post fallback: sticky → featured → latest
     const heroPost =
       breakingNews[0] || featuredPicks[0] || localPicks[0] || posts[0];
@@ -156,8 +165,8 @@ export default async function Home() {
           nationStories={nationalPicks}
         />
         <EditorialStories title={"EDITORIAL"} stories={editorialPicks} />
-        <OpinionSection authors={authors} />
-        <EnhancedVideoSection />
+        <OpinionSection posts={voicesPicks} />
+        <EnhancedVideoSection videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS} />
       </div>
     );
   } catch (err) {

@@ -128,6 +128,8 @@ const CATEGORY_MAP: Record<string, string> = {
   feature: "feature",
   initiatives: "initiatives",
   opinion: "opinion",
+  voices: "voices",
+  visons: "voices",
   editorial: "news",
   entertainment: "feature",
   lifestyle: "feature",

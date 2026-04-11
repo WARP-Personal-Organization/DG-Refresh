@@ -1,17 +1,25 @@
-import { ChevronRight } from "lucide-react";
+import { Calendar, Clock, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { Author } from "../../lib/wordpress";
+import type { Post } from "../../lib/wordpress";
 
 interface OpinionSectionProps {
-  authors?: Author[];
+  posts?: Post[];
 }
 
-const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
-  const featuredAuthor = authors[0];
-  const sidebarAuthors = authors.slice(1, 5);
-  const bottomAuthors = authors.slice(5, 11);
+const formatDate = (dateString: string): string => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
+  const featured = posts[0];
+  const rest = posts.slice(1, 7);
 
   return (
     <section className="py-12 border-default bg-[#1b1a1b] font-open-sans">
@@ -20,180 +28,92 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
           <h2 className="text-3xl font-roboto font-bold text-white">VOICES</h2>
         </div>
 
-        {authors.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No authors available.</p>
+            <p className="text-gray-400 text-lg">No articles available.</p>
           </div>
         ) : (
-          <>
-            <div className="grid lg:grid-cols-4 gap-8 mb-12">
-              {/* Featured Author - 3 columns */}
-              {featuredAuthor && (
-                <div className="lg:col-span-3">
-                  <Link
-                    href={`/author/${featuredAuthor.uid}`}
-                    className="block group"
-                  >
-                    <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-default">
-                      <div className="space-y-4">
-                        <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
-                          Featured Contributor
-                        </div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Featured article - takes 2 columns */}
+            {featured && (
+              <Link href={`/blog/${featured.uid}`} className="lg:col-span-2 block group">
+                <article className="h-full flex flex-col">
+                  {featured.data.featured_image?.url && (
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-4">
+                      <Image
+                        src={featured.data.featured_image.url}
+                        alt={featured.data.featured_image.alt || featured.data.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 1024px) 100vw, 66vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    </div>
+                  )}
+                  <div className="space-y-3">
+                    <span className="text-[#fcee16] text-xs font-bold uppercase tracking-widest">
+                      Featured
+                    </span>
+                    <h3 className="text-2xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
+                      {featured.data.title}
+                    </h3>
+                    {featured.data.summary && (
+                      <p className="text-gray-400 leading-relaxed line-clamp-3">
+                        {featured.data.summary}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-800">
+                      <span className="flex items-center gap-1">
+                        <User size={12} className="text-[#fcee16]" />
+                        {featured.data.author || "Staff"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar size={12} className="text-[#fcee16]" />
+                        {formatDate(featured.data.published_date)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} className="text-[#fcee16]" />
+                        {featured.data.reading_time} min read
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            )}
 
-                        <h1 className="text-3xl font-roboto font-bold text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
-                          {featuredAuthor.data.name}
-                        </h1>
-
-                        {featuredAuthor.data.title && (
-                          <div className="text-lg text-[#fcee16] font-medium font-open-sans">
-                            {featuredAuthor.data.title}
-                          </div>
-                        )}
-
-                        {featuredAuthor.data.bio && (
-                          <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
-                            {featuredAuthor.data.bio}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
-                          {featuredAuthor.data.email && (
-                            <span className="font-medium">
-                              {featuredAuthor.data.email}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {featuredAuthor.data.avatar?.url && (
-                        <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+            {/* Sidebar list */}
+            {rest.length > 0 && (
+              <div className="border-l border-gray-800 pl-8 space-y-6">
+                {rest.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.uid}`} className="block group">
+                    <article className="flex gap-3 pb-6 border-b border-gray-800 last:border-b-0">
+                      {post.data.featured_image?.url && (
+                        <div className="relative w-20 h-16 flex-shrink-0 overflow-hidden rounded">
                           <Image
-                            src={featuredAuthor.data.avatar.url}
-                            alt={
-                              featuredAuthor.data.avatar.alt ||
-                              featuredAuthor.data.name ||
-                              "Author avatar"
-                            }
+                            src={post.data.featured_image.url}
+                            alt={post.data.featured_image.alt || post.data.title}
                             fill
-                            className="object-cover group-hover:opacity-90 transition-opacity duration-200"
-                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="80px"
                           />
                         </div>
                       )}
-                    </article>
-                  </Link>
-                </div>
-              )}
-
-              {/* Sidebar - 1 column */}
-              {sidebarAuthors.length > 0 && (
-                <div className="lg:col-span-1 border-l border-default pl-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-roboto font-bold text-white">
-                        More Contributors
-                      </h3>
-                      <Link
-                        href="/authors"
-                        className="text-[#fcee16] hover:text-[#fcee16]/80 text-sm flex items-center gap-1 transition-colors duration-200 font-open-sans"
-                      >
-                        All <ChevronRight size={14} />
-                      </Link>
-                    </div>
-
-                    {sidebarAuthors.map((author) => (
-                      <article
-                        key={author.id}
-                        className="pb-4 border-b border-default last:border-b-0"
-                      >
-                        <Link
-                          href={`/author/${author.uid}`}
-                          className="block group"
-                        >
-                          <div className="flex items-start gap-3">
-                            {author.data.avatar?.url && (
-                              <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                                <Image
-                                  src={author.data.avatar.url}
-                                  alt={author.data.name || "Author avatar"}
-                                  fill
-                                  className="object-cover"
-                                  sizes="48px"
-                                />
-                              </div>
-                            )}
-
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-roboto font-semibold text-white text-sm leading-tight mb-1 group-hover:text-[#fcee16] transition-colors duration-200">
-                                {author.data.name}
-                              </h4>
-
-                              {author.data.title && (
-                                <div className="text-xs text-[#fcee16] font-medium mb-1 font-open-sans">
-                                  {author.data.title}
-                                </div>
-                              )}
-
-                              {author.data.bio && (
-                                <p className="text-xs text-gray-500 font-open-sans line-clamp-2">
-                                  {author.data.bio.substring(0, 80)}...
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </Link>
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Authors Grid */}
-            {bottomAuthors.length > 0 && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-default">
-                {bottomAuthors.map((author) => (
-                  <article key={author.id} className="group">
-                    <Link href={`/author/${author.uid}`} className="block">
-                      <div className="text-center space-y-4">
-                        {author.data.avatar?.url && (
-                          <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden">
-                            <Image
-                              src={author.data.avatar.url}
-                              alt={author.data.name || "Author avatar"}
-                              fill
-                              className="object-cover group-hover:opacity-90 transition-opacity duration-200"
-                              sizes="80px"
-                            />
-                          </div>
-                        )}
-
-                        <h3 className="font-roboto font-bold text-lg text-white leading-tight group-hover:text-[#fcee16] transition-colors duration-200">
-                          {author.data.name}
-                        </h3>
-
-                        {author.data.title && (
-                          <div className="text-sm text-[#fcee16] font-medium font-open-sans">
-                            {author.data.title}
-                          </div>
-                        )}
-
-                        {author.data.bio && (
-                          <p className="text-sm text-gray-400 font-open-sans line-clamp-3">
-                            {author.data.bio}
-                          </p>
-                        )}
-
-                        <div className="text-xs text-gray-500 border-t border-default pt-3 font-open-sans">
-                          View Profile
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h4 className="text-sm font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-snug line-clamp-3">
+                          {post.data.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span>{post.data.author || "Staff"}</span>
+                          <span>·</span>
+                          <span>{formatDate(post.data.published_date)}</span>
                         </div>
                       </div>
-                    </Link>
-                  </article>
+                    </article>
+                  </Link>
                 ))}
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </section>
