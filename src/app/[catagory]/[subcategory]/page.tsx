@@ -1,9 +1,9 @@
+export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+
 import {
   formatSubcategoryName,
   slugToSubcategory,
 } from "@/app/[catagory]/[subcategory]/types";
-import { createClient } from "@/prismicio";
-import * as prismic from "@prismicio/client";
 import {
   ArrowLeft,
   Calendar,
@@ -16,50 +16,14 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { BlogPostDocument } from "../../../../prismicio-types";
+import { getAllPosts } from "../../../../lib/wordpress";
+import type { Post } from "../../../../lib/wordpress";
 
-// FIXED: Changed to Promise type for Next.js 15+
 type Params = Promise<{ subcategory: string }>;
 interface SubCategoryPageProps {
   params: Params;
 }
 
-// Updated tags group structure based on new schema
-interface TagGroup {
-  tag?: string;
-  priority?: string;
-}
-
-// Helper function to safely render text from RichTextField
-import { RichTextField } from "@prismicio/client";
-
-const renderText = (
-  richText: RichTextField | string | null | undefined
-): string => {
-  if (!richText) return "";
-  if (typeof richText === "string") return richText;
-
-  if (Array.isArray(richText)) {
-    return richText
-      .map((block) => ("text" in block ? block.text : ""))
-      .join(" ")
-      .trim();
-  }
-
-  return "";
-};
-
-// Helper function to render tags from Group field
-const renderTags = (tagsGroup: TagGroup[] | null | undefined): string => {
-  if (!tagsGroup || !Array.isArray(tagsGroup)) return "";
-
-  return tagsGroup
-    .map((tagItem: TagGroup) => tagItem.tag || "")
-    .filter(Boolean)
-    .join(", ");
-};
-
-// Helper function to format dates
 const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
   try {
@@ -74,36 +38,12 @@ const formatDate = (dateString: string | null | undefined): string => {
   }
 };
 
-// Generate static params for all subcategories
 export async function generateStaticParams(): Promise<
   { subcategory: string }[]
 > {
-  const client = createClient();
-
-  try {
-    const blogPosts = await client.getAllByType("blog_post");
-    const subcategories = new Set<string>();
-
-    blogPosts.forEach((post: BlogPostDocument) => {
-      if (post.data.subcategory) {
-        subcategories.add(post.data.subcategory);
-      }
-    });
-
-    const params = Array.from(subcategories).map((subcategory: string) => {
-      // Convert subcategory to slug format
-      const slug = subcategory.toLowerCase().replace(/\s+/g, "-");
-      return { subcategory: slug };
-    });
-
-    return params;
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [{ subcategory: "local" }, { subcategory: "fact-check-news" }];
-  }
+  return [];
 }
 
-// FIXED: Generate metadata for the page - now awaits params
 export async function generateMetadata({
   params,
 }: SubCategoryPageProps): Promise<Metadata> {
@@ -113,22 +53,19 @@ export async function generateMetadata({
 
   return {
     title: `${displayName} - Latest Articles | Daily Guardian`,
-    description: `Read the latest ${displayName} articles and stay updated with current news and insights from Daily Guardian.`,
-    keywords: `${displayName}, news, Daily Guardian, articles, ${subcategoryValue}`,
+    description: `Read the latest ${displayName} articles from Daily Guardian.`,
+    keywords: `${displayName}, news, Daily Guardian, ${subcategoryValue}`,
   };
 }
 
-// Enhanced Article Card Component with reading time
-const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
+const ArticleCard: React.FC<{ article: Post; index: number }> = ({
   article,
-  index,
 }) => {
-  const tags = renderTags(article.data.tags as TagGroup[]);
+  const tags = article.data.tags.join(", ");
 
   return (
     <Link href={`/blog/${article.uid}`} className="block group">
       <article className="bg-[#1b1a1b] border border-default hover:border-[#fcee16]/50 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-[#fcee16]/10">
-        {/* Article Image */}
         {article.data.featured_image?.url && (
           <div className="relative aspect-[16/10] overflow-hidden">
             <Image
@@ -140,7 +77,6 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
-            {/* Breaking News Badge */}
             {article.data.is_breaking_news && (
               <div className="absolute top-4 right-4">
                 <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
@@ -152,36 +88,30 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
         )}
 
         <div className="p-6 space-y-4">
-          {/* Article Title */}
           <h3 className="text-xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
-            {renderText(article.data.title) || "Untitled Article"}
+            {article.data.title || "Untitled Article"}
           </h3>
 
-          {/* Article Summary */}
           <p className="text-gray-400 text-sm leading-relaxed">
-            {renderText(article.data.summary).substring(0, 150)}...
+            {(article.data.summary || "").substring(0, 150)}...
           </p>
 
-          {/* Article Metadata */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
                 <User size={12} className="text-[#fcee16]" />
-                {renderText(article.data.author) || "Staff Reporter"}
+                {article.data.author || "Staff Reporter"}
               </span>
               <span className="flex items-center gap-1">
                 <Calendar size={12} className="text-[#fcee16]" />
                 {formatDate(article.data.published_date)}
               </span>
-              {article.data.reading_time && (
-                <span className="flex items-center gap-1">
-                  <Clock size={12} className="text-[#fcee16]" />
-                  {article.data.reading_time} min
-                </span>
-              )}
+              <span className="flex items-center gap-1">
+                <Clock size={12} className="text-[#fcee16]" />
+                {article.data.reading_time} min
+              </span>
             </div>
 
-            {/* Read More Arrow */}
             <div className="text-[#fcee16] group-hover:translate-x-1 transition-transform duration-200">
               <svg
                 className="w-4 h-4"
@@ -199,7 +129,6 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
             </div>
           </div>
 
-          {/* Tags */}
           {tags && (
             <div className="flex items-center gap-2 pt-2 border-t border-default">
               <Tag size={12} className="text-gray-500" />
@@ -212,14 +141,10 @@ const ArticleCard: React.FC<{ article: BlogPostDocument; index: number }> = ({
   );
 };
 
-// Featured Article Component
-const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
-  article,
-}) => (
+const FeaturedArticle: React.FC<{ article: Post }> = ({ article }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
     <article className="bg-gradient-to-r from-[#1b1a1b] to-black border border-[#fcee16]/30 rounded-lg overflow-hidden">
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Content Side */}
         <div className="p-8 space-y-6">
           <div className="flex items-center gap-4">
             <span className="inline-block bg-[#fcee16] text-[#1b1a1b] px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider">
@@ -234,28 +159,26 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
           </div>
 
           <h2 className="text-3xl lg:text-4xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-300 leading-tight">
-            {renderText(article.data.title) || "Untitled Article"}
+            {article.data.title || "Untitled Article"}
           </h2>
 
           <p className="text-gray-300 text-lg leading-relaxed">
-            {renderText(article.data.summary).substring(0, 200)}...
+            {(article.data.summary || "").substring(0, 200)}...
           </p>
 
           <div className="flex items-center gap-6 text-sm text-gray-400">
             <span className="flex items-center gap-2">
               <User size={16} className="text-[#fcee16]" />
-              {renderText(article.data.author) || "Staff Reporter"}
+              {article.data.author || "Staff Reporter"}
             </span>
             <span className="flex items-center gap-2">
               <Calendar size={16} className="text-[#fcee16]" />
               {formatDate(article.data.published_date)}
             </span>
-            {article.data.reading_time && (
-              <span className="flex items-center gap-2">
-                <Clock size={16} className="text-[#fcee16]" />
-                {article.data.reading_time} min read
-              </span>
-            )}
+            <span className="flex items-center gap-2">
+              <Clock size={16} className="text-[#fcee16]" />
+              {article.data.reading_time} min read
+            </span>
           </div>
 
           <div className="pt-4">
@@ -278,7 +201,6 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
           </div>
         </div>
 
-        {/* Image Side */}
         {article.data.featured_image?.url && (
           <div className="relative lg:aspect-auto aspect-[16/10] min-h-[300px]">
             <Image
@@ -295,51 +217,33 @@ const FeaturedArticle: React.FC<{ article: BlogPostDocument }> = ({
   </Link>
 );
 
-// FIXED: Main page component - now awaits params
 export default async function SubCategoryPage({
   params,
 }: SubCategoryPageProps) {
-  const client = createClient();
-
   try {
-    // FIXED: Await the params promise
     const resolvedParams = await params;
     const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
     const displayName = formatSubcategoryName(subcategoryValue);
 
-    // Fetch all blog posts for this subcategory
-    const allPosts = await client.getAllByType("blog_post", {
-      filters: [
-        prismic.filter.at("my.blog_post.subcategory", subcategoryValue),
-      ],
-      orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
-    });
+    const allPosts = await getAllPosts();
+    const allPostsForSubcat = allPosts.filter(
+      (p) => p.data.subcategory === subcategoryValue
+    );
 
-    if (allPosts.length === 0) {
+    if (allPostsForSubcat.length === 0) {
       notFound();
     }
 
-    // Separate different types of articles
-    const featuredArticles = allPosts.filter(
-      (post: BlogPostDocument) => post.data.is_featured
-    );
-    const editorsPicks = allPosts.filter(
-      (post: BlogPostDocument) => post.data.editors_pick
-    );
-    const breakingNews = allPosts.filter(
-      (post: BlogPostDocument) => post.data.is_breaking_news
-    );
-    const regularArticles = allPosts.filter(
-      (post: BlogPostDocument) =>
-        !post.data.is_featured && !post.data.is_breaking_news
+    const featuredArticles = allPostsForSubcat.filter((p) => p.data.is_featured);
+    const breakingNews = allPostsForSubcat.filter((p) => p.data.is_breaking_news);
+    const regularArticles = allPostsForSubcat.filter(
+      (p) => !p.data.is_featured && !p.data.is_breaking_news
     );
 
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Enhanced Header */}
           <div className="mb-12">
-            {/* Back Navigation */}
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 mb-6 group"
@@ -351,22 +255,16 @@ export default async function SubCategoryPage({
               Back to Home
             </Link>
 
-            {/* Page Title */}
             <div className="space-y-4">
               <h1 className="text-5xl lg:text-6xl font-roboto font-bold text-white">
                 {displayName}
               </h1>
               <div className="flex items-center gap-4">
                 <div className="h-1 w-24 bg-[#fcee16]"></div>
-                {/* <span className="text-lg text-gray-300">
-                  {allPosts.length} article{allPosts.length !== 1 ? "s" : ""}{" "}
-                  available
-                </span> */}
               </div>
             </div>
           </div>
 
-          {/* Breaking News Banner */}
           {breakingNews.length > 0 && (
             <section className="mb-8">
               <div className="bg-gradient-to-r from-red-600 to-red-800 border border-red-500 rounded-lg p-4">
@@ -377,15 +275,13 @@ export default async function SubCategoryPage({
                   </span>
                 </div>
                 <div className="space-y-2">
-                  {breakingNews.slice(0, 3).map((article: BlogPostDocument) => (
+                  {breakingNews.slice(0, 3).map((article) => (
                     <Link
                       key={article.id}
                       href={`/blog/${article.uid}`}
                       className="block text-white hover:text-[#fcee16] transition-colors duration-200"
                     >
-                      <span className="font-semibold">
-                        {renderText(article.data.title)}
-                      </span>
+                      <span className="font-semibold">{article.data.title}</span>
                     </Link>
                   ))}
                 </div>
@@ -393,7 +289,6 @@ export default async function SubCategoryPage({
             </section>
           )}
 
-          {/* Featured Article */}
           {featuredArticles.length > 0 && (
             <section className="mb-16">
               <FeaturedArticle article={featuredArticles[0]} />
@@ -401,9 +296,7 @@ export default async function SubCategoryPage({
           )}
 
           <div className="grid lg:grid-cols-4 gap-12">
-            {/* Main Content */}
             <div className="lg:col-span-3 space-y-12">
-              {/* Latest Articles */}
               {regularArticles.length > 0 && (
                 <section>
                   <div className="flex items-center gap-4 mb-8">
@@ -414,21 +307,18 @@ export default async function SubCategoryPage({
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-8">
-                    {regularArticles.map(
-                      (article: BlogPostDocument, index: number) => (
-                        <ArticleCard
-                          key={article.id}
-                          article={article}
-                          index={index}
-                        />
-                      )
-                    )}
+                    {regularArticles.map((article, index) => (
+                      <ArticleCard
+                        key={article.id}
+                        article={article}
+                        index={index}
+                      />
+                    ))}
                   </div>
                 </section>
               )}
             </div>
 
-            {/* Enhanced Sidebar */}
             <div className="lg:col-span-1"></div>
           </div>
         </div>

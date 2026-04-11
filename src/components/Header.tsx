@@ -3,7 +3,7 @@
 import { Bell, Calendar, MapPin, Search, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 import SearchModal from "./SearchModal";
 
 // Weather data interface
@@ -16,7 +16,7 @@ interface WeatherData {
 
 // Header props interface
 interface HeaderProps {
-  posts?: BlogPostDocument[];
+  posts?: Post[];
 }
 
 // Custom hook for weather data

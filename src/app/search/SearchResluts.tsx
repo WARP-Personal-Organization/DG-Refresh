@@ -1,20 +1,19 @@
 "use client";
 
-import { Search, Calendar, Tag, Clock, ArrowLeft } from "lucide-react";
+import { Search, Calendar, Tag, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import * as prismicH from "@prismicio/helpers";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 
-interface SearchResult extends BlogPostDocument {
+interface SearchResult extends Post {
   relevanceScore: number;
   matchedFields: string[];
 }
 
 interface SearchResultsProps {
-  posts: BlogPostDocument[];
+  posts: Post[];
 }
 
 export default function SearchResults({ posts }: SearchResultsProps) {
@@ -29,14 +28,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
 
   const initialQuery = searchParams?.get("q") || "";
 
-  useEffect(() => {
-    if (initialQuery) {
-      setQuery(initialQuery);
-      performSearch(initialQuery);
-    }
-  }, [initialQuery]);
-
-  // Search function with advanced scoring
   const searchPosts = (searchQuery: string): SearchResult[] => {
     if (!searchQuery.trim()) return [];
 
@@ -47,7 +38,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
       let score = 0;
       const matchedFields: string[] = [];
 
-      // Title matching (highest weight)
       const title = post.data.title?.toLowerCase() || "";
       if (title.includes(normalizedQuery)) {
         score += 15;
@@ -61,8 +51,7 @@ export default function SearchResults({ posts }: SearchResultsProps) {
         });
       }
 
-      // Summary matching
-      const summary = prismicH.asText(post.data.summary).toLowerCase();
+      const summary = post.data.summary?.toLowerCase() || "";
       if (summary.includes(normalizedQuery)) {
         score += 10;
         matchedFields.push("summary");
@@ -76,56 +65,30 @@ export default function SearchResults({ posts }: SearchResultsProps) {
         });
       }
 
-      // Content matching
-      const content = prismicH.asText(post.data.content).toLowerCase();
-      if (content.includes(normalizedQuery)) {
-        score += 7;
-        matchedFields.push("content");
-      } else {
-        queryWords.forEach((word) => {
-          if (content.includes(word)) {
-            score += 3;
-            if (!matchedFields.includes("content"))
-              matchedFields.push("content");
-          }
-        });
-      }
-
-      // Author matching
-      const author = prismicH.asText(post.data.author).toLowerCase();
+      const author = post.data.author?.toLowerCase() || "";
       if (author.includes(normalizedQuery)) {
         score += 6;
         matchedFields.push("author");
       }
 
-      // Category matching
       const category = post.data.category?.toLowerCase() || "";
       if (category.includes(normalizedQuery)) {
         score += 5;
         matchedFields.push("category");
       }
 
-      // Tags matching
-      if (post.data.tags) {
-        post.data.tags.forEach((tagItem) => {
-          const tag = tagItem.tag?.toLowerCase() || "";
-          if (tag.includes(normalizedQuery)) {
-            score += 4;
-            if (!matchedFields.includes("tags")) matchedFields.push("tags");
-          }
-        });
-      }
+      post.data.tags.forEach((tag) => {
+        if (tag.toLowerCase().includes(normalizedQuery)) {
+          score += 4;
+          if (!matchedFields.includes("tags")) matchedFields.push("tags");
+        }
+      });
 
-      // Boost for special post types
       if (post.data.is_featured) score += 2;
       if (post.data.is_breaking_news) score += 3;
       if (post.data.editors_pick) score += 1;
 
-      return {
-        ...post,
-        relevanceScore: score,
-        matchedFields,
-      };
+      return { ...post, relevanceScore: score, matchedFields };
     });
 
     return scoredResults.filter((result) => result.relevanceScore > 0);
@@ -133,43 +96,39 @@ export default function SearchResults({ posts }: SearchResultsProps) {
 
   const performSearch = (searchQuery: string) => {
     setIsLoading(true);
-    const searchResults = searchPosts(searchQuery);
-    setResults(searchResults);
+    setResults(searchPosts(searchQuery));
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (initialQuery) {
+      setQuery(initialQuery);
+      performSearch(initialQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       performSearch(query);
-      // Update URL
       router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
-  // Sort results
   const sortedResults = [...results].sort((a, b) => {
-    if (sortBy === "relevance") {
-      return b.relevanceScore - a.relevanceScore;
-    } else {
-      const dateA = new Date(a.data.published_date || "");
-      const dateB = new Date(b.data.published_date || "");
-      return dateB.getTime() - dateA.getTime();
-    }
+    if (sortBy === "relevance") return b.relevanceScore - a.relevanceScore;
+    return (
+      new Date(b.data.published_date).getTime() -
+      new Date(a.data.published_date).getTime()
+    );
   });
 
-  // Filter results
   const filteredResults =
     filterBy === "all"
       ? sortedResults
       : sortedResults.filter((post) => post.data.category === filterBy);
 
-  // Get unique categories for filter
-  const categories = [
-    ...new Set(posts.map((post) => post.data.category).filter(Boolean)),
-  ];
-
-  // Format date
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -198,7 +157,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
           Search Articles
         </h1>
 
-        {/* Search Form */}
         <form onSubmit={handleSearch} className="mb-6">
           <div className="relative">
             <Search
@@ -215,7 +173,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
           </div>
         </form>
 
-        {/* Search Results Summary */}
         {query && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
@@ -231,7 +188,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
               </p>
             </div>
 
-            {/* Sort and Filter Controls */}
             {!isLoading && filteredResults.length > 0 && (
               <div className="flex gap-4">
                 <select
@@ -251,11 +207,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                   className="px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm font-open-sans"
                 >
                   <option value="all">All Categories</option>
-                  {/* {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))} */}
                 </select>
               </div>
             )}
@@ -263,7 +214,7 @@ export default function SearchResults({ posts }: SearchResultsProps) {
         )}
       </div>
 
-      {/* Search Results */}
+      {/* Results */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#fcee16]"></div>
@@ -286,18 +237,13 @@ export default function SearchResults({ posts }: SearchResultsProps) {
               className="bg-gray-800/50 rounded-lg border border-gray-700 p-6 hover:border-[#fcee16]/50 transition-colors"
             >
               <div className="flex gap-6">
-                {/* Featured Image */}
                 {post.data.featured_image?.url && (
                   <div className="hidden sm:block flex-shrink-0">
                     <Link href={`/blog/${post.uid}`}>
                       <div className="relative w-32 h-24 rounded-lg overflow-hidden">
                         <Image
                           src={post.data.featured_image.url}
-                          alt={
-                            post.data.featured_image.alt ||
-                            post.data.title ||
-                            ""
-                          }
+                          alt={post.data.featured_image.alt || post.data.title || ""}
                           fill
                           className="object-cover hover:scale-105 transition-transform duration-200"
                         />
@@ -306,7 +252,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                   </div>
                 )}
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1">
@@ -316,7 +261,6 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                         </h2>
                       </Link>
 
-                      {/* Badges */}
                       <div className="flex gap-2 mt-2">
                         {post.data.is_breaking_news && (
                           <span className="px-2 py-1 text-xs font-bold bg-red-600 text-white rounded uppercase">
@@ -343,14 +287,12 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                     </div>
                   </div>
 
-                  {/* Summary */}
-                  {prismicH.asText(post.data.summary) && (
+                  {post.data.summary && (
                     <p className="text-gray-300 line-clamp-2 mb-3 font-open-sans">
-                      {prismicH.asText(post.data.summary)}
+                      {post.data.summary}
                     </p>
                   )}
 
-                  {/* Meta Information */}
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center gap-1">
                       <Calendar size={12} />
@@ -366,14 +308,13 @@ export default function SearchResults({ posts }: SearchResultsProps) {
                         </span>
                       </div>
                     )}
-                    {prismicH.asText(post.data.author) && (
+                    {post.data.author && (
                       <span className="font-open-sans">
-                        By {prismicH.asText(post.data.author)}
+                        By {post.data.author}
                       </span>
                     )}
                   </div>
 
-                  {/* Matched Fields */}
                   {post.matchedFields.length > 0 && (
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-gray-500 font-open-sans">

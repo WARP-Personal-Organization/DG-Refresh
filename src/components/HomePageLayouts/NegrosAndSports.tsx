@@ -1,33 +1,23 @@
 import { PublicationCard } from "@/components/PublicationCard";
 import RightSidebar from "@/components/RightSidebar";
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
-import { client } from "../../../lib/prismicio";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 
 interface RegionalStoriesProps {
-  negrosStories: BlogPostDocument[];
+  negrosStories: Post[];
   negrosTitle: string;
-  sportsStories: BlogPostDocument[];
+  sportsStories: Post[];
   sportsTitle: string;
+  allPosts: Post[];
 }
 
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-// Reusable Publication Cards
-
-// NOTE: no "use client" — this stays a Server Component and can be async
-export default async function NegrosAndSportsStories({
+export default function NegrosAndSportsStories({
   negrosStories,
   negrosTitle,
   sportsStories,
-  sportsTitle,
+  allPosts,
 }: RegionalStoriesProps) {
   if (!negrosStories || negrosStories.length === 0) {
     return null;
@@ -37,27 +27,10 @@ export default async function NegrosAndSportsStories({
   const supportingNegrosStories = negrosStories.slice(1, 4);
   const limitedSportsStories = sportsStories.slice(0, 6);
 
-  // Optional: fetch editor's picks here (server-side)
-  let editorsPicks: BlogPostDocument[] = [];
-  try {
-    const posts: BlogPostDocument[] = await client.getAllByType("blog_post", {
-      orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
-    });
-
-    editorsPicks = posts
-      .filter((post) => post.data?.editors_pick === true)
-      .sort((a, b) => {
-        const dateA = new Date(a.data?.published_date || "").getTime() || 0;
-        const dateB = new Date(b.data?.published_date || "").getTime() || 0;
-        return dateB - dateA; // latest first
-      });
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-  }
-
-  // Placeholder URLs
-  const todayPaperUrl = "/Todays'News.PNG";
-  const supplementUrl = "/Supplement.PNG";
+  // Use the top posts as editor's picks fallback
+  const editorsPicks = allPosts
+    .filter((p) => p.data.editors_pick)
+    .slice(0, 4);
 
   return (
     <section className="bg-background py-12">
@@ -92,7 +65,10 @@ export default async function NegrosAndSportsStories({
                     <p className="text-accent text-sm font-medium uppercase font-sans">
                       {mainNegrosStory.data.category || "News"}
                     </p>
-                    <AnimatedHeadline as="h3" extraClassName="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <AnimatedHeadline
+                      as="h3"
+                      extraClassName="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                    >
                       {mainNegrosStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
                   </div>
@@ -105,7 +81,6 @@ export default async function NegrosAndSportsStories({
               <div>
                 <div className="mb-6 pb-3 border-b border-[#fcee16]">
                   <h2 className="text-2xl font-roboto font-bold text-foreground">
-                    {/* {sportsTitle} */}
                     SPORTS
                   </h2>
                 </div>
@@ -150,7 +125,7 @@ export default async function NegrosAndSportsStories({
                       {story.data.title || "Untitled Article"}
                     </h4>
                     <p className="text-xs text-gray-400 pt-2 font-sans">
-                      By {renderText(story.data.author) || "Staff"}
+                      By {story.data.author || "Staff"}
                     </p>
                   </Link>
                 </article>

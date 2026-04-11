@@ -1,27 +1,14 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 
 interface TopStoriesProps {
-  stories: BlogPostDocument[];
+  stories: Post[];
   title: string;
 }
 
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-// Separator adapted for a dark background
-const DottedSeparator = () => (
-  <div className="w-full border-t border-dotted border-[#fcee16]" />
-);
-
 const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
-  // Taking 4 stories for the 4-column layout
   const topStories = stories.slice(0, 4);
 
   if (topStories.length === 0) {
@@ -29,10 +16,8 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
   }
 
   return (
-    // The section is transparent, inheriting the black background from page.tsx
     <section className="py-12">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header with light text and borders */}
         <div className="text-center mb-8 space-y-4">
           <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
           <h2 className="text-sm font-roboto font-semibold text-foreground uppercase tracking-[0.2em]">
@@ -41,12 +26,10 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
           <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
         </div>
 
-        {/* Stories Grid with light vertical separators */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:divide-x md:divide-gray-700">
           {topStories.map((story) => (
             <article key={story.id} className="group px-4 mb-8 md:mb-0">
               <Link href={`/blog/${story.uid}`} className="block">
-                {/* Image remains the same */}
                 {story.data.featured_image?.url && (
                   <div className="relative aspect-[16/10] mb-4 overflow-hidden">
                     <Image
@@ -59,14 +42,10 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
                   </div>
                 )}
 
-                {/* Story Content with light text */}
                 <div className="space-y-2">
-                  {/* Category color changed to be bright and visible */}
                   <p className="text-sm font-semibold text-accent uppercase font-sans">
                     {story.data.category || "News"}
                   </p>
-
-                  {/* Headline with white text */}
                   <h3 className="text-xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h3>

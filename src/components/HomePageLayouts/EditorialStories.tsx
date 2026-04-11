@@ -1,27 +1,18 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 
 interface EditorialStoriesProps {
-  stories: BlogPostDocument[];
+  stories: Post[];
   title: string;
 }
 
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-const calculateReadTime = (summary: prismic.RichTextField): string => {
-  const text = prismicH.asText(summary);
-  if (!text) return "4 MIN READ";
-  const wordsPerMinute = 200;
-  const wordCount = text.split(/\s+/).length;
-  const readTime = Math.ceil(wordCount / wordsPerMinute);
+const calculateReadTime = (summary: string): string => {
+  if (!summary) return "4 MIN READ";
+  const wordCount = summary.split(/\s+/).length;
+  const readTime = Math.ceil(wordCount / 200);
   return `${readTime} MIN READ`;
 };
 
@@ -51,11 +42,14 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
           <div className="lg:col-span-1">
             <article className="h-full">
               <Link href={`/blog/${mainStory.uid}`} className="block group">
-                <AnimatedHeadline as="h3" extraClassName="text-5xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
+                <AnimatedHeadline
+                  as="h3"
+                  extraClassName="text-5xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                >
                   {mainStory.data.title || "Untitled Article"}
                 </AnimatedHeadline>
                 <p className="text-gray-300 mt-4 text-base leading-relaxed font-sans">
-                  {renderText(mainStory.data.summary)}
+                  {mainStory.data.summary}
                 </p>
                 <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mt-4 font-sans">
                   {calculateReadTime(mainStory.data.summary)}
@@ -64,7 +58,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
             </article>
           </div>
 
-          {/* === COLUMN 2: Hero Image (FIXED: Now Landscape) === */}
+          {/* === COLUMN 2: Hero Image === */}
           {heroImageStory && (
             <div className="lg:col-span-1">
               <Link

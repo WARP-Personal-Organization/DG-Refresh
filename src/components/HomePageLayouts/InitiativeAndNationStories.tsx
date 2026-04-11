@@ -1,29 +1,20 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 
-// New props for our combined component
 interface ContentShowcaseProps {
-  initiativeStories: BlogPostDocument[];
+  initiativeStories: Post[];
   initiativeTitle: string;
-  nationStories: BlogPostDocument[];
+  nationStories: Post[];
   nationTitle: string;
 }
 
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-// A reusable card for displaying individual stories in the grid
 const StoryCard = ({
   story,
   hasTopBorder = false,
 }: {
-  story: BlogPostDocument;
+  story: Post;
   hasTopBorder?: boolean;
 }) => (
   <article className="group">
@@ -48,7 +39,7 @@ const StoryCard = ({
         </h3>
         {story.data.summary && (
           <p className="text-gray-400 text-sm leading-relaxed font-sans">
-            {renderText(story.data.summary).substring(0, 100)}...
+            {story.data.summary.substring(0, 100)}...
           </p>
         )}
       </div>
@@ -56,14 +47,12 @@ const StoryCard = ({
   </article>
 );
 
-// The main combined component
 const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
   initiativeStories,
   initiativeTitle,
   nationStories,
   nationTitle,
 }) => {
-  // Take the first 3 stories for each section to fit the layout
   const initiativeItems = initiativeStories.slice(0, 3);
   const nationItems = nationStories.slice(0, 3);
 
@@ -73,12 +62,10 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {/* === INITIATIVE STORIES ROW === */}
         {initiativeItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Intro Column */}
             <div className="lg:pr-8">
               <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">
                 {initiativeTitle}
               </h2>
-
               <Link
                 href={`/${initiativeTitle.toLowerCase()}`}
                 className="text-accent font-semibold font-sans hover:underline transition-colors duration-200"
@@ -86,7 +73,6 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
                 Explore all Initiatives
               </Link>
             </div>
-            {/* Story Cards */}
             {initiativeItems.map((story) => (
               <div key={story.id} className="lg:col-span-1">
                 <StoryCard story={story} />
@@ -98,7 +84,6 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {/* === NATION STORIES ROW === */}
         {nationItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-default">
-            {/* Intro Column */}
             <div className="lg:pr-8">
               <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">
                 {nationTitle}
@@ -114,7 +99,6 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
                 Explore national news
               </Link>
             </div>
-            {/* Story Cards with Top Border */}
             {nationItems.map((story) => (
               <div key={story.id} className="lg:col-span-1">
                 <StoryCard story={story} hasTopBorder={true} />

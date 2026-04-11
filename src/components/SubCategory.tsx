@@ -1,20 +1,17 @@
 "use client";
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import { ChevronRight, Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 
 interface SubcategoryPageProps {
   category: string;
   parentCategory: string;
-  articles: BlogPostDocument[];
+  articles: Post[];
 }
 
-// Helper function to format dates
-const formatDate = (dateString: string | null): string => {
+const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
@@ -22,25 +19,6 @@ const formatDate = (dateString: string | null): string => {
     day: "2-digit",
     year: "numeric",
   });
-};
-
-// Helper function to render rich text as plain text
-const renderRichTextAsText = (
-  richText: prismic.RichTextField,
-  maxLength?: number
-): string => {
-  if (!richText) return "";
-  const text = prismicH.asText(richText);
-  if (maxLength && text.length > maxLength) {
-    return text.substring(0, maxLength).trim() + "...";
-  }
-  return text;
-};
-
-// Helper function to format author names
-const formatAuthors = (authorText: prismic.RichTextField): string => {
-  const authors = renderRichTextAsText(authorText);
-  return authors || "Staff Writer";
 };
 
 const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
@@ -51,12 +29,10 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("Latest");
 
-  // Filter articles based on search query
   const filteredArticles = articles.filter((article) => {
     if (!searchQuery) return true;
     const title = article.data.title?.toLowerCase() || "";
-    const summary =
-      renderRichTextAsText(article.data.summary)?.toLowerCase() || "";
+    const summary = article.data.summary?.toLowerCase() || "";
     return (
       title.includes(searchQuery.toLowerCase()) ||
       summary.includes(searchQuery.toLowerCase())
@@ -98,7 +74,6 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
 
         {/* Navigation Tabs and Search */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-          {/* Tabs */}
           <div className="flex border-b border-default">
             {tabs.map((tab) => (
               <button
@@ -115,7 +90,6 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
             ))}
           </div>
 
-          {/* Search Bar */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search size={16} className="text-gray-400" />
@@ -133,16 +107,15 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
         {/* Articles List */}
         <div className="space-y-8">
           {filteredArticles.length > 0 ? (
-            filteredArticles.map((article, index) => {
+            filteredArticles.map((article) => {
               const publishDate = formatDate(
                 article.data.published_date || article.data.updated_date
               );
               const articleTitle = article.data.title || "Untitled Article";
-              const articleSummary = renderRichTextAsText(
-                article.data.summary,
-                150
-              );
-              const authorName = formatAuthors(article.data.author);
+              const articleSummary = article.data.summary
+                ? article.data.summary.substring(0, 150) + "..."
+                : "";
+              const authorName = article.data.author || "Staff Writer";
               const featuredImage = article.data.featured_image;
 
               return (
@@ -220,7 +193,6 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
               );
             })
           ) : (
-            /* Empty State */
             <div className="text-center py-16">
               <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 border-2 border-default rounded-xl p-8 max-w-md mx-auto">
                 <Search size={48} className="mx-auto text-yellow-400/50 mb-4" />
@@ -260,7 +232,6 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
           </div>
         )}
 
-        {/* Bottom Decorative Border */}
         <div className="flex items-center justify-center mt-16 relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-yellow-500/30"></div>

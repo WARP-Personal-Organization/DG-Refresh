@@ -1,40 +1,31 @@
-import * as prismicH from "@prismicio/helpers";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { AuthorOpinionDocument } from "../../prismicio-types";
+import type { Author } from "../../lib/wordpress";
 
 interface OpinionSectionProps {
-  authors?: AuthorOpinionDocument[];
+  authors?: Author[];
 }
 
 const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
-  // Get featured author (first author)
   const featuredAuthor = authors[0];
-
-  // Get sidebar authors (next 4 authors)
   const sidebarAuthors = authors.slice(1, 5);
-
-  // Get bottom authors (remaining authors)
   const bottomAuthors = authors.slice(5, 11);
 
   return (
     <section className="py-12 border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Clean Section Header */}
         <div className="mb-12 pb-4 border-b border-[#fcee16]">
           <h2 className="text-3xl font-roboto font-bold text-white">VOICES</h2>
         </div>
 
-        {/* Show message if no authors */}
         {authors.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">No authors available.</p>
           </div>
         ) : (
           <>
-            {/* Main Content Grid */}
             <div className="grid lg:grid-cols-4 gap-8 mb-12">
               {/* Featured Author - 3 columns */}
               {featuredAuthor && (
@@ -44,7 +35,6 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                     className="block group"
                   >
                     <article className="grid md:grid-cols-2 gap-8 pb-8 border-b border-default">
-                      {/* Content */}
                       <div className="space-y-4">
                         <div className="text-[#fcee16] text-sm font-medium uppercase tracking-wide font-open-sans">
                           Featured Contributor
@@ -62,7 +52,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
 
                         {featuredAuthor.data.bio && (
                           <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
-                            {prismicH.asText(featuredAuthor.data.bio)}
+                            {featuredAuthor.data.bio}
                           </p>
                         )}
 
@@ -75,7 +65,6 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                         </div>
                       </div>
 
-                      {/* Author Avatar */}
                       {featuredAuthor.data.avatar?.url && (
                         <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                           <Image
@@ -122,7 +111,6 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                           className="block group"
                         >
                           <div className="flex items-start gap-3">
-                            {/* Small Avatar */}
                             {author.data.avatar?.url && (
                               <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                                 <Image
@@ -148,10 +136,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
 
                               {author.data.bio && (
                                 <p className="text-xs text-gray-500 font-open-sans line-clamp-2">
-                                  {prismicH
-                                    .asText(author.data.bio)
-                                    .substring(0, 80)}
-                                  ...
+                                  {author.data.bio.substring(0, 80)}...
                                 </p>
                               )}
                             </div>
@@ -170,9 +155,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
                 {bottomAuthors.map((author) => (
                   <article key={author.id} className="group">
                     <Link href={`/author/${author.uid}`} className="block">
-                      {/* Author Card */}
                       <div className="text-center space-y-4">
-                        {/* Avatar */}
                         {author.data.avatar?.url && (
                           <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden">
                             <Image
@@ -197,7 +180,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ authors = [] }) => {
 
                         {author.data.bio && (
                           <p className="text-sm text-gray-400 font-open-sans line-clamp-3">
-                            {prismicH.asText(author.data.bio)}
+                            {author.data.bio}
                           </p>
                         )}
 

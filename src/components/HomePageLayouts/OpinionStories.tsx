@@ -1,19 +1,12 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 
 interface OpinionStoriesProps {
-  stories: BlogPostDocument[];
+  stories: Post[];
   title: string;
 }
-
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
 
 const formatTimeAgo = (dateString: string | null): string => {
   if (!dateString) return "";
@@ -73,11 +66,11 @@ const OpinionStories: React.FC<OpinionStoriesProps> = ({ stories, title }) => {
                   </h3>
                   {story.data.summary && (
                     <p className="text-gray-400 text-sm leading-relaxed">
-                      {renderText(story.data.summary).substring(0, 100)}...
+                      {story.data.summary.substring(0, 100)}...
                     </p>
                   )}
                   <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-default">
-                    <span>{renderText(story.data.author) || "Staff"}</span>
+                    <span>{story.data.author || "Staff"}</span>
                     <span>•</span>
                     <span>{formatTimeAgo(story.data.published_date)}</span>
                   </div>

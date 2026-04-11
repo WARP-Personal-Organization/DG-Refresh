@@ -2,33 +2,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 
 interface CategoryPageComponentProps {
   categoryName: string;
   categorySlug: string;
-  featuredArticle: BlogPostDocument;
-  newsArticles: BlogPostDocument[];
-  opinionArticles: BlogPostDocument[];
-  recommendedArticles: BlogPostDocument[];
+  featuredArticle: Post;
+  newsArticles: Post[];
+  opinionArticles: Post[];
+  recommendedArticles: Post[];
 }
 
-// Helper function to safely render text
-import { RichTextField } from "@prismicio/client";
-
-const renderText = (richText: RichTextField | string | null): string => {
-  if (!richText) return "";
-  if (typeof richText === "string") return richText;
-
-  if (Array.isArray(richText)) {
-    return richText
-      .map((block) => ("text" in block ? block.text : ""))
-      .join(" ")
-      .trim();
-  }
-
-  return "";
-};
+const renderText = (text: string | null | undefined): string => text || "";
 
 // Helper function to format dates
 const formatDate = (dateString: string | null): string => {
@@ -51,7 +36,7 @@ const formatDate = (dateString: string | null): string => {
 };
 
 // Clean article card
-const ArticleCard: React.FC<{ article: BlogPostDocument }> = ({ article }) => (
+const ArticleCard: React.FC<{ article: Post }> = ({ article }) => (
   <Link href={`/blog/${article.uid}`} className="block group">
     <article className="pb-6 border-b border-default last:border-b-0">
       {/* Article Image */}

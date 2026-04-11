@@ -1,27 +1,20 @@
-import { createClient } from "@/prismicio";
-import * as prismic from "@prismicio/client";
-import { notFound } from "next/navigation";
-import { BlogPostDocument } from "../../../prismicio-types";
-import CategoryPageComponent from "../../components/CategoryPage";
+export const revalidate = 300; // ISR: rebuild at most every 5 minutes
 
-// FIXED: Changed to Promise type for Next.js 15+
+import { notFound } from "next/navigation";
+import CategoryPageComponent from "../../components/CategoryPage";
+import { getAllPosts } from "../../../lib/wordpress";
+import type { Post } from "../../../lib/wordpress";
+
 type Props = {
   params: Promise<{ catagory: string }>;
 };
 
 export default async function CategoryPage({ params }: Props) {
-  const client = createClient();
-
-  // FIXED: Await the params promise
   const resolvedParams = await params;
+  const categorySlug = resolvedParams.catagory;
 
-  // Filter posts by the category field
-  const posts: BlogPostDocument[] = await client.getAllByType("blog_post", {
-    predicates: [
-      prismic.filter.at("my.blog_post.category", resolvedParams.catagory),
-    ],
-    orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
-  });
+  const allPosts: Post[] = await getAllPosts();
+  const posts = allPosts.filter((p) => p.data.category === categorySlug);
 
   if (!posts || posts.length === 0) {
     notFound();
@@ -31,10 +24,9 @@ export default async function CategoryPage({ params }: Props) {
     <div className="font-open-sans">
       <CategoryPageComponent
         categoryName={
-          resolvedParams.catagory.charAt(0).toUpperCase() +
-          resolvedParams.catagory.slice(1)
+          categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
         }
-        categorySlug={resolvedParams.catagory}
+        categorySlug={categorySlug}
         featuredArticle={posts[0]}
         newsArticles={posts}
         opinionArticles={posts}
@@ -44,7 +36,6 @@ export default async function CategoryPage({ params }: Props) {
   );
 }
 
-// FIXED: If you have generateMetadata, update it too
 export async function generateMetadata({ params }: Props) {
   const resolvedParams = await params;
   const categoryName =
@@ -58,32 +49,6 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-// FIXED: If you have generateStaticParams, update it too
 export async function generateStaticParams() {
-  const client = createClient();
-
-  try {
-    const posts = await client.getAllByType("blog_post");
-    const categories = new Set<string>();
-
-    posts.forEach((post: BlogPostDocument) => {
-      if (post.data.category) {
-        categories.add(post.data.category);
-      }
-    });
-
-    return Array.from(categories).map((category) => ({
-      catagory: category,
-    }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [
-      { catagory: "news" },
-      { catagory: "sports" },
-      { catagory: "business" },
-      { catagory: "feature" },
-      { catagory: "opinion" },
-      { catagory: "industries" },
-    ];
-  }
+  return [];
 }

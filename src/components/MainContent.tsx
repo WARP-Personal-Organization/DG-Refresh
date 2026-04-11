@@ -1,24 +1,15 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 import AnimatedHeadline from "./AnimatedHeadline";
 
 interface MainContentProps {
-  heroPost?: BlogPostDocument;
-  featuredPost?: BlogPostDocument;
-  editorialPost?: BlogPostDocument;
-  localposts?: BlogPostDocument;
-  editorsPicks?: BlogPostDocument[];
+  heroPost?: Post;
+  featuredPost?: Post;
+  editorialPost?: Post;
+  localposts?: Post;
 }
-
-// Helper function to render Prismic rich text
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
 
 // Compact Article Separator Component
 const ArticleSeparator: React.FC = () => {
@@ -58,12 +49,15 @@ const MainContent: React.FC<MainContentProps> = ({
               {heroPost.data.category || "News"}
             </p>
             <Link href={`/blog/${heroPost.uid}`} className="block group">
-              <AnimatedHeadline as="h1" extraClassName="text-2xl lg:text-3xl font-roboto font-bold leading-snug">
+              <AnimatedHeadline
+                as="h1"
+                extraClassName="text-2xl lg:text-3xl font-roboto font-bold leading-snug"
+              >
                 {heroPost.data.title}
               </AnimatedHeadline>
             </Link>
             <p className="text-base text-gray-300 mt-2 leading-snug font-sans">
-              {renderText(heroPost.data.summary)}
+              {heroPost.data.summary}
             </p>
           </article>
 
@@ -155,15 +149,9 @@ const MainContent: React.FC<MainContentProps> = ({
                 <div className="flex-1 h-px bg-accent"></div>
               </div>
 
-              {/* Category & Title with Premium Underline Effects */}
               <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1 font-sans text-center">
                 {featuredPost.data.category || "Featured"}
               </p>
-
-              {/* Option 1: Gradient Expanding Underline */}
-              {/* Alternative Options (uncomment one at a time to test): */}
-
-              {/* Option 2: Double Line Effect */}
 
               <h2 className="relative text-3xl lg:text-4xl font-roboto text-accent leading-tight max-w-2xl break-words text-center mx-auto group-hover:text-accent/80 transition-colors duration-300">
                 {featuredPost.data.title}
@@ -171,14 +159,6 @@ const MainContent: React.FC<MainContentProps> = ({
                 <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-px bg-accent group-hover:w-full transition-all duration-500 ease-out"></span>
                 <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-px bg-accent/40 group-hover:w-3/4 transition-all duration-700 delay-100 ease-out"></span>
               </h2>
-
-              {/* Option 3: Animated Dots Underline */}
-
-              {/* Option 4: Typewriter Effect Underline */}
-
-              {/* Option 5: Glow Effect Underline */}
-
-              {/* Option 6: Split Animation Underline */}
             </Link>
           </article>
         </div>
