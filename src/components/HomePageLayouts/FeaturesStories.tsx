@@ -1,25 +1,17 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../../prismicio-types";
+import type { Post } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 
 interface FeaturesStoriesProps {
-  stories: BlogPostDocument[];
+  stories: Post[];
   title: string;
 }
 
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-// Reusable AuthorByline component using global CSS variables
-const AuthorByline = ({ story }: { story: BlogPostDocument }) => (
+const AuthorByline = ({ story }: { story: Post }) => (
   <div className="text-accent text-sm font-medium uppercase tracking-wide mt-2 font-sans">
-    {renderText(story.data.author)}
+    {story.data.author}
   </div>
 );
 
@@ -31,7 +23,6 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
     return null;
   }
 
-  // Assign stories to the new layout structure
   const mainStory = stories[0];
   const heroImageStory = stories.length > 1 ? stories[1] : null;
   const bottomStories = stories.length > 2 ? stories.slice(2, 8) : [];
@@ -57,11 +48,14 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
               {mainStory && (
                 <article>
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
-                    <AnimatedHeadline as="h3" extraClassName="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <AnimatedHeadline
+                      as="h3"
+                      extraClassName="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                    >
                       {mainStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
                     <p className="text-gray-300 mt-4 text-lg font-sans">
-                      {renderText(mainStory.data.summary)}
+                      {mainStory.data.summary}
                     </p>
                   </Link>
                 </article>
@@ -90,7 +84,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                     <h4 className="text-xl font-roboto font-bold text-foreground mt-4 transition-colors duration-200 group-hover:text-accent">
                       {heroImageStory.data.title}
                     </h4>
-                    {prismicH.asText(heroImageStory.data.author) && (
+                    {heroImageStory.data.author && (
                       <AuthorByline story={heroImageStory} />
                     )}
                   </Link>
@@ -110,9 +104,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                       <h4 className="text-lg font-roboto font-bold text-foreground transition-colors duration-200 group-hover:text-accent">
                         {story.data.title}
                       </h4>
-                      {prismicH.asText(story.data.author) && (
-                        <AuthorByline story={story} />
-                      )}
+                      {story.data.author && <AuthorByline story={story} />}
                     </Link>
                   </article>
                 ))}

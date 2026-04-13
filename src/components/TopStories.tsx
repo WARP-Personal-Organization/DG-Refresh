@@ -1,22 +1,13 @@
-import type * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 
 interface TopStoriesProps {
-  stories: BlogPostDocument[];
+  stories: Post[];
   title: string;
 }
 
-// Helper function to render Prismic rich text
-const renderText = (richText: prismic.RichTextField): string => {
-  if (!richText) return "";
-  return prismicH.asText(richText);
-};
-
-// Clean date formatting
 const formatTimeAgo = (dateString: string | null): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -73,7 +64,7 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
 
                 {/* Story Content */}
                 <div className="space-y-3">
-                  {/* Category - Simple Text */}
+                  {/* Category */}
                   <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide">
                     {story.data.category || "News"}
                   </div>
@@ -86,13 +77,13 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
                   {/* Summary */}
                   {story.data.summary && (
                     <p className="text-gray-400 text-sm leading-relaxed">
-                      {renderText(story.data.summary).substring(0, 100)}...
+                      {story.data.summary.substring(0, 100)}...
                     </p>
                   )}
 
-                  {/* Meta - Clean Format */}
+                  {/* Meta */}
                   <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 border-t border-gray-800/50">
-                    <span>{renderText(story.data.author) || "Staff"}</span>
+                    <span>{story.data.author || "Staff"}</span>
                     <span>•</span>
                     <span>{formatTimeAgo(story.data.published_date)}</span>
                   </div>
@@ -102,10 +93,10 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
           ))}
         </div>
 
-        {/* View All Button - Simple */}
+        {/* View All Button */}
         <div className="text-center mt-12 pt-8 border-t border-gray-800">
           <Link
-            href={`/${title.toLowerCase}`}
+            href={`/${title.toLowerCase()}`}
             className="inline-block px-6 py-3 text-yellow-500 hover:text-yellow-400 font-medium transition-colors duration-200 border border-yellow-500 hover:border-yellow-400 rounded"
           >
             View All Stories

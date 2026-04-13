@@ -1,9 +1,8 @@
 // app/blog/[uid]/page.tsx
+export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";
-import * as prismic from "@prismicio/client";
-import * as prismicH from "@prismicio/helpers";
-import { PrismicRichText } from "@prismicio/react";
 import {
   Bookmark,
   Calendar,
@@ -21,23 +20,15 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { client } from "../../../../lib/prismicio";
-import type {
-  BlogPostDocument,
-  BlogPostDocumentDataTagsItem,
-} from "../../../../prismicio-types";
+import { getPostBySlug, getRelatedPosts } from "../../../../lib/wordpress";
+import type { Post } from "../../../../lib/wordpress";
 
-// FIXED: Proper interface for params (Next.js 15+ compatibility)
 interface BlogPageProps {
-  params: Promise<{
-    uid: string;
-  }>;
+  params: Promise<{ uid: string }>;
 }
 
-// Helper function to format date
-const formatDate = (dateString: string | null): string => {
+const formatDate = (dateString: string): string => {
   if (!dateString) return "";
-
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     year: "numeric",
@@ -46,89 +37,29 @@ const formatDate = (dateString: string | null): string => {
   });
 };
 
-// Helper function to estimate reading time
-const estimateReadingTime = (content: prismic.RichTextField): string => {
-  const text = prismicH.asText(content);
-  const wordsPerMinute = 250;
-  const wordCount = text.trim().split(/\s+/).length;
-  const minutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-  return `${minutes} min`;
-};
-
-// FIXED: Properly typed function to extract tags
-const extractTagsFromGroup = (
-  tagsGroup: BlogPostDocumentDataTagsItem[] | undefined
-): string[] => {
-  if (!Array.isArray(tagsGroup)) return [];
-
-  return tagsGroup
-    .map((item: BlogPostDocumentDataTagsItem) => item.tag) // Extract the 'tag' field from each group item
-    .filter((tag) => tag !== null && tag !== undefined) // Filter out null/undefined
-    .map((tag) => tag.toString().trim()); // Convert to string and clean up whitespace
-};
-
-// FIXED: Main component with proper params handling
 export default async function BlogPost({ params }: BlogPageProps) {
-  let post: BlogPostDocument;
-  let relatedArticles: BlogPostDocument[] = [];
+  const resolvedParams = await params;
+  let post: Post;
+  let relatedArticles: Post[] = [];
 
   try {
-    // FIXED: Await params for Next.js 15+
-    const resolvedParams = await params;
-    post = await client.getByUID("blog_post", resolvedParams.uid);
+    const found = await getPostBySlug(resolvedParams.uid);
+    if (!found) notFound();
+    post = found;
 
-    // Fetch related articles: same category, exclude current post
-    const filters = [
-      prismic.filter.not("my.blog_post.uid", resolvedParams.uid),
-      post.data.category
-        ? prismic.filter.at("my.blog_post.category", post.data.category)
-        : null,
-    ].filter((f): f is string => typeof f === "string");
-    relatedArticles = await client.getAllByType("blog_post", {
-      filters,
-      orderings: {
-        field: "my.blog_post.published_date",
-        direction: "desc",
-      },
-      pageSize: 3,
-    });
-
-    // Fallback: if not enough, fill with featured/editorial
-    if (relatedArticles.length < 3) {
-      const fallbackArticles = await client.getAllByType("blog_post", {
-        filters: [
-          prismic.filter.not("my.blog_post.uid", resolvedParams.uid),
-          prismic.filter.any("my.blog_post.category", ["feature", "editorial"]),
-        ],
-        orderings: {
-          field: "my.blog_post.published_date",
-          direction: "desc",
-        },
-        pageSize: 3 - relatedArticles.length,
-      });
-      // Avoid duplicates
-      const fallbackUids = new Set(relatedArticles.map((a) => a.uid));
-      relatedArticles = [
-        ...relatedArticles,
-        ...fallbackArticles.filter((a) => !fallbackUids.has(a.uid)),
-      ];
-    }
+    relatedArticles = await getRelatedPosts(
+      resolvedParams.uid,
+      post.data.category,
+      3
+    );
   } catch {
     notFound();
   }
 
-  const readingTime = post.data.reading_time
-    ? `${post.data.reading_time} min`
-    : estimateReadingTime(post.data.content);
   const publishDate = formatDate(post.data.published_date);
   const updateDate = formatDate(post.data.updated_date);
-
-  // FIXED: Properly typed tag extraction
-  const postTags = extractTagsFromGroup(post.data.tags);
-
-  // Generate the current article URL for sharing
-  const resolvedParams = await params;
-  const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://yourdomain.com"}/blog/${resolvedParams.uid}`;
+  const readingTime = `${post.data.reading_time} min`;
+  const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyguardian.com.ph"}/blog/${post.uid}`;
 
   return (
     <div className="bg-[#1b1a1b] min-h-screen font-open-sans">
@@ -149,10 +80,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
       </header>
 
       <article className="max-w-4xl mx-auto px-4 py-8">
-        {/* === COMBINED TAGS AND BADGES SECTION === */}
+        {/* Tags & Badges */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-3">
-            {/* Badges with same styling as tags */}
             {post.data.is_breaking_news && (
               <span className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200">
                 BREAKING NEWS
@@ -168,9 +98,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
                 EDITOR&apos;S PICK
               </span>
             )}
-
-            {/* Tags with same styling */}
-            {postTags.map((tag, index) => (
+            {post.data.tags.map((tag, index) => (
               <Link
                 key={index}
                 href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
@@ -188,14 +116,12 @@ export default async function BlogPost({ params }: BlogPageProps) {
             {post.data.title}
           </h1>
 
-          {/* Summary/Subtitle */}
-          {post.data.summary && prismicH.asText(post.data.summary) && (
+          {post.data.summary && (
             <div className="text-xl text-gray-300 leading-relaxed mb-6 font-light font-open-sans">
-              <PrismicRichText field={post.data.summary} />
+              <p>{post.data.summary}</p>
             </div>
           )}
 
-          {/* Article Meta Info */}
           <div className="flex flex-wrap items-center gap-6 py-4 border-t border-b border-gray-700">
             <button className="flex items-center gap-2 text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200">
               <Play size={16} />
@@ -206,11 +132,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             <ShareButton
               title={post.data.title || "Article"}
               url={articleUrl}
-              text={
-                prismicH.asText(post.data.summary) ||
-                post.data.title ||
-                "Check out this article"
-              }
+              text={post.data.summary || post.data.title || "Check out this article"}
             />
             <button className="flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200">
               <Bookmark size={16} />
@@ -250,7 +172,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             </div>
             <div>
               <p className="font-medium text-white font-open-sans">
-                By {prismicH.asText(post.data.author) || "Staff Writer"}
+                By {post.data.author || "Staff Writer"}
               </p>
               <div className="flex items-center gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-1 font-open-sans">
@@ -279,138 +201,22 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </div>
 
-        {/* Article Content */}
-        <div className="prose prose-lg prose-invert max-w-none">
-          <PrismicRichText
-            field={post.data.content}
-            components={{
-              /* --- your existing mappers (paragraph, headings, etc.) --- */
-
-              // 1) IMAGES (supports "image links" via node.linkTo)
-              image: ({ node }) => {
-                // Prefer Next/Image if you like, but plain <img> is fine too.
-                const Img = (
-                  <img
-                    src={node.url}
-                    alt={node.alt ?? ""}
-                    width={node.dimensions?.width}
-                    height={node.dimensions?.height}
-                    loading="lazy"
-                    className="my-6 rounded-lg border border-gray-700"
-                  />
-                );
-
-                // If the image is clickable, Prismic puts the link on node.linkTo
-                const href = node.linkTo ? prismicH.asLink(node.linkTo) : null;
-
-                return href ? (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-block"
-                  >
-                    {Img}
-                  </a>
-                ) : (
-                  Img
-                );
-              },
-
-              // 2) EMBEDS (YouTube, Vimeo, tweets, etc.)
-              embed: ({ node }) => {
-                const html = node?.oembed?.html ?? "";
-                if (!html) return null;
-
-                // Responsive 16:9 wrapper; change paddingTop if you want a different ratio
-                return (
-                  <div className="my-8">
-                    <div
-                      className="relative w-full"
-                      style={{ paddingTop: "56.25%" }}
-                    >
-                      <div
-                        className="absolute inset-0 [&>iframe]:w-full [&>iframe]:h-full [&>iframe]:rounded-lg [&>iframe]:border [&>iframe]:border-gray-700"
-                        dangerouslySetInnerHTML={{ __html: html }}
-                      />
-                    </div>
-                  </div>
-                );
-              },
-
-              /* --- keep the rest of your mappers --- */
-              paragraph: ({ children }) => (
-                <p className="mb-6 text-gray-200 leading-relaxed text-lg font-open-sans">
-                  {children}
-                </p>
-              ),
-              heading1: ({ children }) => (
-                <h1 className="mt-8 mb-4 text-3xl font-bold text-white font-roboto">
-                  {children}
-                </h1>
-              ),
-              heading2: ({ children }) => (
-                <h2 className="mt-8 mb-4 text-2xl font-bold text-white font-roboto">
-                  {children}
-                </h2>
-              ),
-              heading3: ({ children }) => (
-                <h3 className="mt-6 mb-3 text-xl font-bold text-white font-roboto">
-                  {children}
-                </h3>
-              ),
-              list: ({ children }) => (
-                <ul className="mb-6 ml-6 list-disc text-gray-200 font-open-sans">
-                  {children}
-                </ul>
-              ),
-              oList: ({ children }) => (
-                <ol className="mb-6 ml-6 list-decimal text-gray-200 font-open-sans">
-                  {children}
-                </ol>
-              ),
-              listItem: ({ children }) => (
-                <li className="mb-2 text-gray-200 font-open-sans">
-                  {children}
-                </li>
-              ),
-              strong: ({ children }) => (
-                <strong className="text-white font-bold">{children}</strong>
-              ),
-              em: ({ children }) => (
-                <em className="text-[#fcee16] italic">{children}</em>
-              ),
-              hyperlink: ({ children, node }) => {
-                const linkUrl = prismicH.asLink(node.data);
-                const linkTarget =
-                  node.data.link_type === "Web" && "target" in node.data
-                    ? node.data.target
-                    : "_self";
-                return (
-                  <a
-                    href={linkUrl || "#"}
-                    className="text-[#fcee16] hover:text-[#fcee16]/80 underline transition-colors duration-200"
-                    target={linkTarget}
-                    rel={
-                      linkTarget === "_blank"
-                        ? "noopener noreferrer"
-                        : undefined
-                    }
-                  >
-                    {children}
-                  </a>
-                );
-              },
-              preformatted: ({ children }) => (
-                <pre className="mb-6 p-4 bg-gray-800 rounded-lg overflow-x-auto">
-                  <code className="text-green-400 text-sm font-mono">
-                    {children}
-                  </code>
-                </pre>
-              ),
-            }}
-          />
-        </div>
+        {/* Article Content (WordPress HTML) */}
+        <div
+          className="prose prose-lg prose-invert max-w-none
+            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-lg prose-p:font-open-sans
+            prose-h1:text-white prose-h1:font-roboto
+            prose-h2:text-white prose-h2:font-roboto
+            prose-h3:text-white prose-h3:font-roboto
+            prose-strong:text-white prose-strong:font-bold
+            prose-em:text-[#fcee16] prose-em:italic
+            prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
+            prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200
+            prose-img:rounded-lg prose-img:border prose-img:border-gray-700
+            prose-pre:bg-gray-800 prose-pre:rounded-lg
+            prose-code:text-green-400"
+          dangerouslySetInnerHTML={{ __html: post.data.content }}
+        />
 
         {/* Article Meta Information */}
         <div className="mt-8 p-6 bg-[#1b1a1b]/80 rounded-lg border border-gray-800">
@@ -448,22 +254,20 @@ export default async function BlogPost({ params }: BlogPageProps) {
               {updateDate && updateDate !== publishDate && (
                 <div className="flex justify-between">
                   <span className="text-gray-400 font-open-sans">Updated:</span>
-                  <span className="text-white font-open-sans">
-                    {updateDate}
-                  </span>
+                  <span className="text-white font-open-sans">{updateDate}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-gray-400 font-open-sans">Tags:</span>
                 <span className="text-white font-open-sans">
-                  {postTags.length}
+                  {post.data.tags.length}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* COMMENT SECTION - Using post.uid as the unique identifier */}
+        {/* Comment Section */}
         <CommentSection postId={post.uid} />
 
         {/* Share Section */}
@@ -517,9 +321,6 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </div>
 
-        {/* COMMENT SECTION */}
-        <CommentSection postId={post.uid} />
-
         {/* Related Articles */}
         <div className="mt-16 pt-8 border-t border-default">
           <h3 className="text-2xl font-bold text-white mb-6 font-roboto">
@@ -532,37 +333,25 @@ export default async function BlogPost({ params }: BlogPageProps) {
               </div>
             )}
             {relatedArticles.map((article) => {
-              const articleUrl = `/blog/${article.uid}`;
               const articleImage = article.data.featured_image?.url;
-              const articleImageAlt =
-                article.data.featured_image?.alt ||
-                article.data.title ||
-                "Related article image";
               const articleTitle = article.data.title || "Untitled";
-              const articleSummary =
-                prismicH.asText(article.data.summary) || "";
               const articleDate = formatDate(article.data.published_date);
-              const articleReadingTime = article.data.reading_time
-                ? `${article.data.reading_time} min`
-                : estimateReadingTime(article.data.content);
               return (
                 <Link
                   key={article.uid}
-                  href={articleUrl}
+                  href={`/blog/${article.uid}`}
                   className="block group focus:outline-none focus:ring-2 focus:ring-[#fcee16] rounded-lg"
                   aria-label={`Read related article: ${articleTitle}`}
-                  tabIndex={0}
                 >
                   <div className="bg-[#1b1a1b]/80 border border-gray-700 hover:border-[#fcee16]/50 rounded-lg p-0 overflow-hidden transition-all duration-300 flex flex-col h-full">
                     {articleImage && (
                       <div className="relative aspect-[16/10] w-full h-40 overflow-hidden">
                         <Image
                           src={articleImage}
-                          alt={articleImageAlt}
+                          alt={article.data.featured_image?.alt || articleTitle}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          priority={false}
                         />
                       </div>
                     )}
@@ -570,9 +359,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
                       <h4 className="text-lg font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 font-roboto mb-2">
                         {articleTitle}
                       </h4>
-                      {articleSummary && (
+                      {article.data.summary && (
                         <p className="text-gray-400 text-sm font-open-sans mb-3 line-clamp-3">
-                          {articleSummary}
+                          {article.data.summary}
                         </p>
                       )}
                       <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto font-open-sans">
@@ -582,7 +371,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock size={10} />
-                          {articleReadingTime} read
+                          {article.data.reading_time} min read
                         </span>
                       </div>
                     </div>
@@ -597,20 +386,18 @@ export default async function BlogPost({ params }: BlogPageProps) {
   );
 }
 
-// Generate metadata (no changes needed here)
 export async function generateMetadata({ params }: BlogPageProps) {
   try {
     const resolvedParams = await params;
-    const post = await client.getByUID("blog_post", resolvedParams.uid);
+    const post = await getPostBySlug(resolvedParams.uid);
+    if (!post) return { title: "Article Not Found | Daily Guardian" };
 
     return {
       title: `${post.data.title} | Daily Guardian`,
-      description:
-        post.data.meta_description || prismicH.asText(post.data.summary),
+      description: post.data.meta_description || post.data.summary,
       openGraph: {
         title: post.data.title,
-        description:
-          post.data.meta_description || prismicH.asText(post.data.summary),
+        description: post.data.meta_description || post.data.summary,
         images: post.data.featured_image?.url
           ? [
               {
@@ -625,8 +412,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
       twitter: {
         card: "summary_large_image",
         title: post.data.title,
-        description:
-          post.data.meta_description || prismicH.asText(post.data.summary),
+        description: post.data.meta_description || post.data.summary,
         images: post.data.featured_image?.url
           ? [post.data.featured_image.url]
           : [],

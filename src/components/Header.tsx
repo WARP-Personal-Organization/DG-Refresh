@@ -3,10 +3,9 @@
 import { Bell, Calendar, MapPin, Search, User } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import type { BlogPostDocument } from "../../prismicio-types";
+import type { Post } from "../../lib/wordpress";
 import SearchModal from "./SearchModal";
 
-// Weather data interface
 interface WeatherData {
   temperature: number;
   description: string;
@@ -14,9 +13,9 @@ interface WeatherData {
   error: boolean;
 }
 
-// Header props interface
 interface HeaderProps {
-  posts?: BlogPostDocument[];
+  posts?: Post[];
+  breakingPost?: Post | null;
 }
 
 // Custom hook for weather data
@@ -85,7 +84,7 @@ const useWeather = () => {
   return weather;
 };
 
-const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
+const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const weather = useWeather();
@@ -150,13 +149,18 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-black">
-              <span className="font-semibold font-roboto">Breaking News</span>
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-black font-medium font-open-sans">
-                Local Election Results Tonight
-              </span>
-            </div>
+            {breakingPost && (
+              <Link
+                href={`/blog/${breakingPost.uid}`}
+                className="flex items-center gap-3 text-black hover:opacity-80 transition-opacity"
+              >
+                <span className="font-semibold font-roboto">Breaking News</span>
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="font-medium font-open-sans truncate max-w-sm">
+                  {breakingPost.data.title}
+                </span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Top Bar */}
@@ -304,17 +308,23 @@ const Header: React.FC<HeaderProps> = ({ posts = [] }) => {
                 </button>
               </div>
 
-              <div className="mt-6 p-4 bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-red-400 font-bold text-sm font-roboto">
-                    BREAKING NEWS
-                  </span>
-                </div>
-                <p className="text-black text-sm font-open-sans">
-                  Local Election Results Tonight
-                </p>
-              </div>
+              {breakingPost && (
+                <Link
+                  href={`/blog/${breakingPost.uid}`}
+                  className="mt-6 p-4 bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/30 rounded-lg block"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-red-400 font-bold text-sm font-roboto">
+                      BREAKING NEWS
+                    </span>
+                  </div>
+                  <p className="text-black text-sm font-open-sans">
+                    {breakingPost.data.title}
+                  </p>
+                </Link>
+              )}
             </div>
           </div>
         )}
