@@ -17,8 +17,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const categorySlug = resolvedParams.catagory;
   const page = Math.max(1, parseInt(resolvedSearch.page ?? "1", 10) || 1);
 
-  const wpSlugs = getWPSlugsForCategory(categorySlug);
-  const { posts, totalPages } = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+  let posts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
+  let totalPages = 1;
+
+  try {
+    const wpSlugs = getWPSlugsForCategory(categorySlug);
+    const result = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+    posts = result.posts;
+    totalPages = result.totalPages;
+  } catch {
+    // WordPress API unreachable — fall through to notFound
+  }
 
   if (!posts || posts.length === 0) {
     notFound();
