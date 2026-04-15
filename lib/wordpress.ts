@@ -195,15 +195,16 @@ export function transformPost(wpPost: WPPost): Post {
   const category = mapCategory(categorySlugs);
   const subcategory = mapSubcategory(categorySlugs);
 
-  const excerpt = stripHtml(wpPost.excerpt.rendered);
+  const rawContent = wpPost.content?.rendered ?? "";
+  const excerpt = stripHtml(wpPost.excerpt?.rendered ?? "");
 
   return {
     id: wpPost.id,
     uid: wpPost.slug,
     data: {
-      title: stripHtml(wpPost.title.rendered),
+      title: stripHtml(wpPost.title?.rendered ?? ""),
       summary: excerpt,
-      content: wpPost.content.rendered,
+      content: rawContent,
       category,
       subcategory,
       is_featured: wpPost.sticky,
@@ -212,16 +213,16 @@ export function transformPost(wpPost: WPPost): Post {
       featured_image: media
         ? {
             url: media.source_url,
-            alt: media.alt_text || stripHtml(wpPost.title.rendered),
+            alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
           }
         : null,
       author: authorItem?.name ?? "Staff Writer",
       published_date: wpPost.date,
       updated_date: wpPost.modified,
-      reading_time: estimateReadingTime(wpPost.content.rendered),
+      reading_time: estimateReadingTime(rawContent),
       tags: tagTerms.map((t) => t.name),
       meta_description: excerpt.substring(0, 160),
-      original_link: wpPost.link,
+      original_link: wpPost.link ?? "",
     },
   };
 }
@@ -317,23 +318,43 @@ const APP_CATEGORY_WP_SLUGS: Record<string, string[]> = {
   sports: ["sports"],
   business: ["business"],
   feature: [
-    "feature",
     "features",
     "entertainment",
     "lifestyle",
     "health",
     "technology",
+    "education",
+    "environment",
+    "arts-and-culture",
+    "travel",
+    "tourism",
+    "society",
   ],
-  initiatives: ["initiatives"],
+  initiatives: ["initiative"],
   opinion: ["opinion"],
-  voices: ["voices", "visons"],
+  voices: ["opinion"],
 };
 
 const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
-  local: ["local", "local-news", "iloilo", "western-visayas"],
-  negros: ["negros", "negros-news", "bacolod"],
-  "national-news": ["national", "national-news"],
-  editorial: ["editorial", "the-dg-view"],
+  local: ["local-news"],
+  negros: ["negros"],
+  "national-news": ["nation"],
+  editorial: ["editorial"],
+  capiz: ["capiz"],
+  "facts-first-ph": ["facts-first-ph"],
+  motoring: ["motoring"],
+  "tech-talk": ["tecktalk"],
+  health: ["health"],
+  travel: ["travel"],
+  entertainment: ["entertainment"],
+  lifestyle: ["lifestyle"],
+  "arts-and-culture": ["arts-and-culture"],
+  education: ["education"],
+  environment: ["environment"],
+  "fashion-fridays": ["fashion-fridays"],
+  empower: ["empower"],
+  "global-shapers-iloilo": ["global-shapers-iloilo"],
+  "zero-day": ["zero-day"],
 };
 
 export function getWPSlugsForCategory(appSlug: string): string[] {
@@ -345,6 +366,19 @@ export function getWPSlugsForSubcategory(appSlug: string): string[] {
 }
 
 // ─── Public API Functions ─────────────────────────────────────────────────────
+
+// Lightweight fetch for layout/header — no _embed, fewer posts, essential fields only.
+// Much faster than getAllPosts; use this in the root layout to avoid timeouts.
+export async function getLayoutPosts(perPage = 10): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>("/posts", {
+    per_page: perPage,
+    status: "publish",
+    orderby: "date",
+    order: "desc",
+    _fields: "id,slug,title,excerpt,sticky",
+  }).catch(() => [] as WPPost[]);
+  return wpPosts.map(transformPost);
+}
 
 export async function getAllPosts(perPage = 40): Promise<Post[]> {
   const wpPosts = await wpFetch<WPPost[]>("/posts", {
