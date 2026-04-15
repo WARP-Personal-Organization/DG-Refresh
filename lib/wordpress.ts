@@ -254,7 +254,7 @@ async function wpFetch<T>(
   );
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000); // 10s timeout
+  const timeout = setTimeout(() => controller.abort(), 20000); // 10s timeout
 
   try {
     const res = await fetch(url.toString(), {
@@ -302,7 +302,7 @@ async function wpFetchPaginated<T>(
 
     const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
     const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
-    const data = await res.json() as T;
+    const data = (await res.json()) as T;
     return { data, totalPages, total };
   } finally {
     clearTimeout(timeout);
@@ -316,7 +316,14 @@ const APP_CATEGORY_WP_SLUGS: Record<string, string[]> = {
   news: ["news"],
   sports: ["sports"],
   business: ["business"],
-  feature: ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
+  feature: [
+    "feature",
+    "features",
+    "entertainment",
+    "lifestyle",
+    "health",
+    "technology",
+  ],
   initiatives: ["initiatives"],
   opinion: ["opinion"],
   voices: ["voices", "visons"],
@@ -378,14 +385,17 @@ export async function getPostsByCategory(
   });
   if (!categories[0]) return { posts: [], totalPages: 0, total: 0 };
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
-    categories: categories[0].id,
-    per_page: perPage,
-    page,
-    _embed: 1,
-    orderby: "date",
-    order: "desc",
-  });
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+    "/posts",
+    {
+      categories: categories[0].id,
+      per_page: perPage,
+      page,
+      _embed: 1,
+      orderby: "date",
+      order: "desc",
+    },
+  );
   return { posts: data.map(transformPost), totalPages, total };
 }
 
@@ -397,20 +407,35 @@ export async function getPostsByCategorySlugs(
 ): Promise<{ posts: Post[]; totalPages: number; total: number }> {
   const categoryResults = await Promise.all(
     slugs.map((slug) =>
-      wpFetch<WPCategory[]>("/categories", { slug }).catch(() => [] as WPCategory[])
-    )
+      wpFetch<WPCategory[]>("/categories", { slug }).catch(
+        () => [] as WPCategory[],
+      ),
+    ),
   );
-  const ids = categoryResults.flatMap((cats) => cats[0]?.id ? [cats[0].id] : []);
-  if (ids.length === 0) return { posts: [], totalPages: 0, total: 0 };
+  const ids = categoryResults.flatMap((cats) =>
+    cats[0]?.id ? [cats[0].id] : [],
+  );
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
-    categories: ids.join(","),
-    per_page: perPage,
-    page,
-    _embed: 1,
-    orderby: "date",
-    order: "desc",
-  });
+  console.log("SLUGS:", slugs);
+  console.log("CATEGORY RESULTS:", categoryResults);
+  console.log("IDS:", ids);
+
+  if (ids.length === 0) {
+    console.error("No category IDs found for slugs:", slugs);
+    return { posts: [], totalPages: 1, total: 0 };
+  }
+
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+    "/posts",
+    {
+      categories: ids.join(","),
+      per_page: perPage,
+      page,
+      _embed: 1,
+      orderby: "date",
+      order: "desc",
+    },
+  );
   return { posts: data.map(transformPost), totalPages, total };
 }
 

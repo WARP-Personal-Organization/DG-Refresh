@@ -1,32 +1,34 @@
 export const revalidate = 300; // ISR: rebuild at most every 5 minutes
 
 import { notFound } from "next/navigation";
+import {
+  getPostsByCategorySlugs,
+  getWPSlugsForCategory,
+} from "../../../lib/wordpress";
 import CategoryPageComponent from "../../components/CategoryPage";
 import Pagination from "../../components/Pagination";
-import { getPostsByCategorySlugs, getWPSlugsForCategory } from "../../../lib/wordpress";
 
 type Props = {
-  params: Promise<{ catagory: string }>;
-  searchParams: Promise<{ page?: string }>;
+  params: { catagory: string };
+  searchParams: { page?: string };
 };
 
 const POSTS_PER_PAGE = 20;
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
-  const categorySlug = resolvedParams.catagory;
-  const page = Math.max(1, parseInt(resolvedSearch.page ?? "1", 10) || 1);
+  const categorySlug = params.catagory;
+  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
 
   let posts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   let totalPages = 1;
-
+  const safeCategory = categorySlug ?? "news";
   try {
     const wpSlugs = getWPSlugsForCategory(categorySlug);
     const result = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
     posts = result.posts;
     totalPages = result.totalPages;
-  } catch {
-    // WordPress API unreachable — fall through to notFound
+  } catch (err) {
+    console.error("WP FETCH ERROR:", err);
   }
 
   if (!posts || posts.length === 0) {
@@ -36,8 +38,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <div className="font-open-sans">
       <CategoryPageComponent
-        categoryName={categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)}
-        categorySlug={categorySlug}
+        categoryName={
+          safeCategory.charAt(0).toUpperCase() + safeCategory.slice(1)
+        }
+        categorySlug={safeCategory}
         featuredArticle={posts[0]}
         newsArticles={posts}
         opinionArticles={posts}
@@ -47,7 +51,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <Pagination
           currentPage={page}
           totalPages={totalPages}
-          basePath={`/${categorySlug}`}
+          basePath={`/${safeCategory}`}
         />
       </div>
     </div>
