@@ -254,7 +254,7 @@ async function wpFetch<T>(
   );
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000); // 10s timeout
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(url.toString(), {
@@ -285,7 +285,7 @@ async function wpFetchPaginated<T>(
   );
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(url.toString(), {
@@ -416,27 +416,27 @@ export async function getPostsByCategorySlugs(
     cats[0]?.id ? [cats[0].id] : [],
   );
 
-  console.log("SLUGS:", slugs);
-  console.log("CATEGORY RESULTS:", categoryResults);
-  console.log("IDS:", ids);
-
   if (ids.length === 0) {
-    console.error("No category IDs found for slugs:", slugs);
     return { posts: [], totalPages: 1, total: 0 };
   }
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
-    "/posts",
-    {
-      categories: ids.join(","),
-      per_page: perPage,
-      page,
-      _embed: 1,
-      orderby: "date",
-      order: "desc",
-    },
-  );
-  return { posts: data.map(transformPost), totalPages, total };
+  try {
+    const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+      "/posts",
+      {
+        categories: ids.join(","),
+        per_page: perPage,
+        page,
+        _embed: 1,
+        orderby: "date",
+        order: "desc",
+      },
+    );
+    return { posts: data.map(transformPost), totalPages, total };
+  } catch (err) {
+    console.error("Failed to fetch posts for category IDs:", ids, err);
+    return { posts: [], totalPages: 1, total: 0 };
+  }
 }
 
 interface WPPage {

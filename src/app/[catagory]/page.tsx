@@ -1,4 +1,5 @@
 export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+export const maxDuration = 30;
 
 import { notFound } from "next/navigation";
 import {
@@ -9,15 +10,15 @@ import CategoryPageComponent from "../../components/CategoryPage";
 import Pagination from "../../components/Pagination";
 
 type Props = {
-  params: { catagory: string };
-  searchParams: { page?: string };
+  params: Promise<{ catagory: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
 const POSTS_PER_PAGE = 20;
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const categorySlug = params.catagory;
-  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+  const categorySlug = (await params).catagory;
+  const page = Math.max(1, parseInt((await searchParams).page ?? "1", 10) || 1);
 
   let posts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   let totalPages = 1;

@@ -1,4 +1,5 @@
 export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+export const maxDuration = 30;
 
 import {
   formatSubcategoryName,
@@ -225,121 +226,121 @@ export default async function SubCategoryPage({
   params,
   searchParams,
 }: SubCategoryPageProps) {
+  const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
+  const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
+  const displayName = formatSubcategoryName(subcategoryValue);
+  const page = Math.max(1, parseInt(resolvedSearch.page ?? "1", 10) || 1);
+
+  let posts: Post[] = [];
+  let totalPages = 1;
+
   try {
-    const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
-    const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
-    const displayName = formatSubcategoryName(subcategoryValue);
-    const page = Math.max(1, parseInt(resolvedSearch.page ?? "1", 10) || 1);
-
     const wpSlugs = getWPSlugsForSubcategory(subcategoryValue);
-    const { posts: allPostsForSubcat, totalPages } = await getPostsByCategorySlugs(
-      wpSlugs,
-      POSTS_PER_PAGE,
-      page
-    );
-
-    if (allPostsForSubcat.length === 0) {
-      notFound();
-    }
-
-    const featuredArticles = allPostsForSubcat.filter((p) => p.data.is_featured);
-    const breakingNews = allPostsForSubcat.filter((p) => p.data.is_breaking_news);
-    const regularArticles = allPostsForSubcat.filter(
-      (p) => !p.data.is_featured && !p.data.is_breaking_news
-    );
-
-    return (
-      <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="mb-12">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 mb-6 group"
-            >
-              <ArrowLeft
-                size={16}
-                className="group-hover:-translate-x-1 transition-transform duration-200"
-              />
-              Back to Home
-            </Link>
-
-            <div className="space-y-4">
-              <h1 className="text-5xl lg:text-6xl font-roboto font-bold text-white">
-                {displayName}
-              </h1>
-              <div className="flex items-center gap-4">
-                <div className="h-1 w-24 bg-[#fcee16]"></div>
-              </div>
-            </div>
-          </div>
-
-          {breakingNews.length > 0 && (
-            <section className="mb-8">
-              <div className="bg-gradient-to-r from-red-600 to-red-800 border border-red-500 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-                  <span className="text-white font-bold text-lg uppercase tracking-wider">
-                    Breaking News
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {breakingNews.slice(0, 3).map((article) => (
-                    <Link
-                      key={article.id}
-                      href={`/blog/${article.uid}`}
-                      className="block text-white hover:text-[#fcee16] transition-colors duration-200"
-                    >
-                      <span className="font-semibold">{article.data.title}</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {featuredArticles.length > 0 && (
-            <section className="mb-16">
-              <FeaturedArticle article={featuredArticles[0]} />
-            </section>
-          )}
-
-          <div className="grid lg:grid-cols-4 gap-12">
-            <div className="lg:col-span-3 space-y-12">
-              {regularArticles.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-1 h-8 bg-[#fcee16]"></div>
-                    <h2 className="text-3xl font-roboto font-bold text-white">
-                      Latest {displayName} Articles
-                    </h2>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {regularArticles.map((article, index) => (
-                      <ArticleCard
-                        key={article.id}
-                        article={article}
-                        index={index}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                basePath={`/${resolvedParams.catagory}/${resolvedParams.subcategory}`}
-              />
-            </div>
-
-            <div className="lg:col-span-1"></div>
-          </div>
-        </div>
-      </div>
-    );
+    const result = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+    posts = result.posts;
+    totalPages = result.totalPages;
   } catch (error) {
     console.error("Error fetching subcategory articles:", error);
+  }
+
+  if (posts.length === 0) {
     notFound();
   }
+
+  const featuredArticles = posts.filter((p) => p.data.is_featured);
+  const breakingNews = posts.filter((p) => p.data.is_breaking_news);
+  const regularArticles = posts.filter(
+    (p) => !p.data.is_featured && !p.data.is_breaking_news
+  );
+
+  return (
+    <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-12">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 mb-6 group"
+          >
+            <ArrowLeft
+              size={16}
+              className="group-hover:-translate-x-1 transition-transform duration-200"
+            />
+            Back to Home
+          </Link>
+
+          <div className="space-y-4">
+            <h1 className="text-5xl lg:text-6xl font-roboto font-bold text-white">
+              {displayName}
+            </h1>
+            <div className="flex items-center gap-4">
+              <div className="h-1 w-24 bg-[#fcee16]"></div>
+            </div>
+          </div>
+        </div>
+
+        {breakingNews.length > 0 && (
+          <section className="mb-8">
+            <div className="bg-gradient-to-r from-red-600 to-red-800 border border-red-500 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                <span className="text-white font-bold text-lg uppercase tracking-wider">
+                  Breaking News
+                </span>
+              </div>
+              <div className="space-y-2">
+                {breakingNews.slice(0, 3).map((article) => (
+                  <Link
+                    key={article.id}
+                    href={`/blog/${article.uid}`}
+                    className="block text-white hover:text-[#fcee16] transition-colors duration-200"
+                  >
+                    <span className="font-semibold">{article.data.title}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {featuredArticles.length > 0 && (
+          <section className="mb-16">
+            <FeaturedArticle article={featuredArticles[0]} />
+          </section>
+        )}
+
+        <div className="grid lg:grid-cols-4 gap-12">
+          <div className="lg:col-span-3 space-y-12">
+            {regularArticles.length > 0 && (
+              <section>
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-1 h-8 bg-[#fcee16]"></div>
+                  <h2 className="text-3xl font-roboto font-bold text-white">
+                    Latest {displayName} Articles
+                  </h2>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  {regularArticles.map((article, index) => (
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              basePath={`/${resolvedParams.catagory}/${resolvedParams.subcategory}`}
+            />
+          </div>
+
+          <div className="lg:col-span-1"></div>
+        </div>
+      </div>
+    </div>
+  );
 }
