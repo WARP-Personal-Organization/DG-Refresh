@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "images.prismic.io",
-      "dailyguardian.com.ph",
-      "i0.wp.com",
-      "i1.wp.com",
-      "i2.wp.com",
-      "secure.gravatar.com",
+    remotePatterns: [
+      { protocol: "https", hostname: "dailyguardian.com.ph" },
+      { protocol: "https", hostname: "**.dailyguardian.com.ph" },
+      { protocol: "https", hostname: "i0.wp.com" },
+      { protocol: "https", hostname: "i1.wp.com" },
+      { protocol: "https", hostname: "i2.wp.com" },
+      { protocol: "https", hostname: "secure.gravatar.com" },
+      { protocol: "https", hostname: "images.prismic.io" },
+      { protocol: "http", hostname: "dailyguardian.com.ph" },
     ],
   },
 };
