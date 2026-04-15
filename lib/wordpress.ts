@@ -245,6 +245,18 @@ export function transformAuthor(wpUser: WPUser): Author {
 
 // ─── API Fetch ────────────────────────────────────────────────────────────────
 
+// Rejects after `ms` milliseconds with a timeout error.
+// Using Promise.race (not AbortController) avoids conflicts with
+// Next.js 15's fetch instrumentation for ISR/Data Cache on Vercel.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`WP API timeout after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 async function wpFetch<T>(
   endpoint: string,
   params: Record<string, string | number | boolean> = {},
@@ -254,26 +266,21 @@ async function wpFetch<T>(
     url.searchParams.set(key, String(value)),
   );
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
-  try {
-    const res = await fetch(url.toString(), {
-      next: { revalidate: 300 }, // cache 5 minutes
+  const res = await withTimeout(
+    fetch(url.toString(), {
+      next: { revalidate: 300 },
       headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
+    }),
+    8000,
+  );
 
-    if (!res.ok) {
-      throw new Error(
-        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-      );
-    }
-
-    return res.json();
-  } finally {
-    clearTimeout(timeout);
+  if (!res.ok) {
+    throw new Error(
+      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
+    );
   }
+
+  return res.json();
 }
 
 async function wpFetchPaginated<T>(
@@ -285,29 +292,24 @@ async function wpFetchPaginated<T>(
     url.searchParams.set(key, String(value)),
   );
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
-  try {
-    const res = await fetch(url.toString(), {
+  const res = await withTimeout(
+    fetch(url.toString(), {
       next: { revalidate: 300 },
       headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
+    }),
+    8000,
+  );
 
-    if (!res.ok) {
-      throw new Error(
-        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-      );
-    }
-
-    const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
-    const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
-    const data = (await res.json()) as T;
-    return { data, totalPages, total };
-  } finally {
-    clearTimeout(timeout);
+  if (!res.ok) {
+    throw new Error(
+      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
+    );
   }
+
+  const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
+  const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
+  const data = (await res.json()) as T;
+  return { data, totalPages, total };
 }
 
 // ─── App category/subcategory → WP category slug(s) ──────────────────────────
