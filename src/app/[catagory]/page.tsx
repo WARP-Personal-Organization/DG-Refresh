@@ -1,5 +1,4 @@
-export const revalidate = 300; // ISR: rebuild at most every 5 minutes
-export const maxDuration = 30;
+export const dynamic = 'force-dynamic';
 
 import { notFound } from "next/navigation";
 import {
