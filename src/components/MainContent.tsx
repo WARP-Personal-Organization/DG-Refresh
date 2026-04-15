@@ -51,7 +51,7 @@ const MainContent: React.FC<MainContentProps> = ({
             <Link href={`/blog/${heroPost.uid}`} className="block group">
               <AnimatedHeadline
                 as="h1"
-                extraClassName="text-2xl lg:text-3xl font-roboto font-bold leading-snug"
+                extraClassName="text-2xl lg:text-3xl font-playfair font-bold leading-snug"
               >
                 {heroPost.data.title}
               </AnimatedHeadline>
@@ -74,7 +74,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     <div className="flex items-start gap-2">
                       <div className="text-accent text-lg font-roboto font-bold"></div>
                       <div className="flex-1">
-                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
+                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair">
                           <span className="text-gray-400 font-normal text-sm">
                             The DG View.
                           </span>{" "}
@@ -101,7 +101,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     <div className="flex items-start gap-2">
                       <div className="text-accent text-lg font-roboto font-bold"></div>
                       <div className="flex-1">
-                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-roboto">
+                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair">
                           <span className="text-gray-400 font-normal text-sm">
                             The DG View.
                           </span>{" "}
@@ -153,7 +153,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 {featuredPost.data.category || "Featured"}
               </p>
 
-              <h2 className="relative text-3xl lg:text-4xl font-roboto text-accent leading-tight max-w-2xl break-words text-center mx-auto group-hover:text-accent/80 transition-colors duration-300">
+              <h2 className="relative text-3xl lg:text-4xl font-playfair font-bold text-accent leading-tight max-w-2xl break-words text-center mx-auto group-hover:text-accent/80 transition-colors duration-300">
                 {featuredPost.data.title}
 
                 <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-px bg-accent group-hover:w-full transition-all duration-500 ease-out"></span>

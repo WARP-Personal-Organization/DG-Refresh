@@ -54,7 +54,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
                     <span className="text-[#fcee16] text-xs font-bold uppercase tracking-widest">
                       Featured
                     </span>
-                    <h3 className="text-2xl font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
+                    <h3 className="text-2xl font-playfair font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
                       {featured.data.title}
                     </h3>
                     {featured.data.summary && (
@@ -73,7 +73,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock size={12} className="text-[#fcee16]" />
-                        {featured.data.reading_time} min read
+                        {featured.data.reading_time ?? "—"} min read
                       </span>
                     </div>
                   </div>
@@ -99,7 +99,7 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className="text-sm font-roboto font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-snug line-clamp-3">
+                        <h4 className="text-sm font-playfair font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-snug line-clamp-3">
                           {post.data.title}
                         </h4>
                         <div className="flex items-center gap-2 text-xs text-gray-500">

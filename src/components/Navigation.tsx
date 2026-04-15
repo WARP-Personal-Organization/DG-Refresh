@@ -10,10 +10,10 @@ const navigationData = [
     name: "News",
     href: "/news",
     dropdown: [
-      { name: "LOCAL", href: "/subcategory/local" },
-      { name: "FACTS FIRST PH", href: "/subcategory/fact-first-ph" },
-      { name: "CAPIZ", href: "/subcategory/capiz" },
-      { name: "NEGROS", href: "/subcategory/negros" },
+      { name: "LOCAL", href: "/news/local" },
+      { name: "FACTS FIRST PH", href: "/news/facts-first-ph" },
+      { name: "CAPIZ", href: "/news/capiz" },
+      { name: "NEGROS", href: "/news/negros" },
     ],
   },
   {
@@ -24,42 +24,38 @@ const navigationData = [
     name: "Business",
     href: "/business",
     dropdown: [
-      { name: "MONITORING", href: "/subcategory/monitoring" },
-      { name: "TECH TALK", href: "/subcategory/tech-talk" },
+      { name: "MOTORING", href: "/business/motoring" },
+      { name: "TECH TALK", href: "/business/tech-talk" },
     ],
   },
   {
     name: "Sports",
     href: "/sports",
-    dropdown: [
-      { name: "LOCAL NEWS", href: "/subcategory/local-news" },
-      { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
-    ],
   },
   {
     name: "Features",
     href: "/feature",
     dropdown: [
-      { name: "HEALTH", href: "/subcategory/health" },
-      { name: "TRAVEL", href: "/subcategory/travel" },
-      { name: "ENTERTAINMENT", href: "/subcategory/entertainment" },
-      { name: "LIFESTYLE", href: "/subcategory/lifestyle" },
-      { name: "ARTS AND CULTURE", href: "/subcategory/arts-and-culture" },
-      { name: "EDUCATION", href: "/subcategory/education" },
-      { name: "ENVIRONMENT", href: "/subcategory/environment" },
+      { name: "HEALTH", href: "/feature/health" },
+      { name: "TRAVEL", href: "/feature/travel" },
+      { name: "ENTERTAINMENT", href: "/feature/entertainment" },
+      { name: "LIFESTYLE", href: "/feature/lifestyle" },
+      { name: "ARTS AND CULTURE", href: "/feature/arts-and-culture" },
+      { name: "EDUCATION", href: "/feature/education" },
+      { name: "ENVIRONMENT", href: "/feature/environment" },
     ],
   },
   {
     name: "Initiative",
     href: "/initiatives",
     dropdown: [
-      { name: "FASHION FRIDAYS", href: "/subcategory/fashion-fridays" },
-      { name: "EMPOWER", href: "/subcategory/empower" },
+      { name: "FASHION FRIDAYS", href: "/initiatives/fashion-fridays" },
+      { name: "EMPOWER", href: "/initiatives/empower" },
       {
         name: "GLOBAL SHAPERS ILOILO",
-        href: "/subcategory/global-shapers-iloilo",
+        href: "/initiatives/global-shapers-iloilo",
       },
-      { name: "ZERO DAY", href: "/subcategory/zero-day" },
+      { name: "ZERO DAY", href: "/initiatives/zero-day" },
     ],
   },
   {
@@ -70,11 +66,10 @@ const navigationData = [
     name: "Others",
     href: "/other-pages",
     dropdown: [
-      { name: "ABOUT US", href: "/subcategory/about-us" },
-      { name: "CONTACT US", href: "/subcategory/contact-us" },
+      { name: "ABOUT US", href: "/about-us" },
+      { name: "CONTACT US", href: "/contact-us" },
     ],
   },
-  { name: "CONTACT US", href: "/subcategory/contact-us" },
 ];
 
 const NavigationBar: React.FC = () => {
@@ -161,13 +156,13 @@ const NavigationBar: React.FC = () => {
                   {/* Scrollable dropdown content */}
                   <div
                     className={`py-2 ${
-                      item.name === "Feature"
+                      item.name === "Features"
                         ? "max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#ffe600] scrollbar-track-gray-800 hover:scrollbar-thumb-[#ffe600]/80"
                         : ""
                     }`}
                   >
                     {/* Scroll indicator for Feature dropdown */}
-                    {item.name === "Feature" && (
+                    {item.name === "Features" && (
                       <div className="px-4 py-2 border-b border-[#ffe600]/20 bg-[#ffe600]/5 sticky top-0 z-10">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-[#ffe600] font-medium font-open-sans">

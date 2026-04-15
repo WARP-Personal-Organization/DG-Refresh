@@ -46,7 +46,7 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
                   <p className="text-sm font-semibold text-accent uppercase font-sans">
                     {story.data.category || "News"}
                   </p>
-                  <h3 className="text-xl font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                  <h3 className="text-xl font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h3>
                 </div>

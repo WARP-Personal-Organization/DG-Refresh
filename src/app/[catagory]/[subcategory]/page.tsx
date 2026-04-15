@@ -16,12 +16,16 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllPosts } from "../../../../lib/wordpress";
+import { getPostsByCategorySlugs, getWPSlugsForSubcategory } from "../../../../lib/wordpress";
 import type { Post } from "../../../../lib/wordpress";
+import Pagination from "../../../components/Pagination";
 
-type Params = Promise<{ subcategory: string }>;
+const POSTS_PER_PAGE = 20;
+
+type Params = Promise<{ catagory: string; subcategory: string }>;
 interface SubCategoryPageProps {
   params: Params;
+  searchParams: Promise<{ page?: string }>;
 }
 
 const formatDate = (dateString: string | null | undefined): string => {
@@ -219,15 +223,19 @@ const FeaturedArticle: React.FC<{ article: Post }> = ({ article }) => (
 
 export default async function SubCategoryPage({
   params,
+  searchParams,
 }: SubCategoryPageProps) {
   try {
-    const resolvedParams = await params;
+    const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
     const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
     const displayName = formatSubcategoryName(subcategoryValue);
+    const page = Math.max(1, parseInt(resolvedSearch.page ?? "1", 10) || 1);
 
-    const allPosts = await getAllPosts();
-    const allPostsForSubcat = allPosts.filter(
-      (p) => p.data.subcategory === subcategoryValue
+    const wpSlugs = getWPSlugsForSubcategory(subcategoryValue);
+    const { posts: allPostsForSubcat, totalPages } = await getPostsByCategorySlugs(
+      wpSlugs,
+      POSTS_PER_PAGE,
+      page
     );
 
     if (allPostsForSubcat.length === 0) {
@@ -317,6 +325,12 @@ export default async function SubCategoryPage({
                   </div>
                 </section>
               )}
+
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                basePath={`/${resolvedParams.catagory}/${resolvedParams.subcategory}`}
+              />
             </div>
 
             <div className="lg:col-span-1"></div>

@@ -22,7 +22,7 @@ const formatDate = (dateString: string | null): string => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
     );
 
     if (diffInHours < 1) return "JUST NOW";
@@ -113,7 +113,7 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                       <p className="text-lg text-gray-400 leading-relaxed font-open-sans">
                         {renderText(featuredArticle.data.summary).substring(
                           0,
-                          200
+                          200,
                         )}
                         ...
                       </p>
