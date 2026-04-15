@@ -21,7 +21,7 @@ import { getPostsByCategorySlugs, getWPSlugsForSubcategory } from "../../../../l
 import type { Post } from "../../../../lib/wordpress";
 import Pagination from "../../../components/Pagination";
 
-const POSTS_PER_PAGE = 20;
+const POSTS_PER_PAGE = 6;
 
 type Params = Promise<{ catagory: string; subcategory: string }>;
 interface SubCategoryPageProps {

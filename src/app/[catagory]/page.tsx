@@ -14,7 +14,7 @@ type Props = {
   searchParams: Promise<{ page?: string }>;
 };
 
-const POSTS_PER_PAGE = 20;
+const POSTS_PER_PAGE = 6;
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const categorySlug = (await params).catagory;
