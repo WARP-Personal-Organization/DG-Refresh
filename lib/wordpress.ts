@@ -195,15 +195,16 @@ export function transformPost(wpPost: WPPost): Post {
   const category = mapCategory(categorySlugs);
   const subcategory = mapSubcategory(categorySlugs);
 
-  const excerpt = stripHtml(wpPost.excerpt.rendered);
+  const rawContent = wpPost.content?.rendered ?? "";
+  const excerpt = stripHtml(wpPost.excerpt?.rendered ?? "");
 
   return {
     id: wpPost.id,
     uid: wpPost.slug,
     data: {
-      title: stripHtml(wpPost.title.rendered),
+      title: stripHtml(wpPost.title?.rendered ?? ""),
       summary: excerpt,
-      content: wpPost.content.rendered,
+      content: rawContent,
       category,
       subcategory,
       is_featured: wpPost.sticky,
@@ -212,16 +213,16 @@ export function transformPost(wpPost: WPPost): Post {
       featured_image: media
         ? {
             url: media.source_url,
-            alt: media.alt_text || stripHtml(wpPost.title.rendered),
+            alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
           }
         : null,
       author: authorItem?.name ?? "Staff Writer",
       published_date: wpPost.date,
       updated_date: wpPost.modified,
-      reading_time: estimateReadingTime(wpPost.content.rendered),
+      reading_time: estimateReadingTime(rawContent),
       tags: tagTerms.map((t) => t.name),
       meta_description: excerpt.substring(0, 160),
-      original_link: wpPost.link,
+      original_link: wpPost.link ?? "",
     },
   };
 }
@@ -244,6 +245,18 @@ export function transformAuthor(wpUser: WPUser): Author {
 
 // ─── API Fetch ────────────────────────────────────────────────────────────────
 
+// Rejects after `ms` milliseconds with a timeout error.
+// Using Promise.race (not AbortController) avoids conflicts with
+// Next.js 15's fetch instrumentation for ISR/Data Cache on Vercel.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`WP API timeout after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 async function wpFetch<T>(
   endpoint: string,
   params: Record<string, string | number | boolean> = {},
@@ -253,26 +266,21 @@ async function wpFetch<T>(
     url.searchParams.set(key, String(value)),
   );
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000); // 10s timeout
-
-  try {
-    const res = await fetch(url.toString(), {
-      next: { revalidate: 300 }, // cache 5 minutes
+  const res = await withTimeout(
+    fetch(url.toString(), {
+      next: { revalidate: 300 },
       headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
+    }),
+    8000,
+  );
 
-    if (!res.ok) {
-      throw new Error(
-        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-      );
-    }
-
-    return res.json();
-  } finally {
-    clearTimeout(timeout);
+  if (!res.ok) {
+    throw new Error(
+      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
+    );
   }
+
+  return res.json();
 }
 
 async function wpFetchPaginated<T>(
@@ -284,29 +292,24 @@ async function wpFetchPaginated<T>(
     url.searchParams.set(key, String(value)),
   );
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
-
-  try {
-    const res = await fetch(url.toString(), {
+  const res = await withTimeout(
+    fetch(url.toString(), {
       next: { revalidate: 300 },
       headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
+    }),
+    8000,
+  );
 
-    if (!res.ok) {
-      throw new Error(
-        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-      );
-    }
-
-    const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
-    const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
-    const data = await res.json() as T;
-    return { data, totalPages, total };
-  } finally {
-    clearTimeout(timeout);
+  if (!res.ok) {
+    throw new Error(
+      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
+    );
   }
+
+  const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
+  const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
+  const data = (await res.json()) as T;
+  return { data, totalPages, total };
 }
 
 // ─── App category/subcategory → WP category slug(s) ──────────────────────────
@@ -316,17 +319,44 @@ const APP_CATEGORY_WP_SLUGS: Record<string, string[]> = {
   news: ["news"],
   sports: ["sports"],
   business: ["business"],
-  feature: ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
-  initiatives: ["initiatives"],
+  feature: [
+    "features",
+    "entertainment",
+    "lifestyle",
+    "health",
+    "technology",
+    "education",
+    "environment",
+    "arts-and-culture",
+    "travel",
+    "tourism",
+    "society",
+  ],
+  initiatives: ["initiative"],
   opinion: ["opinion"],
-  voices: ["voices", "visons"],
+  voices: ["opinion"],
 };
 
 const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
-  local: ["local", "local-news", "iloilo", "western-visayas"],
-  negros: ["negros", "negros-news", "bacolod"],
-  "national-news": ["national", "national-news"],
-  editorial: ["editorial", "the-dg-view"],
+  local: ["local-news"],
+  negros: ["negros"],
+  "national-news": ["nation"],
+  editorial: ["editorial"],
+  capiz: ["capiz"],
+  "facts-first-ph": ["facts-first-ph"],
+  motoring: ["motoring"],
+  "tech-talk": ["tecktalk"],
+  health: ["health"],
+  travel: ["travel"],
+  entertainment: ["entertainment"],
+  lifestyle: ["lifestyle"],
+  "arts-and-culture": ["arts-and-culture"],
+  education: ["education"],
+  environment: ["environment"],
+  "fashion-fridays": ["fashion-fridays"],
+  empower: ["empower"],
+  "global-shapers-iloilo": ["global-shapers-iloilo"],
+  "zero-day": ["zero-day"],
 };
 
 export function getWPSlugsForCategory(appSlug: string): string[] {
@@ -338,6 +368,19 @@ export function getWPSlugsForSubcategory(appSlug: string): string[] {
 }
 
 // ─── Public API Functions ─────────────────────────────────────────────────────
+
+// Lightweight fetch for layout/header — no _embed, fewer posts, essential fields only.
+// Much faster than getAllPosts; use this in the root layout to avoid timeouts.
+export async function getLayoutPosts(perPage = 10): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>("/posts", {
+    per_page: perPage,
+    status: "publish",
+    orderby: "date",
+    order: "desc",
+    _fields: "id,slug,title,excerpt,sticky",
+  }).catch(() => [] as WPPost[]);
+  return wpPosts.map(transformPost);
+}
 
 export async function getAllPosts(perPage = 40): Promise<Post[]> {
   const wpPosts = await wpFetch<WPPost[]>("/posts", {
@@ -378,14 +421,17 @@ export async function getPostsByCategory(
   });
   if (!categories[0]) return { posts: [], totalPages: 0, total: 0 };
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
-    categories: categories[0].id,
-    per_page: perPage,
-    page,
-    _embed: 1,
-    orderby: "date",
-    order: "desc",
-  });
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+    "/posts",
+    {
+      categories: categories[0].id,
+      per_page: perPage,
+      page,
+      _embed: 1,
+      orderby: "date",
+      order: "desc",
+    },
+  );
   return { posts: data.map(transformPost), totalPages, total };
 }
 
@@ -397,21 +443,36 @@ export async function getPostsByCategorySlugs(
 ): Promise<{ posts: Post[]; totalPages: number; total: number }> {
   const categoryResults = await Promise.all(
     slugs.map((slug) =>
-      wpFetch<WPCategory[]>("/categories", { slug }).catch(() => [] as WPCategory[])
-    )
+      wpFetch<WPCategory[]>("/categories", { slug }).catch(
+        () => [] as WPCategory[],
+      ),
+    ),
   );
-  const ids = categoryResults.flatMap((cats) => cats[0]?.id ? [cats[0].id] : []);
-  if (ids.length === 0) return { posts: [], totalPages: 0, total: 0 };
+  const ids = categoryResults.flatMap((cats) =>
+    cats[0]?.id ? [cats[0].id] : [],
+  );
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
-    categories: ids.join(","),
-    per_page: perPage,
-    page,
-    _embed: 1,
-    orderby: "date",
-    order: "desc",
-  });
-  return { posts: data.map(transformPost), totalPages, total };
+  if (ids.length === 0) {
+    return { posts: [], totalPages: 1, total: 0 };
+  }
+
+  try {
+    const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+      "/posts",
+      {
+        categories: ids.join(","),
+        per_page: perPage,
+        page,
+        _embed: 1,
+        orderby: "date",
+        order: "desc",
+      },
+    );
+    return { posts: data.map(transformPost), totalPages, total };
+  } catch (err) {
+    console.error("Failed to fetch posts for category IDs:", ids, err);
+    return { posts: [], totalPages: 1, total: 0 };
+  }
 }
 
 interface WPPage {

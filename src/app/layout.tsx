@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import NavigationBar from "@/components/Navigation";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
-import { getAllPosts } from "../../lib/wordpress";
+import { getLayoutPosts } from "../../lib/wordpress";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,7 +32,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const posts = await getAllPosts().catch(() => []);
+  const posts = await getLayoutPosts();
 
   // Latest local+featured post for breaking news, fallback to any featured
   const breakingPost =
