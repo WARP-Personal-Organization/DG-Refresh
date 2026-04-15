@@ -21,7 +21,12 @@ export interface WPPost {
   categories: number[];
   tags: number[];
   _embedded?: {
-    author?: Array<{ id: number; name: string; description: string; slug: string }>;
+    author?: Array<{
+      id: number;
+      name: string;
+      description: string;
+      slug: string;
+    }>;
     "wp:featuredmedia"?: Array<{
       id: number;
       source_url: string;
@@ -241,11 +246,11 @@ export function transformAuthor(wpUser: WPUser): Author {
 
 async function wpFetch<T>(
   endpoint: string,
-  params: Record<string, string | number | boolean> = {}
+  params: Record<string, string | number | boolean> = {},
 ): Promise<T> {
   const url = new URL(`${WP_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([key, value]) =>
-    url.searchParams.set(key, String(value))
+    url.searchParams.set(key, String(value)),
   );
 
   const controller = new AbortController();
@@ -260,7 +265,7 @@ async function wpFetch<T>(
 
     if (!res.ok) {
       throw new Error(
-        `WordPress API error ${res.status}: ${url.pathname}${url.search}`
+        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
       );
     }
 
@@ -268,6 +273,68 @@ async function wpFetch<T>(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function wpFetchPaginated<T>(
+  endpoint: string,
+  params: Record<string, string | number | boolean> = {},
+): Promise<{ data: T; totalPages: number; total: number }> {
+  const url = new URL(`${WP_API_BASE}${endpoint}`);
+  Object.entries(params).forEach(([key, value]) =>
+    url.searchParams.set(key, String(value)),
+  );
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+
+  try {
+    const res = await fetch(url.toString(), {
+      next: { revalidate: 300 },
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(
+        `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
+      );
+    }
+
+    const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
+    const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
+    const data = await res.json() as T;
+    return { data, totalPages, total };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ─── App category/subcategory → WP category slug(s) ──────────────────────────
+// Used to resolve paginated queries from the category/subcategory pages.
+
+const APP_CATEGORY_WP_SLUGS: Record<string, string[]> = {
+  news: ["news"],
+  sports: ["sports"],
+  business: ["business"],
+  feature: ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
+  initiatives: ["initiatives"],
+  opinion: ["opinion"],
+  voices: ["voices", "visons"],
+};
+
+const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
+  local: ["local", "local-news", "iloilo", "western-visayas"],
+  negros: ["negros", "negros-news", "bacolod"],
+  "national-news": ["national", "national-news"],
+  editorial: ["editorial", "the-dg-view"],
+};
+
+export function getWPSlugsForCategory(appSlug: string): string[] {
+  return APP_CATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
+}
+
+export function getWPSlugsForSubcategory(appSlug: string): string[] {
+  return APP_SUBCATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
 }
 
 // ─── Public API Functions ─────────────────────────────────────────────────────
@@ -292,7 +359,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function getRelatedPosts(
   currentSlug: string,
   category: string,
-  limit = 3
+  limit = 3,
 ): Promise<Post[]> {
   // Re-uses the same cached fetch as getAllPosts — no extra network call within the same revalidation window
   const allPosts = await getAllPosts(30);
@@ -303,21 +370,196 @@ export async function getRelatedPosts(
 
 export async function getPostsByCategory(
   categorySlug: string,
-  perPage = 50
-): Promise<Post[]> {
-  // First resolve the category ID from its slug
+  perPage = 20,
+  page = 1,
+): Promise<{ posts: Post[]; totalPages: number; total: number }> {
   const categories = await wpFetch<WPCategory[]>("/categories", {
     slug: categorySlug,
   });
-  if (!categories[0]) return [];
-  const wpPosts = await wpFetch<WPPost[]>("/posts", {
+  if (!categories[0]) return { posts: [], totalPages: 0, total: 0 };
+
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
     categories: categories[0].id,
     per_page: perPage,
+    page,
     _embed: 1,
     orderby: "date",
     order: "desc",
   });
-  return wpPosts.map(transformPost);
+  return { posts: data.map(transformPost), totalPages, total };
+}
+
+// Resolve multiple WP category slugs to IDs, then fetch paginated posts
+export async function getPostsByCategorySlugs(
+  slugs: string[],
+  perPage = 20,
+  page = 1,
+): Promise<{ posts: Post[]; totalPages: number; total: number }> {
+  const categoryResults = await Promise.all(
+    slugs.map((slug) =>
+      wpFetch<WPCategory[]>("/categories", { slug }).catch(() => [] as WPCategory[])
+    )
+  );
+  const ids = categoryResults.flatMap((cats) => cats[0]?.id ? [cats[0].id] : []);
+  if (ids.length === 0) return { posts: [], totalPages: 0, total: 0 };
+
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
+    categories: ids.join(","),
+    per_page: perPage,
+    page,
+    _embed: 1,
+    orderby: "date",
+    order: "desc",
+  });
+  return { posts: data.map(transformPost), totalPages, total };
+}
+
+interface WPPage {
+  link: string;
+  content: { rendered: string };
+  _embedded?: {
+    "wp:featuredmedia"?: Array<{ source_url: string; alt_text: string }>;
+  };
+}
+
+export interface Publication {
+  imageUrl: string | null;
+  link: string;
+  title: string;
+  /** Raw HTML content from the WP page — may contain iframe embeds (Issuu, PDF, etc.) */
+  content: string;
+  /** Extracted src from the first iframe in content, if any */
+  embedSrc: string | null;
+  /** Extracted PDF URL from content links, if any */
+  pdfUrl: string | null;
+}
+
+function extractIframeSrc(html: string): string | null {
+  const match = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+  return match?.[1] ?? null;
+}
+
+function extractPdfUrl(html: string, pageLink: string): string | null {
+  // ── 3D FlipBook plugin (FB3D_CLIENT_DATA) ──────────────────────────────────
+  // The plugin stores PDF data as a base64-encoded JSON pushed into FB3D_CLIENT_DATA.
+  // Decode it and pull the `guid` field which is the direct PDF URL.
+  const fb3dMatch = html.match(/FB3D_CLIENT_DATA\.push\('([^']+)'\)/);
+  if (fb3dMatch?.[1]) {
+    try {
+      const json = JSON.parse(
+        Buffer.from(fb3dMatch[1], "base64").toString("utf-8"),
+      );
+      const posts: Record<string, { data?: { guid?: string } }> =
+        json?.posts ?? {};
+      const firstPost = Object.values(posts)[0];
+      const guid = firstPost?.data?.guid;
+      if (guid && guid.toLowerCase().endsWith(".pdf")) {
+        return guid.replace(/\\\//g, "/"); // unescape WP JSON slashes
+      }
+    } catch {
+      // malformed base64 — fall through
+    }
+  }
+
+  // ── Plain PDF link in content ──────────────────────────────────────────────
+  const hrefMatch = html.match(/href=["']([^"']+\.pdf[^"']*)["']/i);
+  if (hrefMatch?.[1]) return hrefMatch[1];
+
+  // ── Page link is itself a PDF ──────────────────────────────────────────────
+  if (pageLink.toLowerCase().endsWith(".pdf")) return pageLink;
+
+  return null;
+}
+
+async function fetchPublicationByPageSlug(
+  slug: string,
+  fallbackLink: string,
+  fallbackTitle: string,
+): Promise<Publication> {
+  try {
+    const pages = await wpFetch<WPPage[]>("/pages", { slug, _embed: 1 });
+    const page = pages[0];
+    if (page) {
+      const content = page.content?.rendered ?? "";
+      return {
+        imageUrl: page._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
+        link: page.link,
+        title: fallbackTitle,
+        content,
+        embedSrc: extractIframeSrc(content),
+        pdfUrl: extractPdfUrl(content, page.link),
+      };
+    }
+  } catch {
+    // fall through to post search
+  }
+
+  // Try as a post instead
+  try {
+    const posts = await wpFetch<WPPost[]>("/posts", {
+      slug,
+      _embed: 1,
+      per_page: 1,
+    });
+    if (posts[0]) {
+      const p = transformPost(posts[0]);
+      const content = posts[0].content?.rendered ?? "";
+      return {
+        imageUrl: p.data.featured_image?.url ?? null,
+        link: p.data.original_link,
+        title: p.data.title || fallbackTitle,
+        content,
+        embedSrc: extractIframeSrc(content),
+        pdfUrl: extractPdfUrl(content, p.data.original_link),
+      };
+    }
+  } catch {
+    // fall through to fallback
+  }
+
+  return {
+    imageUrl: null,
+    link: fallbackLink,
+    title: fallbackTitle,
+    content: "",
+    embedSrc: null,
+    pdfUrl: null,
+  };
+}
+
+export async function getTodaysPaper(): Promise<Publication> {
+  return fetchPublicationByPageSlug(
+    "todays-paper",
+    "https://dailyguardian.com.ph/todays-paper/",
+    "Today's Paper",
+  );
+}
+
+export async function getSupplement(): Promise<Publication> {
+  // Try multiple possible slugs for the supplement page
+  const slugsToTry = [
+    "supplement",
+    "e-supplement",
+    "dg-supplement",
+    "weekly-supplement",
+  ];
+  for (const slug of slugsToTry) {
+    const pub = await fetchPublicationByPageSlug(
+      slug,
+      "https://dailyguardian.com.ph/supplement/",
+      "Supplement",
+    );
+    // Return as soon as we find one with real content
+    if (pub.embedSrc || pub.pdfUrl || pub.imageUrl) return pub;
+  }
+  return {
+    imageUrl: null,
+    link: "https://dailyguardian.com.ph/supplement/",
+    title: "Supplement",
+    content: "",
+    embedSrc: null,
+    pdfUrl: null,
+  };
 }
 
 export async function getAllAuthors(): Promise<Author[]> {

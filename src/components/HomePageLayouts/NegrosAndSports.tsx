@@ -67,7 +67,7 @@ export default function NegrosAndSportsStories({
                     </p>
                     <AnimatedHeadline
                       as="h3"
-                      extraClassName="text-3xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                      extraClassName="text-3xl font-playfair font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
                     >
                       {mainNegrosStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
@@ -103,7 +103,7 @@ export default function NegrosAndSportsStories({
                         <p className="text-accent text-xs font-semibold uppercase mb-1 font-sans">
                           {story.data.category || "Sports"}
                         </p>
-                        <h4 className="text-lg font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                        <h4 className="text-lg font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                           {story.data.title || "Untitled Article"}
                         </h4>
                       </Link>
@@ -121,7 +121,7 @@ export default function NegrosAndSportsStories({
               {supportingNegrosStories.map((story) => (
                 <article key={story.id} className="group py-5 first:pt-0">
                   <Link href={`/blog/${story.uid}`} className="block">
-                    <h4 className="text-lg font-roboto font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
+                    <h4 className="text-lg font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                       {story.data.title || "Untitled Article"}
                     </h4>
                     <p className="text-xs text-gray-400 pt-2 font-sans">
@@ -132,7 +132,7 @@ export default function NegrosAndSportsStories({
               ))}
 
               <RightSidebar editorsPicks={editorsPicks} />
-              <div className="pt-40">
+              <div className="pt-6">
                 <PublicationCard
                   title="Supplement"
                   imageUrl={"/Supplement.PNG"}

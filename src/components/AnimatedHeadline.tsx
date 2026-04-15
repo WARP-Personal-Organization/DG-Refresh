@@ -21,7 +21,7 @@ const AnimatedHeadline: React.FC<AnimatedHeadlineProps> = ({
 }) => {
   return (
     <Tag
-      className={`relative font-bold text-accent group-hover:text-accent/80 transition-colors duration-300 ${extraClassName}`.trim()}
+      className={`relative font-playfair font-bold text-accent group-hover:text-accent/80 transition-colors duration-300 ${extraClassName}`.trim()}
     >
       {children}
       <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-px bg-accent group-hover:w-full transition-all duration-500 ease-out"></span>

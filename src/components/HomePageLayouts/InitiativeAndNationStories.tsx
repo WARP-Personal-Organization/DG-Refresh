@@ -34,7 +34,7 @@ const StoryCard = ({
             />
           </div>
         )}
-        <h3 className="text-lg font-roboto font-bold text-foreground leading-tight mb-2 transition-colors duration-200 group-hover:text-accent">
+        <h3 className="text-lg font-playfair font-bold text-foreground leading-tight mb-2 transition-colors duration-200 group-hover:text-accent">
           {story.data.title || "Untitled Article"}
         </h3>
         {story.data.summary && (
@@ -63,9 +63,11 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {initiativeItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:pr-8">
-              <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">
-                {initiativeTitle}
-              </h2>
+              <div className="mb-4 pb-3 border-b border-accent">
+                <h2 className="text-2xl font-roboto font-bold text-foreground">
+                  {initiativeTitle}
+                </h2>
+              </div>
               <Link
                 href={`/${initiativeTitle.toLowerCase()}`}
                 className="text-accent font-semibold font-sans hover:underline transition-colors duration-200"
@@ -85,9 +87,11 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {nationItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-default">
             <div className="lg:pr-8">
-              <h2 className="text-2xl font-roboto font-bold text-foreground mb-3">
-                {nationTitle}
-              </h2>
+              <div className="mb-4 pb-3 border-b border-accent">
+                <h2 className="text-2xl font-roboto font-bold text-foreground">
+                  {nationTitle}
+                </h2>
+              </div>
               <p className="text-gray-300 mb-4 font-sans">
                 Gain access to exclusive coverage and analysis of national
                 developments.

@@ -36,7 +36,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                   <div className="flex-grow">
                     <AnimatedHeadline
                       as="h3"
-                      extraClassName="text-3xl text-accent font-roboto font-bold -mt-4"
+                      extraClassName="text-3xl text-accent font-playfair font-bold -mt-4"
                     >
                       {mainStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
@@ -75,8 +75,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
             {otherStories.map((story) => (
               <article key={story.id} className="group">
                 <Link href={`/blog/${story.uid}`} className="block">
-                  <span className="text-4xl text-gray-500 leading-none font-sans"></span>
-                  <h4 className="text-base font-roboto font-bold text-foreground uppercase -mt-3 transition-colors duration-200 group-hover:text-accent">
+                  <h4 className="text-base font-playfair font-bold text-foreground uppercase transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h4>
                   <div className="mt-2 pt-2 border-t border-default">

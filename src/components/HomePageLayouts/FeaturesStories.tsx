@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 import type { Post } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
+import FacebookPagePlugin from "../FacebookPagePlugin";
 
 interface FeaturesStoriesProps {
   stories: Post[];
@@ -27,9 +28,6 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
   const heroImageStory = stories.length > 1 ? stories[1] : null;
   const bottomStories = stories.length > 2 ? stories.slice(2, 8) : [];
 
-  const sidebarLinks = ["Moral Money", "Due Diligence", "Cryptocurrencies"];
-  const facebookPostImageUrl = "/DGFacebook.PNG";
-
   return (
     <section className="bg-background py-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -46,11 +44,11 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               {/* Top-Left Main Story */}
               {mainStory && (
-                <article>
+                <article className="pr-6 md:pr-8">
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
                     <AnimatedHeadline
                       as="h3"
-                      extraClassName="text-4xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                      extraClassName="text-4xl font-playfair font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
                     >
                       {mainStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
@@ -63,7 +61,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
               {/* Top-Right Landscape Image Story */}
               {heroImageStory && (
-                <article>
+                <article className="md:border-l md:border-accent md:pl-8">
                   <Link
                     href={`/blog/${heroImageStory.uid}`}
                     className="block group"
@@ -81,7 +79,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                         />
                       </div>
                     )}
-                    <h4 className="text-xl font-roboto font-bold text-foreground mt-4 transition-colors duration-200 group-hover:text-accent">
+                    <h4 className="text-xl font-playfair font-bold text-foreground mt-4 transition-colors duration-200 group-hover:text-accent">
                       {heroImageStory.data.title}
                     </h4>
                     {heroImageStory.data.author && (
@@ -94,14 +92,29 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
             {/* === BOTTOM ROW: Grid of smaller stories === */}
             {bottomStories.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-default pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-accent pt-8">
                 {bottomStories.map((story) => (
-                  <article key={story.id} className="group">
-                    <Link
-                      href={`/blog/${story.uid}`}
-                      className="block border-t border-gray-700 pt-4"
-                    >
-                      <h4 className="text-lg font-roboto font-bold text-foreground transition-colors duration-200 group-hover:text-accent">
+                  <article key={story.id} className="group border-t border-gray-700 pt-4">
+                    <Link href={`/blog/${story.uid}`} className="block">
+                      {/* Thumbnail — shows image when available, fallback placeholder otherwise */}
+                      <div className="relative w-full aspect-[16/10] overflow-hidden rounded-md mb-3">
+                        {story.data.featured_image?.url ? (
+                          <Image
+                            src={story.data.featured_image.url}
+                            alt={story.data.featured_image.alt || story.data.title || "Article image"}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                            <span className="text-gray-500 text-xs font-sans uppercase tracking-widest select-none">
+                              Daily Guardian
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <h4 className="text-lg font-playfair font-bold text-foreground transition-colors duration-200 group-hover:text-accent leading-snug">
                         {story.data.title}
                       </h4>
                       {story.data.author && <AuthorByline story={story} />}
@@ -113,33 +126,8 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
           </div>
 
           {/* === SIDEBAR === */}
-          <aside className="lg:col-span-1 lg:border-l lg:border-default lg:pl-8">
-            <h3 className="font-roboto font-bold text-foreground mb-4 text-lg">
-              More Features
-            </h3>
-            <ul className="space-y-4">
-              {sidebarLinks.map((link) => (
-                <li key={link} className="border-b border-default pb-4">
-                  <Link
-                    href="#"
-                    className="font-sans text-foreground transition-colors duration-200 hover:text-accent"
-                  >
-                    {link}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8">
-              <Link href="#" className="block">
-                <Image
-                  src={facebookPostImageUrl}
-                  alt="Daily Guardian on Facebook"
-                  width={400}
-                  height={710}
-                  className="w-full h-auto"
-                />
-              </Link>
-            </div>
+          <aside className="lg:col-span-1 lg:border-l lg:border-accent lg:pl-8">
+            <FacebookPagePlugin />
           </aside>
         </div>
       </div>

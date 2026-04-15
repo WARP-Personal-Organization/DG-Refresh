@@ -44,7 +44,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
               <Link href={`/blog/${mainStory.uid}`} className="block group">
                 <AnimatedHeadline
                   as="h3"
-                  extraClassName="text-5xl font-roboto font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                  extraClassName="text-5xl font-playfair font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
                 >
                   {mainStory.data.title || "Untitled Article"}
                 </AnimatedHeadline>
@@ -60,7 +60,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
 
           {/* === COLUMN 2: Hero Image === */}
           {heroImageStory && (
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 lg:border-l lg:border-accent/30 lg:pl-8">
               <Link
                 href={`/blog/${heroImageStory.uid}`}
                 className="block group"
@@ -77,7 +77,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                     />
                   </div>
                 )}
-                <h4 className="text-xl font-bold mt-4 transition-colors duration-200 group-hover:text-[#fcee16]">
+                <h4 className="text-xl font-bold mt-4 transition-colors duration-200 group-hover:text-accent">
                   {heroImageStory.data.title || "Untitled Article"}
                 </h4>
               </Link>
@@ -86,13 +86,13 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
 
           {/* === COLUMN 3: Secondary Stories List === */}
           {secondaryStories.length > 0 && (
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 lg:border-l lg:border-accent/30 lg:pl-8">
               <div className="flex flex-col">
                 {secondaryStories.map((story, index) => (
                   <article
                     key={story.id}
                     className={`py-6 ${
-                      index > 0 ? "border-t border-default" : "pt-0"
+                      index > 0 ? "border-t border-accent/20" : "pt-0"
                     }`}
                   >
                     <Link href={`/blog/${story.uid}`} className="block group">
@@ -101,7 +101,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                           <p className="text-xs font-bold uppercase mb-1">
                             {story.data.category || "Editorial"}
                           </p>
-                          <h4 className="text-xl font-bold leading-tight transition-colors duration-200 group-hover:text-[#fcee16]">
+                          <h4 className="text-xl font-bold leading-tight transition-colors duration-200 group-hover:text-accent">
                             {story.data.title || "Untitled Article"}
                           </h4>
                           <p className="text-xs font-semibold uppercase tracking-wider mt-3">
@@ -109,7 +109,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                           </p>
                         </div>
                         {story.data.featured_image?.url && (
-                          <div className="relative w-24 h-24 flex-shrink-0">
+                          <div className="relative w-24 h-24 flex-shrink-0 rounded-sm overflow-hidden">
                             <Image
                               src={story.data.featured_image.url}
                               alt={story.data.featured_image.alt || ""}
