@@ -1,5 +1,5 @@
 // app/blog/[uid]/page.tsx
-export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+export const revalidate = 60;
 
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";
@@ -11,7 +11,6 @@ import {
   Facebook,
   Instagram,
   MessageCircle,
-  Play,
   Tag,
   Twitter,
   User,
@@ -20,7 +19,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getRelatedPosts } from "../../../../lib/wordpress";
+import { getCommentsByPostId, getPostBySlug, getRelatedPosts } from "../../../../lib/wordpress";
 import type { Post } from "../../../../lib/wordpress";
 
 interface BlogPageProps {
@@ -42,16 +41,17 @@ export default async function BlogPost({ params }: BlogPageProps) {
   let post: Post;
   let relatedArticles: Post[] = [];
 
+  let initialComments: Awaited<ReturnType<typeof getCommentsByPostId>> = [];
+
   try {
     const found = await getPostBySlug(resolvedParams.uid);
     if (!found) notFound();
     post = found;
 
-    relatedArticles = await getRelatedPosts(
-      resolvedParams.uid,
-      post.data.category,
-      3
-    );
+    [relatedArticles, initialComments] = await Promise.all([
+      getRelatedPosts(resolvedParams.uid, post.data.category, 3),
+      getCommentsByPostId(post.id),
+    ]);
   } catch {
     notFound();
   }
@@ -123,12 +123,10 @@ export default async function BlogPost({ params }: BlogPageProps) {
           )}
 
           <div className="flex flex-wrap items-center gap-6 py-4 border-t border-b border-gray-700">
-            <button className="flex items-center gap-2 text-[#fcee16] hover:text-[#fcee16]/80 transition-colors duration-200">
-              <Play size={16} />
-              <span className="text-sm font-medium font-open-sans">
-                Listen to this article • {readingTime} read
-              </span>
-            </button>
+            <span className="flex items-center gap-2 text-gray-400 text-sm font-open-sans">
+              <Clock size={16} className="text-[#fcee16]" />
+              {readingTime} read
+            </span>
             <ShareButton
               title={post.data.title || "Article"}
               url={articleUrl}
@@ -139,7 +137,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             </button>
             <div className="flex items-center gap-2 text-gray-400">
               <MessageCircle size={16} />
-              <span className="text-sm font-open-sans">24</span>
+              <span className="text-sm font-open-sans">{initialComments.length}</span>
             </div>
           </div>
         </header>
@@ -268,7 +266,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
 
         {/* Comment Section */}
-        <CommentSection postId={post.uid} />
+        <CommentSection postId={post.id} initialComments={initialComments} />
 
         {/* Share Section */}
         <div className="mt-12 pt-8 border-t border-default">

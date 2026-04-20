@@ -232,6 +232,7 @@ export default async function SubCategoryPage({
 
   let posts: Post[] = [];
   let totalPages = 1;
+  let fetchError = false;
 
   try {
     const wpSlugs = getWPSlugsForSubcategory(subcategoryValue);
@@ -240,6 +241,27 @@ export default async function SubCategoryPage({
     totalPages = result.totalPages;
   } catch (error) {
     console.error("Error fetching subcategory articles:", error);
+    fetchError = true;
+  }
+
+  if (fetchError) {
+    return (
+      <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200 mb-6 group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform duration-200" />
+            Back to Home
+          </Link>
+          <div className="text-center py-20">
+            <h1 className="text-2xl font-bold text-red-400 mb-4">Unable to load content</h1>
+            <p className="text-gray-400">Could not reach the Daily Guardian API. Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (posts.length === 0) {
