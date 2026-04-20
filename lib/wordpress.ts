@@ -634,3 +634,48 @@ export async function getAllAuthors(): Promise<Author[]> {
 export async function getAllCategories(): Promise<WPCategory[]> {
   return wpFetch<WPCategory[]>("/categories", { per_page: 100 });
 }
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+export interface WPComment {
+  id: number;
+  post: number;
+  parent: number;
+  author_name: string;
+  date: string;
+  content: { rendered: string };
+  status: string;
+}
+
+export async function getCommentsByPostId(postId: number): Promise<WPComment[]> {
+  return wpFetch<WPComment[]>("/comments", {
+    post: postId,
+    per_page: 100,
+    status: "approve",
+    orderby: "date",
+    order: "asc",
+  }).catch(() => []);
+}
+
+export async function submitWPComment(
+  postId: number,
+  authorName: string,
+  authorEmail: string,
+  content: string,
+  parent = 0,
+): Promise<WPComment> {
+  const url = `${WP_API_BASE}/comments`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      post: postId,
+      author_name: authorName,
+      author_email: authorEmail,
+      content,
+      parent,
+    }),
+  });
+  if (!res.ok) throw new Error(`Failed to submit comment: ${res.status}`);
+  return res.json();
+}
