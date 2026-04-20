@@ -1,3 +1,4 @@
+import AutoRefresh from "@/components/AutoRefresh";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import NavigationBar from "@/components/Navigation";
@@ -47,6 +48,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
+        <AutoRefresh intervalMs={60_000} />
         <Header posts={posts} breakingPost={breakingPost} />
         <NavigationBar />
         <main>{children}</main>

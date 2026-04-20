@@ -1,5 +1,5 @@
 // app/page.tsx
-export const revalidate = 300; // ISR: rebuild at most every 5 minutes
+export const revalidate = 60;
 
 import Header from "@/components/Header";
 import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
