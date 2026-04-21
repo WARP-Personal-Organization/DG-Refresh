@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Blocks page content instantly on first load (before React mounts).
+   Inline script in layout.tsx adds this class synchronously. */
+html.dg-first-load { overflow: hidden; }
+html.dg-first-load::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 999997;
+  pointer-events: none;
+}
+
 :root {
   --background: #1b1a1b;
   --foreground: #ffffff;

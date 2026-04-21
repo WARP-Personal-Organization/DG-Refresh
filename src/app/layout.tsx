@@ -1,6 +1,7 @@
 import AutoRefresh from "@/components/AutoRefresh";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import LoadingScreen from "@/components/LoadingScreen";
 import NavigationBar from "@/components/Navigation";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
@@ -43,11 +44,15 @@ export default async function RootLayout({
     null;
 
   return (
-    <html lang="en">
-      <head />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Runs synchronously before React — blocks page on first visit with no flash */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(!sessionStorage.getItem('dg_intro'))document.documentElement.classList.add('dg-first-load')}catch(e){}` }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
+        <LoadingScreen />
         <AutoRefresh intervalMs={60_000} />
         <Header posts={posts} breakingPost={breakingPost} />
         <NavigationBar />
