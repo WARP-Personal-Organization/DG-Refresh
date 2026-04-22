@@ -1,8 +1,8 @@
+import CartoonCard from "@/components/CartoonCard";
 import { PublicationCard } from "@/components/PublicationCard";
-import RightSidebar from "@/components/RightSidebar";
 import Image from "next/image";
 import Link from "next/link";
-import type { Post } from "../../../lib/wordpress";
+import type { Post, Publication } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 
 interface RegionalStoriesProps {
@@ -11,13 +11,16 @@ interface RegionalStoriesProps {
   sportsStories: Post[];
   sportsTitle: string;
   allPosts: Post[];
+  supplement?: Publication | null;
+  cartoons?: Post[];
 }
 
 export default function NegrosAndSportsStories({
   negrosStories,
   negrosTitle,
   sportsStories,
-  allPosts,
+  supplement,
+  cartoons = [],
 }: RegionalStoriesProps) {
   if (!negrosStories || negrosStories.length === 0) {
     return null;
@@ -26,11 +29,6 @@ export default function NegrosAndSportsStories({
   const mainNegrosStory = negrosStories[0];
   const supportingNegrosStories = negrosStories.slice(1, 4);
   const limitedSportsStories = sportsStories.slice(0, 6);
-
-  // Use the top posts as editor's picks fallback
-  const editorsPicks = allPosts
-    .filter((p) => p.data.editors_pick)
-    .slice(0, 4);
 
   return (
     <section className="bg-background py-12">
@@ -130,16 +128,70 @@ export default function NegrosAndSportsStories({
                   </Link>
                 </article>
               ))}
-
-              <RightSidebar editorsPicks={editorsPicks} />
-              <div className="pt-6">
-                <PublicationCard
-                  title="Supplement"
-                  imageUrl={"/Supplement.PNG"}
-                  link="https://dailyguardian.com.ph/3d-flip-book/supplement/"
-                />
-              </div>
             </div>
+
+            {/* Supplement card */}
+            <div className="pt-6">
+              <PublicationCard
+                title="Supplement"
+                imageUrl={supplement?.imageUrl || "/Supplement.PNG"}
+                link={supplement?.link || "https://dailyguardian.com.ph/3d-flip-book/supplement/"}
+                embedSrc={supplement?.embedSrc}
+                pdfUrl={supplement?.pdfUrl}
+                content={supplement?.content}
+              />
+            </div>
+
+            {/* Lotto banner */}
+            <a
+              href="https://dailyguardian.com.ph/lotto/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group mt-4 flex flex-col items-center justify-center rounded-lg overflow-hidden px-5 py-5 gap-2 transition-opacity hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #00206e 0%, #0044cc 50%, #00206e 100%)" }}
+              aria-label="PCSO Lotto Results"
+            >
+              {/* PCSO label */}
+              <span
+                className="text-white/60 font-black text-[11px] uppercase tracking-[0.3em]"
+                style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
+              >
+                PCSO
+              </span>
+              {/* Main headline */}
+              <span
+                className="text-[#fcee16] font-black text-2xl uppercase leading-none tracking-tight text-center drop-shadow"
+                style={{
+                  fontFamily: "Impact, Arial Black, sans-serif",
+                  textShadow: "0 0 16px rgba(252,238,22,0.35)",
+                }}
+              >
+                LET&apos;S PLAY LOTTO
+              </span>
+              {/* Game pills */}
+              <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                {["6/42","6/45","6/49","6/55","6/58","3D","4D"].map((g) => (
+                  <span
+                    key={g}
+                    className="text-[10px] font-black text-white border border-white/25 rounded-sm px-2 py-0.5 bg-white/10 uppercase tracking-wider"
+                    style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
+              {/* CTA */}
+              <span className="text-white/50 group-hover:text-[#fcee16] text-[10px] font-roboto uppercase tracking-widest mt-1 transition-colors">
+                View Results →
+              </span>
+            </a>
+
+            {/* Cartoon card */}
+            {cartoons.length > 0 && (
+              <div className="mt-4">
+                <CartoonCard cartoons={cartoons} />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
 import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
-import { getAllPosts, getPostsByCategorySlugs, getTodaysPaper } from "../../lib/wordpress";
+import { getAllPosts, getPostsByCategorySlugs, getTodaysPaper, getSupplement } from "../../lib/wordpress";
 import "./globals.css";
 
 export default async function Home() {
@@ -32,6 +32,8 @@ export default async function Home() {
       voicesResult,
       youtubeVideos,
       todaysPaper,
+      supplement,
+      cartoonResult,
     ] = await Promise.all([
       getAllPosts(20),                                                                          // hero + featured fallback
       getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),        // LocalStories needs 4 + 1 for hero
@@ -44,6 +46,8 @@ export default async function Home() {
       getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),                            // Opinion needs 7
       getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
       getTodaysPaper().catch(() => null),
+      getSupplement().catch(() => null),
+      getPostsByCategorySlugs(["cartoon"], 5),
     ]);
 
     const localPicks = localResult.posts;
@@ -98,6 +102,16 @@ export default async function Home() {
       ...sportsPicks,
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i); // deduplicate
 
+    // Posts already shown prominently in MainContent — exclude from downstream sections
+    const shownInMainContent = new Set([heroPost.id, featuredPost.id, editorialPost.id]);
+
+    // TopStories: filter out posts already rendered in the MainContent hero/featured slots
+    const topStoriesPool = (featuredPicks.length >= 4 ? featuredPicks : recentPosts)
+      .filter((p) => !shownInMainContent.has(p.id));
+
+    // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
+    const localStoriesData = localPicks.slice(1);
+
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">
         <div className="max-w-7xl mx-auto px-4 py-8 pb">
@@ -121,14 +135,16 @@ export default async function Home() {
             </div>
           </div>
         </div>
-        <TopStories title={"Top Stories"} stories={featuredPicks.length >= 4 ? featuredPicks : recentPosts} />
-        <LocalStories title={"LOCAL"} stories={localPicks} />
+        <TopStories title={"Top Stories"} stories={topStoriesPool} />
+        <LocalStories title={"LOCAL"} stories={localStoriesData} />
         <NegrosAndSportsStories
           negrosTitle={"NEGROS"}
           negrosStories={negrosPicks}
           sportsTitle={"Banner News"}
           sportsStories={sportsPicks}
           allPosts={allPostsForEditorsPicks}
+          supplement={supplement}
+          cartoons={cartoonResult.posts}
         />
         <FeaturesStories title={"FEATURES"} stories={featuredPicksAsCategory} />
         <InitiativeAndNationStories

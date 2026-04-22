@@ -119,22 +119,36 @@ const NavigationBar: React.FC = () => {
               onMouseEnter={() => handleDropdownEnter(item.name)}
               onMouseLeave={handleDropdownLeave}
             >
-              <Link
-                href={item.href}
-                className={`
-                  flex items-center gap-1 py-2 px-3 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600]
-                `}
-              >
-                {item.name.toUpperCase()}
-                {item.dropdown && (
-                  <ChevronDown
-                    size={12}
-                    className={`transition-transform duration-200 ${
-                      activeDropdown === item.name ? "rotate-180" : ""
-                    }`}
-                  />
-                )}
-              </Link>
+              {item.href === "/other-pages" ? (
+                <span
+                  className="flex items-center gap-1 py-2 px-3 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600] cursor-default"
+                >
+                  {item.name.toUpperCase()}
+                  {item.dropdown && (
+                    <ChevronDown
+                      size={12}
+                      className={`transition-transform duration-200 ${
+                        activeDropdown === item.name ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </span>
+              ) : (
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-1 py-2 px-3 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600]"
+                >
+                  {item.name.toUpperCase()}
+                  {item.dropdown && (
+                    <ChevronDown
+                      size={12}
+                      className={`transition-transform duration-200 ${
+                        activeDropdown === item.name ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </Link>
+              )}
 
               {/* Desktop Dropdown */}
               {item.dropdown && (

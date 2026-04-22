@@ -597,25 +597,50 @@ export async function getTodaysPaper(): Promise<Publication> {
 }
 
 export async function getSupplement(): Promise<Publication> {
-  // Try multiple possible slugs for the supplement page
-  const slugsToTry = [
-    "supplement",
-    "e-supplement",
-    "dg-supplement",
-    "weekly-supplement",
-  ];
+  const SUPPLEMENT_URL = "https://dailyguardian.com.ph/3d-flip-book/supplement/";
+  const slugsToTry = ["supplement", "e-supplement", "dg-supplement", "weekly-supplement"];
+
+  let imageOnlyResult: Publication | null = null;
+
   for (const slug of slugsToTry) {
-    const pub = await fetchPublicationByPageSlug(
-      slug,
-      "https://dailyguardian.com.ph/supplement/",
-      "Supplement",
-    );
-    // Return as soon as we find one with real content
-    if (pub.embedSrc || pub.pdfUrl || pub.imageUrl) return pub;
+    const pub = await fetchPublicationByPageSlug(slug, SUPPLEMENT_URL, "Supplement");
+    if (pub.pdfUrl || pub.embedSrc) return pub; // ideal — has something to render
+    if (pub.imageUrl && !imageOnlyResult) imageOnlyResult = pub; // save thumbnail as fallback
   }
-  return {
+
+  // The 3D FlipBook plugin injects FB3D_CLIENT_DATA via wp_localize_script which
+  // only runs during a full page render — it never appears in content.rendered from
+  // the REST API. Fetch the actual HTML page so extractPdfUrl can parse it.
+  try {
+    const res = await withTimeout(
+      fetch(SUPPLEMENT_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
+      }),
+      8000,
+    );
+    if (res.ok) {
+      const html = await res.text();
+      const pdfUrl = extractPdfUrl(html, SUPPLEMENT_URL);
+      if (pdfUrl) {
+        return {
+          ...(imageOnlyResult ?? {
+            imageUrl: null,
+            title: "Supplement",
+            content: "",
+            embedSrc: null,
+          }),
+          link: SUPPLEMENT_URL,
+          pdfUrl,
+        };
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  return imageOnlyResult ?? {
     imageUrl: null,
-    link: "https://dailyguardian.com.ph/supplement/",
+    link: SUPPLEMENT_URL,
     title: "Supplement",
     content: "",
     embedSrc: null,
