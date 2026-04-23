@@ -135,7 +135,10 @@ export default function NegrosAndSportsStories({
               <PublicationCard
                 title="Supplement"
                 imageUrl={supplement?.imageUrl || "/Supplement.PNG"}
-                link={supplement?.link || "https://dailyguardian.com.ph/3d-flip-book/supplement/"}
+                link={
+                  supplement?.link ||
+                  "https://dailyguardian.com.ph/3d-flip-book/supplement/"
+                }
                 embedSrc={supplement?.embedSrc}
                 pdfUrl={supplement?.pdfUrl}
                 content={supplement?.content}
@@ -144,11 +147,14 @@ export default function NegrosAndSportsStories({
 
             {/* Lotto banner */}
             <a
-              href="https://dailyguardian.com.ph/lotto/"
+              href="https://www.pcso.gov.ph/"
               target="_blank"
               rel="noopener noreferrer"
               className="group mt-4 flex flex-col items-center justify-center rounded-lg overflow-hidden px-5 py-5 gap-2 transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #00206e 0%, #0044cc 50%, #00206e 100%)" }}
+              style={{
+                background:
+                  "linear-gradient(135deg, #00206e 0%, #0044cc 50%, #00206e 100%)",
+              }}
               aria-label="PCSO Lotto Results"
             >
               {/* PCSO label */}
@@ -170,15 +176,17 @@ export default function NegrosAndSportsStories({
               </span>
               {/* Game pills */}
               <div className="flex flex-wrap justify-center gap-1.5 mt-1">
-                {["6/42","6/45","6/49","6/55","6/58","3D","4D"].map((g) => (
-                  <span
-                    key={g}
-                    className="text-[10px] font-black text-white border border-white/25 rounded-sm px-2 py-0.5 bg-white/10 uppercase tracking-wider"
-                    style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
-                  >
-                    {g}
-                  </span>
-                ))}
+                {["6/42", "6/45", "6/49", "6/55", "6/58", "3D", "4D"].map(
+                  (g) => (
+                    <span
+                      key={g}
+                      className="text-[10px] font-black text-white border border-white/25 rounded-sm px-2 py-0.5 bg-white/10 uppercase tracking-wider"
+                      style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
+                    >
+                      {g}
+                    </span>
+                  ),
+                )}
               </div>
               {/* CTA */}
               <span className="text-white/50 group-hover:text-[#fcee16] text-[10px] font-roboto uppercase tracking-widest mt-1 transition-colors">

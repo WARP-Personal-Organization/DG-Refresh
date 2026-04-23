@@ -10,7 +10,17 @@ interface CartoonAndLottoProps {
   cartoons: Post[];
 }
 
-const LOTTO_GAMES = ["6/42", "6/45", "6/49", "6/55", "6/58", "3D", "4D", "6D", "2D"];
+const LOTTO_GAMES = [
+  "6/42",
+  "6/45",
+  "6/49",
+  "6/55",
+  "6/58",
+  "3D",
+  "4D",
+  "6D",
+  "2D",
+];
 
 export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
   const [idx, setIdx] = useState(0);
@@ -23,15 +33,15 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
 
   return (
     <section className="bg-[#1b1a1b]">
-
       {/* ── LOTTO STRIP ─────────────────────────────────────────────── */}
       <a
-        href="https://dailyguardian.com.ph/lotto/"
+        href="https://www.pcso.gov.ph/"
         target="_blank"
         rel="noopener noreferrer"
         className="group flex items-center w-full overflow-hidden"
         style={{
-          background: "linear-gradient(90deg, #00206e 0%, #0044cc 50%, #00206e 100%)",
+          background:
+            "linear-gradient(90deg, #00206e 0%, #0044cc 50%, #00206e 100%)",
           minHeight: "52px",
         }}
         aria-label="PCSO Lotto Results"
@@ -64,26 +74,31 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
           <span className="text-white/70 group-hover:text-[#fcee16] text-[10px] md:text-xs font-roboto uppercase tracking-widest whitespace-nowrap transition-colors hidden sm:block">
             Results
           </span>
-          <ExternalLink size={12} className="text-white/50 group-hover:text-[#fcee16] transition-colors" />
+          <ExternalLink
+            size={12}
+            className="text-white/50 group-hover:text-[#fcee16] transition-colors"
+          />
         </div>
       </a>
 
       {/* ── CARTOON SECTION ─────────────────────────────────────────── */}
       <div className="py-10">
         <div className="max-w-7xl mx-auto px-4">
-
           {/* Header */}
           <div className="mb-8 pb-4 border-b border-[#fcee16]">
-            <h2 className="text-2xl font-roboto font-bold text-white">CARTOON</h2>
+            <h2 className="text-2xl font-roboto font-bold text-white">
+              CARTOON
+            </h2>
           </div>
 
           {/* Main layout: large image + sidebar on desktop */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-8">
-
             {/* Cartoon image — full width on mobile, 2/3 on desktop */}
             <div className="lg:col-span-2 relative">
-              <div className="relative overflow-hidden" style={{ aspectRatio: "4/3" }}>
-
+              <div
+                className="relative overflow-hidden"
+                style={{ aspectRatio: "4/3" }}
+              >
                 {/* Paper background — cartoons are on white */}
                 <div className="absolute inset-0 bg-[#f4f0eb]" />
 
@@ -98,7 +113,9 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400 font-roboto text-sm uppercase tracking-widest">No cartoon</span>
+                    <span className="text-gray-400 font-roboto text-sm uppercase tracking-widest">
+                      No cartoon
+                    </span>
                   </div>
                 )}
 
@@ -148,7 +165,9 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
                       key={i}
                       onClick={() => setIdx(i)}
                       className={`h-1 rounded-full transition-all duration-300 ${
-                        i === idx ? "w-8 bg-[#fcee16]" : "w-2 bg-gray-600 hover:bg-gray-400"
+                        i === idx
+                          ? "w-8 bg-[#fcee16]"
+                          : "w-2 bg-gray-600 hover:bg-gray-400"
                       }`}
                       aria-label={`Cartoon ${i + 1}`}
                     />
@@ -186,21 +205,29 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className={`text-xs font-roboto font-bold leading-tight line-clamp-2 uppercase transition-colors ${
-                      i === idx ? "text-[#fcee16]" : "text-white group-hover:text-[#fcee16]"
-                    }`}>
+                    <p
+                      className={`text-xs font-roboto font-bold leading-tight line-clamp-2 uppercase transition-colors ${
+                        i === idx
+                          ? "text-[#fcee16]"
+                          : "text-white group-hover:text-[#fcee16]"
+                      }`}
+                    >
                       {c.data.title}
                     </p>
                     <p className="text-[10px] text-gray-500 mt-1 font-open-sans">
-                      {new Date(c.data.published_date).toLocaleDateString("en-US", {
-                        month: "short", day: "numeric", year: "numeric",
-                      })}
+                      {new Date(c.data.published_date).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      )}
                     </p>
                   </div>
                 </button>
               ))}
             </div>
-
           </div>
         </div>
       </div>
