@@ -21,12 +21,21 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   let posts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   let totalPages = 1;
+  let recommendedPosts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   const safeCategory = categorySlug ?? "news";
   try {
     const wpSlugs = getWPSlugsForCategory(categorySlug);
-    const result = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
-    posts = result.posts;
-    totalPages = result.totalPages;
+    const mainResult = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+    posts = mainResult.posts;
+    totalPages = mainResult.totalPages;
+
+    // Fetch adjacent page for sidebar so recommended articles don't overlap main content
+    const mainIds = new Set(posts.map((p) => p.id));
+    const sidebarPage = page < totalPages ? page + 1 : totalPages > 1 ? page - 1 : 0;
+    if (sidebarPage > 0) {
+      const sidebarResult = await getPostsByCategorySlugs(wpSlugs, 5, sidebarPage);
+      recommendedPosts = sidebarResult.posts.filter((p) => !mainIds.has(p.id)).slice(0, 5);
+    }
   } catch (err) {
     console.error("WP FETCH ERROR:", err);
   }
@@ -43,9 +52,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         }
         categorySlug={safeCategory}
         featuredArticle={posts[0]}
-        newsArticles={posts}
-        opinionArticles={posts}
-        recommendedArticles={posts}
+        newsArticles={posts.slice(1)}
+        opinionArticles={[]}
+        recommendedArticles={recommendedPosts}
       />
       <div className="max-w-7xl mx-auto px-4">
         <Pagination

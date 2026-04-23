@@ -4,8 +4,11 @@ import Header from "@/components/Header";
 import NavigationBar from "@/components/Navigation";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
-import { getLayoutPosts } from "../../lib/wordpress";
+import Script from "next/script";
+import { getAllPosts, getLayoutPosts, getPostsByCategorySlugs } from "../../lib/wordpress";
 import "./globals.css";
+
+export const revalidate = 60;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +36,33 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const posts = await getLayoutPosts();
+  const [
+    posts,
+    recentNav,
+    sportsNav,
+    voicesNav,
+    businessNav,
+    featuresNav,
+    initiativesNav,
+  ] = await Promise.all([
+    getLayoutPosts(),
+    getAllPosts(20),
+    getPostsByCategorySlugs(["sports"], 4),
+    getPostsByCategorySlugs(["voices", "visons", "opinion"], 4),
+    getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4),
+    getPostsByCategorySlugs(["feature", "features", "entertainment", "lifestyle", "health"], 4),
+    getPostsByCategorySlugs(["initiatives"], 4),
+  ]);
+
+  // Merge all nav posts, deduplicated — each category is guaranteed representation
+  const navPosts = [
+    ...recentNav,
+    ...sportsNav.posts,
+    ...voicesNav.posts,
+    ...businessNav.posts,
+    ...featuresNav.posts,
+    ...initiativesNav.posts,
+  ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
 
   // Latest local+featured post for breaking news, fallback to any featured
   const breakingPost =
@@ -48,9 +77,27 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
+        {/* Google AdSense — auto ads */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1002683760929339"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-FTDWF3L7Z8"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-FTDWF3L7Z8');
+        `}</Script>
         <AutoRefresh intervalMs={60_000} />
         <Header posts={posts} breakingPost={breakingPost} />
-        <NavigationBar />
+        <NavigationBar navPosts={navPosts} />
         <main>{children}</main>
         <Footer />
       </body>

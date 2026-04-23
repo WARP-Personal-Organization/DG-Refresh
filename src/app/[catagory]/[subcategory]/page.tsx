@@ -20,7 +20,7 @@ import { getPostsByCategorySlugs, getWPSlugsForSubcategory } from "../../../../l
 import type { Post } from "../../../../lib/wordpress";
 import Pagination from "../../../components/Pagination";
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 9;
 
 type Params = Promise<{ catagory: string; subcategory: string }>;
 interface SubCategoryPageProps {
@@ -329,37 +329,33 @@ export default async function SubCategoryPage({
           </section>
         )}
 
-        <div className="grid lg:grid-cols-4 gap-12">
-          <div className="lg:col-span-3 space-y-12">
-            {regularArticles.length > 0 && (
-              <section>
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-1 h-8 bg-[#fcee16]"></div>
-                  <h2 className="text-3xl font-roboto font-bold text-white">
-                    Latest {displayName} Articles
-                  </h2>
-                </div>
+        <div>
+          {regularArticles.length > 0 && (
+            <section className="mb-12">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-1 h-8 bg-[#fcee16]"></div>
+                <h2 className="text-3xl font-roboto font-bold text-white">
+                  Latest {displayName} Articles
+                </h2>
+              </div>
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  {regularArticles.map((article, index) => (
-                    <ArticleCard
-                      key={article.id}
-                      article={article}
-                      index={index}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {regularArticles.map((article, index) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              basePath={`/${resolvedParams.catagory}/${resolvedParams.subcategory}`}
-            />
-          </div>
-
-          <div className="lg:col-span-1"></div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            basePath={`/${resolvedParams.catagory}/${resolvedParams.subcategory}`}
+          />
         </div>
       </div>
     </div>
