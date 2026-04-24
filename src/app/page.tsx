@@ -87,8 +87,23 @@ export default async function Home() {
     // Hero fallback chain: featured → local → editorial → latest
     const heroPost =
       featuredPicks[0] || localPicks[0] || editorialPicks[0] || recentPosts[0];
-    const featuredPost = featuredPicks[1] || featuredPicks[0] || recentPosts[1] || recentPosts[0];
-    const editorialPost = editorialPicks[0] || recentPosts[2] || recentPosts[0];
+
+    // Each subsequent slot picks the first candidate that isn't already shown
+    const usedIds = new Set([heroPost.id]);
+
+    const featuredPost =
+      [featuredPicks[1], featuredPicks[0], recentPosts[1], recentPosts[0]]
+        .find((p) => p && !usedIds.has(p.id)) ?? heroPost;
+    usedIds.add(featuredPost.id);
+
+    const editorialPost =
+      [...editorialPicks, recentPosts[2], recentPosts[1], recentPosts[0]]
+        .find((p) => p && !usedIds.has(p.id)) ?? undefined;
+    if (editorialPost) usedIds.add(editorialPost.id);
+
+    // localPost shown in the left column sidebar — must not repeat heroPost or editorialPost
+    const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
+    if (localPost) usedIds.add(localPost.id);
 
     // Fill editorial section to at least 5 posts — supplement with recent posts when the
     // editorial/the-dg-view categories don't have enough content in WordPress
@@ -108,14 +123,14 @@ export default async function Home() {
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i); // deduplicate
 
     // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([heroPost.id, featuredPost.id, editorialPost.id]);
+    const shownInMainContent = new Set([heroPost.id, featuredPost.id, ...(editorialPost ? [editorialPost.id] : [])]);
 
     // TopStories: filter out posts already rendered in the MainContent hero/featured slots
     const topStoriesPool = (featuredPicks.length >= 4 ? featuredPicks : recentPosts)
       .filter((p) => !shownInMainContent.has(p.id));
 
     // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
-    const localStoriesData = localPicks.slice(1);
+    const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
 
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">
@@ -124,7 +139,7 @@ export default async function Home() {
             <MainContent
               heroPost={heroPost}
               featuredPost={featuredPost}
-              localposts={localPicks[0]}
+              localposts={localPost}
               editorialPost={editorialPost}
             />
             <div className="flex flex-col gap-6 self-start sticky top-4">
