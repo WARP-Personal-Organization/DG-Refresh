@@ -18,12 +18,10 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
   return (
     <section className="py-12">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-8 space-y-4">
-          <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
-          <h2 className="text-sm font-roboto font-semibold text-foreground uppercase tracking-[0.2em]">
+        <div className="mb-8 pb-3 border-b-2 border-[#fbd203] text-center">
+          <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
             {title}
           </h2>
-          <div className="mb-6 pb-2 border-b border-[#fcee16]"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:divide-x md:divide-gray-700">

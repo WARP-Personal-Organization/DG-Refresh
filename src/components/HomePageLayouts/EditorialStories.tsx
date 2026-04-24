@@ -31,8 +31,8 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
   return (
     <section className="bg-background py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-10 pb-4 border-b border-accent">
-          <h2 className="text-2xl font-roboto font-bold text-foreground">
+        <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+          <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
             {title}
           </h2>
         </div>
@@ -77,7 +77,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                     />
                   </div>
                 )}
-                <h4 className="text-xl font-bold mt-4 transition-colors duration-200 group-hover:text-accent">
+                <h4 className="text-xl font-playfair font-bold mt-4 transition-colors duration-200 group-hover:text-accent">
                   {heroImageStory.data.title || "Untitled Article"}
                 </h4>
               </Link>
@@ -101,7 +101,7 @@ const EditorialStories: React.FC<EditorialStoriesProps> = ({
                           <p className="text-xs font-bold uppercase mb-1">
                             {story.data.category || "Editorial"}
                           </p>
-                          <h4 className="text-xl font-bold leading-tight transition-colors duration-200 group-hover:text-accent">
+                          <h4 className="text-xl font-playfair font-bold leading-tight transition-colors duration-200 group-hover:text-accent">
                             {story.data.title || "Untitled Article"}
                           </h4>
                           <p className="text-xs font-semibold uppercase tracking-wider mt-3">

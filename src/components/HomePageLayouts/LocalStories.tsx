@@ -19,8 +19,8 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-6 pb-2 border-b border-[#fcee16]">
-        <h2 className="text-lg font-roboto font-semibold text-foreground uppercase tracking-widest">
+      <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+        <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
           {title}
         </h2>
       </div>

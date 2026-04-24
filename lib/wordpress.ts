@@ -648,6 +648,66 @@ export async function getSupplement(): Promise<Publication> {
   };
 }
 
+export interface PaperEdition {
+  id: number;
+  date: string;
+  label: string;
+  pdfUrl: string;
+}
+
+interface WPMediaItem {
+  id: number;
+  date: string;
+  title: { rendered: string };
+  source_url: string;
+}
+
+// Fetch daily paper editions from the WP media library.
+// Daily papers are named "PDF-[Month]-[Day]-[Year]".
+export async function getPaperEditions(limit = 30): Promise<PaperEdition[]> {
+  try {
+    const items = await wpFetch<WPMediaItem[]>("/media", {
+      mime_type: "application/pdf",
+      per_page: limit,
+      orderby: "date",
+      order: "desc",
+      _fields: "id,date,title,source_url",
+    });
+    return items
+      .filter((m) => /^PDF-[A-Za-z]+-\d+-\d+$/.test(m.title.rendered.replace(/\.pdf$/i, "")))
+      .map((m) => ({
+        id: m.id,
+        date: m.date,
+        label: m.title.rendered.replace(/^PDF-/, "").replace(/-/g, " "),
+        pdfUrl: m.source_url,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+// Fetch past supplement editions (special issues) from the WP media library.
+export async function getSupplementEditions(limit = 20): Promise<PaperEdition[]> {
+  try {
+    const items = await wpFetch<WPMediaItem[]>("/media", {
+      mime_type: "application/pdf",
+      per_page: limit,
+      orderby: "date",
+      order: "desc",
+      search: "supplement",
+      _fields: "id,date,title,source_url",
+    });
+    return items.map((m) => ({
+      id: m.id,
+      date: m.date,
+      label: m.title.rendered.replace(/[-_]/g, " ").replace(/\.pdf$/i, ""),
+      pdfUrl: m.source_url,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function getAllAuthors(): Promise<Author[]> {
   const wpUsers = await wpFetch<WPUser[]>("/users", {
     per_page: 100,

@@ -31,15 +31,15 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
   return (
     <section className="bg-background py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-10 pb-4 border-b border-accent">
-          <h2 className="text-2xl font-roboto font-bold text-foreground">
+        <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+          <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
             {title}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-12">
           {/* === MAIN CONTENT AREA === */}
-          <div className="lg:col-span-3 flex flex-col gap-12">
+          <div className="lg:col-span-2 flex flex-col gap-12">
             {/* === TOP ROW: Main Story + Landscape Image === */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               {/* Top-Left Main Story */}

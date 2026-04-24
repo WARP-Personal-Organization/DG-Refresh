@@ -13,8 +13,9 @@ import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
+import DGDriveReels from "@/components/DGDriveReels";
 import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
-import { getAllPosts, getPostsByCategorySlugs, getTodaysPaper, getSupplement } from "../../lib/wordpress";
+import { getAllPosts, getPostsByCategorySlugs, getTodaysPaper, getSupplement, getPaperEditions, getSupplementEditions } from "../../lib/wordpress";
 import "./globals.css";
 
 export default async function Home() {
@@ -34,6 +35,8 @@ export default async function Home() {
       todaysPaper,
       supplement,
       cartoonResult,
+      paperEditions,
+      supplementEditions,
     ] = await Promise.all([
       getAllPosts(20),                                                                          // hero + featured fallback
       getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),        // LocalStories needs 4 + 1 for hero
@@ -48,6 +51,8 @@ export default async function Home() {
       getTodaysPaper().catch(() => null),
       getSupplement().catch(() => null),
       getPostsByCategorySlugs(["cartoon"], 5),
+      getPaperEditions(30).catch(() => []),
+      getSupplementEditions(10).catch(() => []),
     ]);
 
     const localPicks = localResult.posts;
@@ -130,6 +135,7 @@ export default async function Home() {
                 embedSrc={todaysPaper?.embedSrc}
                 pdfUrl={todaysPaper?.pdfUrl}
                 content={todaysPaper?.content}
+                editions={paperEditions}
                 isToday
               />
             </div>
@@ -144,6 +150,7 @@ export default async function Home() {
           sportsStories={sportsPicks}
           allPosts={allPostsForEditorsPicks}
           supplement={supplement}
+          supplementEditions={supplementEditions}
           cartoons={cartoonResult.posts}
         />
         <FeaturesStories title={"FEATURES"} stories={featuredPicksAsCategory} />
@@ -155,6 +162,7 @@ export default async function Home() {
         />
         <EditorialStories title={"EDITORIAL"} stories={editorialFilled} />
         <OpinionSection posts={voicesPicks} />
+        <DGDriveReels />
         <EnhancedVideoSection videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS} />
       </div>
     );

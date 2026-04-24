@@ -1,4 +1,5 @@
 import { Clock, User } from "lucide-react";
+import DGDriveReels from "@/components/DGDriveReels";
 
 const DGDriveHomepage = () => {
   const articles = [
@@ -484,6 +485,8 @@ const DGDriveHomepage = () => {
           </div>
         </div>
       </div>
+
+      <DGDriveReels />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white mt-20">

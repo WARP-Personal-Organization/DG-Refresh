@@ -36,8 +36,8 @@ const EnhancedVideoSection: React.FC<EnhancedVideoSectionProps> = ({
     <section className="py-12 border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-12 pb-4 border-b border-default">
-          <h2 className="text-3xl font-roboto font-bold text-white mb-2">
+        <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+          <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest mb-2">
             Daily Guardian Documentaries
           </h2>
           <p className="text-gray-400 italic font-open-sans">

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { Post } from "../../lib/wordpress";
+import AnimatedHeadline from "./AnimatedHeadline";
 
 interface OpinionSectionProps {
   posts?: Post[];
@@ -24,8 +25,8 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
   return (
     <section className="py-12 border-default bg-[#1b1a1b] font-open-sans">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-12 pb-4 border-b border-[#fcee16]">
-          <h2 className="text-3xl font-roboto font-bold text-white">VOICES</h2>
+        <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+          <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">VOICES</h2>
         </div>
 
         {posts.length === 0 ? (
@@ -54,9 +55,9 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
                     <span className="text-[#fcee16] text-xs font-bold uppercase tracking-widest">
                       Featured
                     </span>
-                    <h3 className="text-2xl font-playfair font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-tight">
+                    <AnimatedHeadline as="h3" extraClassName="text-2xl text-white leading-tight">
                       {featured.data.title}
-                    </h3>
+                    </AnimatedHeadline>
                     {featured.data.summary && (
                       <p className="text-gray-400 leading-relaxed line-clamp-3">
                         {featured.data.summary}
@@ -99,9 +100,9 @@ const OpinionSection: React.FC<OpinionSectionProps> = ({ posts = [] }) => {
                         </div>
                       )}
                       <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className="text-sm font-playfair font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 leading-snug line-clamp-3">
-                          {post.data.title}
-                        </h4>
+                        <AnimatedHeadline as="h4" extraClassName="text-sm text-white leading-snug">
+                          <span className="line-clamp-3 block">{post.data.title}</span>
+                        </AnimatedHeadline>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <span>{post.data.author || "Staff"}</span>
                           <span>·</span>

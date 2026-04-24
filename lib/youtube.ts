@@ -45,63 +45,55 @@ export const FALLBACK_VIDEOS: YouTubeVideo[] = [
     videoId: "pspDeWO-HHQ",
     title: "DGD Episode 9: Business Leaders' Summit 5.0",
     description:
-      "An exclusive look at the annual business summit featuring local entrepreneurs and industry leaders discussing the future of our local economy.",
+      "Before the Enhanced Community Quarantine, University of the Philippines held Business Leaders' Summit 5.0 where Senior High and College students in Western Visayas were given a two-day immersion into the corporate world. This episode is all about the experience at BLS 5, and it has a surprise host!",
     thumbnail: "https://img.youtube.com/vi/pspDeWO-HHQ/mqdefault.jpg",
     publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=pspDeWO-HHQ",
+    videoUrl: "https://youtu.be/pspDeWO-HHQ?si=wslbtRzWA7Qm0alk",
   },
   {
     id: "2",
-    videoId: "6Q7Jz1Xqz8A",
-    title: "DGD Episode 8: Daily Guardian Cup 2019",
+    videoId: "BMjJ5W3IV_Q",
+    title: "DGD Episode 8: Dinagyang Badminton Cup",
     description:
-      "Highlights from the annual Daily Guardian sponsored community sports championship.",
-    thumbnail: "https://img.youtube.com/vi/6Q7Jz1Xqz8A/mqdefault.jpg",
+      "Reviving a proud tradition in the Dinagyang Festival, the Dinagyang Badminton Cup returns and is once again embraced by the Iloilo Badminton community with over 400 smashers including world-class players from the national pool vying for 130K in cash prizes.",
+    thumbnail: "https://img.youtube.com/vi/BMjJ5W3IV_Q/mqdefault.jpg",
     publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=6Q7Jz1Xqz8A",
+    videoUrl: "https://youtu.be/BMjJ5W3IV_Q?si=OsFUsalbfT698_7k",
   },
   {
     id: "3",
-    videoId: "QHc9j3QMwOg",
-    title: "DGD Episode 7: Pride Celebration",
+    videoId: "HDwa0s1ax_I",
+    title: "DGD Episode 7: DG Initiative Night",
     description:
-      "Community comes together for the annual Pride celebration in downtown.",
-    thumbnail: "https://img.youtube.com/vi/QHc9j3QMwOg/mqdefault.jpg",
+      "The Daily Guardian Initiative was first founded in April 2019 to create a network of passion and advocacy-based organizations and individuals who can give more perspectives to the shared story of human experience.",
+    thumbnail: "https://img.youtube.com/vi/HDwa0s1ax_I/mqdefault.jpg",
     publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=QHc9j3QMwOg",
+    videoUrl: "https://youtu.be/HDwa0s1ax_I?si=nfE7V-Jc2sjwfPJg",
   },
   {
     id: "4",
-    videoId: "Zn5G6n4S3Yk",
-    title: "DGD Episode 6: The Royal Homecoming",
-    description: "Local high school celebrates homecoming with record attendance.",
-    thumbnail: "https://img.youtube.com/vi/Zn5G6n4S3Yk/mqdefault.jpg",
+    videoId: "0eGJDJL-w3o",
+    title: "DGD Episode 5: Pride",
+    description:
+      "Iloilo City's 4th Pride March was powerful in its unity, and its diversity. With an appearance by Senator Risa Hontiveros, a battalion of 5,000 strong, and the support of the Iloilo City Government, Ilonggos show that their strongest weapon is love.",
+    thumbnail: "https://img.youtube.com/vi/0eGJDJL-w3o/mqdefault.jpg",
     publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=Zn5G6n4S3Yk",
+    videoUrl: "https://www.youtube.com/watch?v=0eGJDJL-w3o",
   },
   {
     id: "5",
-    videoId: "XkQvTn3LHSE",
-    title: "DGD Episode 5: Iloilo Fade Barber",
-    description: "Meet the local barber who has become a community institution.",
-    thumbnail: "https://img.youtube.com/vi/XkQvTn3LHSE/mqdefault.jpg",
-    publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=XkQvTn3LHSE",
-  },
-  {
-    id: "6",
-    videoId: "mNjIHbMDFH0",
-    title: "DGD Episode 4: Ilonggo Hablon Heritage",
+    videoId: "E9cX2N5H2Nc",
+    title: "DGD Episode 4: The Royal Homecoming",
     description:
-      "Exploring the traditional weaving techniques of local artisans.",
-    thumbnail: "https://img.youtube.com/vi/mNjIHbMDFH0/mqdefault.jpg",
+      "The Iloilo United-Royals of the Maharlika Pilipinas Basketball League came home for the first time and we were there to document all of it. Let us take you through the Royal Homecoming of OUR MPBL Team!",
+    thumbnail: "https://img.youtube.com/vi/E9cX2N5H2Nc/mqdefault.jpg",
     publishDate: "",
-    videoUrl: "https://www.youtube.com/watch?v=mNjIHbMDFH0",
+    videoUrl: "https://www.youtube.com/watch?v=E9cX2N5H2Nc",
   },
 ];
 
 export async function getChannelVideos(
-  handle = "@dailyguardian782"
+  handle = "@dailyguardian782",
 ): Promise<YouTubeVideo[]> {
   try {
     const channelId = await resolveChannelId(handle);
@@ -109,7 +101,7 @@ export async function getChannelVideos(
 
     const rssRes = await fetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-      { next: { revalidate: 3600 } } // refresh every hour
+      { next: { revalidate: 3600 } }, // refresh every hour
     );
 
     if (!rssRes.ok) return [];
@@ -121,10 +113,12 @@ export async function getChannelVideos(
       const videoId =
         entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? "";
       const title = decodeEntities(
-        entry.match(/<title>([^<]+)<\/title>/)?.[1] ?? ""
+        entry.match(/<title>([^<]+)<\/title>/)?.[1] ?? "",
       );
       const description = decodeEntities(
-        entry.match(/<media:description>([\s\S]*?)<\/media:description>/)?.[1]?.trim() ?? ""
+        entry
+          .match(/<media:description>([\s\S]*?)<\/media:description>/)?.[1]
+          ?.trim() ?? "",
       );
       const publishDate =
         entry.match(/<published>([^<]+)<\/published>/)?.[1] ?? "";

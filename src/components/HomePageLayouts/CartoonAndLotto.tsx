@@ -85,8 +85,8 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
       <div className="py-10">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
-          <div className="mb-8 pb-4 border-b border-[#fcee16]">
-            <h2 className="text-2xl font-roboto font-bold text-white">
+          <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+            <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
               CARTOON
             </h2>
           </div>
@@ -95,65 +95,59 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-8">
             {/* Cartoon image — full width on mobile, 2/3 on desktop */}
             <div className="lg:col-span-2 relative">
-              <div
-                className="relative overflow-hidden"
-                style={{ aspectRatio: "4/3" }}
-              >
-                {/* Paper background — cartoons are on white */}
-                <div className="absolute inset-0 bg-[#f4f0eb]" />
-
+              <div className="relative overflow-hidden bg-[#f4f0eb]">
                 {current.data.featured_image?.url ? (
-                  <Image
-                    src={current.data.featured_image.url}
-                    alt={current.data.featured_image.alt || current.data.title}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 1024px) 100vw, 66vw"
-                    priority
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={current.data.featured_image.url}
+                      alt={current.data.featured_image.alt || current.data.title}
+                      className="w-full h-auto block"
+                    />
+
+                    {/* Bottom gradient for text legibility */}
+                    <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+
+                    {/* CARTOON badge */}
+                    <div className="absolute bottom-12 left-5">
+                      <span className="bg-[#fcee16] text-black font-black text-[10px] px-3 py-1 font-roboto tracking-[0.2em] uppercase">
+                        CARTOON
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <Link href={`/blog/${current.uid}`} className="block">
+                      <h3 className="absolute bottom-4 left-5 right-14 text-white font-roboto font-black text-lg md:text-xl uppercase leading-tight tracking-wide drop-shadow-lg hover:text-[#fcee16] transition-colors">
+                        {current.data.title}
+                      </h3>
+                    </Link>
+
+                    {/* Prev / Next arrows */}
+                    {cartoons.length > 1 && (
+                      <>
+                        <button
+                          onClick={prev}
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-12 bg-black/40 hover:bg-[#fcee16] text-white hover:text-black flex items-center justify-center transition-all duration-200 z-10"
+                          aria-label="Previous cartoon"
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button
+                          onClick={next}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 w-9 h-12 bg-black/40 hover:bg-[#fcee16] text-white hover:text-black flex items-center justify-center transition-all duration-200 z-10"
+                          aria-label="Next cartoon"
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      </>
+                    )}
+                  </>
                 ) : (
-                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                  <div className="h-64 bg-gray-200 flex items-center justify-center">
                     <span className="text-gray-400 font-roboto text-sm uppercase tracking-widest">
                       No cartoon
                     </span>
                   </div>
-                )}
-
-                {/* Bottom gradient for text legibility */}
-                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-
-                {/* CARTOON badge */}
-                <div className="absolute bottom-12 left-5">
-                  <span className="bg-[#fcee16] text-black font-black text-[10px] px-3 py-1 font-roboto tracking-[0.2em] uppercase">
-                    CARTOON
-                  </span>
-                </div>
-
-                {/* Title */}
-                <Link href={`/blog/${current.uid}`} className="block">
-                  <h3 className="absolute bottom-4 left-5 right-14 text-white font-roboto font-black text-lg md:text-xl uppercase leading-tight tracking-wide drop-shadow-lg hover:text-[#fcee16] transition-colors">
-                    {current.data.title}
-                  </h3>
-                </Link>
-
-                {/* Prev / Next arrows */}
-                {cartoons.length > 1 && (
-                  <>
-                    <button
-                      onClick={prev}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-9 h-12 bg-black/40 hover:bg-[#fcee16] text-white hover:text-black flex items-center justify-center transition-all duration-200 z-10"
-                      aria-label="Previous cartoon"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      onClick={next}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 w-9 h-12 bg-black/40 hover:bg-[#fcee16] text-white hover:text-black flex items-center justify-center transition-all duration-200 z-10"
-                      aria-label="Next cartoon"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </>
                 )}
               </div>
 

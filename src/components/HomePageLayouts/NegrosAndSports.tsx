@@ -2,7 +2,7 @@ import CartoonCard from "@/components/CartoonCard";
 import { PublicationCard } from "@/components/PublicationCard";
 import Image from "next/image";
 import Link from "next/link";
-import type { Post, Publication } from "../../../lib/wordpress";
+import type { PaperEdition, Post, Publication } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 
 interface RegionalStoriesProps {
@@ -12,6 +12,7 @@ interface RegionalStoriesProps {
   sportsTitle: string;
   allPosts: Post[];
   supplement?: Publication | null;
+  supplementEditions?: PaperEdition[];
   cartoons?: Post[];
 }
 
@@ -20,6 +21,7 @@ export default function NegrosAndSportsStories({
   negrosTitle,
   sportsStories,
   supplement,
+  supplementEditions = [],
   cartoons = [],
 }: RegionalStoriesProps) {
   if (!negrosStories || negrosStories.length === 0) {
@@ -38,37 +40,53 @@ export default function NegrosAndSportsStories({
           <div className="lg:col-span-2 mb-10 lg:mb-0">
             {/* --- Negros Featured Story --- */}
             <div className="mb-12">
-              <div className="mb-6 pb-3 border-b border-[#fcee16]">
-                <h2 className="text-2xl font-roboto font-bold text-foreground">
+              <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+                <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
                   {negrosTitle}
                 </h2>
               </div>
               <article className="group">
                 <Link href={`/blog/${mainNegrosStory.uid}`} className="block">
                   {mainNegrosStory.data.featured_image?.url && (
-                    <div className="relative aspect-video mb-4">
+                    <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
                       <Image
                         src={mainNegrosStory.data.featured_image.url}
-                        alt={
-                          mainNegrosStory.data.featured_image.alt ||
-                          "Story image"
-                        }
+                        alt={mainNegrosStory.data.featured_image.alt || "Story image"}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                         sizes="(max-width: 1024px) 100vw, 66vw"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     </div>
                   )}
-                  <div className="space-y-2">
-                    <p className="text-accent text-sm font-medium uppercase font-sans">
+                  <div className="space-y-3">
+                    <span className="text-[#fbd203] text-xs font-bold uppercase tracking-widest font-roboto">
                       {mainNegrosStory.data.category || "News"}
-                    </p>
+                    </span>
                     <AnimatedHeadline
                       as="h3"
-                      extraClassName="text-3xl font-playfair font-bold text-accent leading-tight transition-colors duration-200 group-hover:text-accent"
+                      extraClassName="text-3xl text-[#fbd203] leading-tight"
                     >
                       {mainNegrosStory.data.title || "Untitled Article"}
                     </AnimatedHeadline>
+                    {mainNegrosStory.data.summary && (
+                      <p className="text-gray-400 leading-relaxed line-clamp-3 font-open-sans">
+                        {mainNegrosStory.data.summary}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-800 font-open-sans">
+                      <span>{mainNegrosStory.data.author || "Staff Writer"}</span>
+                      <span>·</span>
+                      <span>
+                        {new Date(mainNegrosStory.data.published_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                      {mainNegrosStory.data.reading_time && (
+                        <>
+                          <span>·</span>
+                          <span>{mainNegrosStory.data.reading_time} min read</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Link>
               </article>
@@ -77,8 +95,8 @@ export default function NegrosAndSportsStories({
             {/* --- Sports Section --- */}
             {limitedSportsStories.length > 0 && (
               <div>
-                <div className="mb-6 pb-3 border-b border-[#fcee16]">
-                  <h2 className="text-2xl font-roboto font-bold text-foreground">
+                <div className="mb-8 pb-3 border-b-2 border-[#fbd203]">
+                  <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
                     SPORTS
                   </h2>
                 </div>
@@ -142,6 +160,7 @@ export default function NegrosAndSportsStories({
                 embedSrc={supplement?.embedSrc}
                 pdfUrl={supplement?.pdfUrl}
                 content={supplement?.content}
+                editions={supplementEditions}
               />
             </div>
 

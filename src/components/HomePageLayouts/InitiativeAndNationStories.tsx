@@ -63,8 +63,8 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {initiativeItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:pr-8">
-              <div className="mb-4 pb-3 border-b border-accent">
-                <h2 className="text-2xl font-roboto font-bold text-foreground">
+              <div className="mb-4 pb-3 border-b-2 border-[#fbd203]">
+                <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
                   {initiativeTitle}
                 </h2>
               </div>
@@ -87,8 +87,8 @@ const ContentShowcaseSection: React.FC<ContentShowcaseProps> = ({
         {nationItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-12 border-t border-default">
             <div className="lg:pr-8">
-              <div className="mb-4 pb-3 border-b border-accent">
-                <h2 className="text-2xl font-roboto font-bold text-foreground">
+              <div className="mb-4 pb-3 border-b-2 border-[#fbd203]">
+                <h2 className="text-4xl font-playfair font-bold text-[#fbd203] uppercase tracking-widest">
                   {nationTitle}
                 </h2>
               </div>
