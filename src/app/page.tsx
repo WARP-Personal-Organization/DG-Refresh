@@ -209,9 +209,9 @@ export default async function Home() {
         />
         <EditorialStories title={"EDITORIAL"} stories={editorialFilled} />
         <OpinionSection posts={voicesPicks} />
-        <EnhancedVideoSection
+        {/* <EnhancedVideoSection
           videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS}
-        />
+        /> */}
       </div>
     );
   } catch (err) {
