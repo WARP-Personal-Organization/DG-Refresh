@@ -7,7 +7,6 @@ import {
   Bookmark,
   Calendar,
   Clock,
-  Eye,
   Facebook,
   Instagram,
   MessageCircle,
@@ -188,10 +187,6 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
 
           <div className="flex items-center gap-4 text-sm text-gray-400">
-            <div className="flex items-center gap-1 font-open-sans">
-              <Eye size={12} />
-              <span>1,247 views</span>
-            </div>
             <div className="flex items-center gap-1 font-open-sans">
               <Tag size={12} />
               <span>{readingTime} read</span>
