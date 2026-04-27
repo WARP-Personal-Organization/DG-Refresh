@@ -168,14 +168,6 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                       </Link>
                     ))}
                   </div>
-                  <div className="px-4 py-2 border-t border-[#ffe600]/20 bg-[#ffe600]/5">
-                    <Link
-                      href={item.href}
-                      className="text-xs text-[#ffe600] hover:text-[#ffe600]/80 font-medium transition-colors font-open-sans"
-                    >
-                      View All {item.name} →
-                    </Link>
-                  </div>
                 </div>
               )}
             </li>

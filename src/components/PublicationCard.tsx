@@ -3,6 +3,7 @@ import { ChevronDown, Eye } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { PaperEdition } from "../../lib/wordpress";
+import PdfThumbnail from "./PdfThumbnail";
 
 const FlipbookViewer = dynamic(() => import("./FlipbookViewer"), { ssr: false });
 
@@ -58,8 +59,9 @@ export const PublicationCard = ({
           className="block w-full relative group overflow-hidden"
         >
           <div className="relative aspect-[3/4] overflow-hidden">
-            <img
-              src={imageUrl}
+            <PdfThumbnail
+              pdfUrl={activePdfUrl}
+              fallbackImageUrl={imageUrl}
               alt={title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />

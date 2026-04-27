@@ -38,6 +38,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Open Sans", Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 /* Override Facebook Page Plugin injected wrapper classes that clip the embed */

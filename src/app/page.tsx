@@ -13,9 +13,15 @@ import NavigationBar from "@/components/Navigation";
 import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
-import DGDriveReels from "@/components/DGDriveReels";
 import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
-import { getAllPosts, getPostsByCategorySlugs, getTodaysPaper, getSupplement, getPaperEditions, getSupplementEditions } from "../../lib/wordpress";
+import {
+  getAllPosts,
+  getPostsByCategorySlugs,
+  getTodaysPaper,
+  getSupplement,
+  getPaperEditions,
+  getSupplementEditions,
+} from "../../lib/wordpress";
 import "./globals.css";
 
 export default async function Home() {
@@ -38,15 +44,28 @@ export default async function Home() {
       paperEditions,
       supplementEditions,
     ] = await Promise.all([
-      getAllPosts(20),                                                                          // hero + featured fallback
-      getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),        // LocalStories needs 4 + 1 for hero
-      getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),                        // Negros section needs 4
-      getPostsByCategorySlugs(["sports"], 8),                                                  // Sports needs 6
-      getPostsByCategorySlugs(["feature", "features", "entertainment", "lifestyle", "health", "technology"], 10), // Features needs 8
-      getPostsByCategorySlugs(["initiatives"], 5),                                             // Initiatives needs 3
-      getPostsByCategorySlugs(["national", "national-news"], 5),                               // Nation needs 3
-      getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),                               // Editorial needs 5 + 1 for hero
-      getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),                            // Opinion needs 7
+      getAllPosts(20), // hero + featured fallback
+      getPostsByCategorySlugs(
+        ["local", "local-news", "iloilo", "western-visayas"],
+        6,
+      ), // LocalStories needs 4 + 1 for hero
+      getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5), // Negros section needs 4
+      getPostsByCategorySlugs(["sports"], 8), // Sports needs 6
+      getPostsByCategorySlugs(
+        [
+          "feature",
+          "features",
+          "entertainment",
+          "lifestyle",
+          "health",
+          "technology",
+        ],
+        10,
+      ), // Features needs 8
+      getPostsByCategorySlugs(["initiatives"], 5), // Initiatives needs 3
+      getPostsByCategorySlugs(["national", "national-news"], 5), // Nation needs 3
+      getPostsByCategorySlugs(["editorial", "the-dg-view"], 8), // Editorial needs 5 + 1 for hero
+      getPostsByCategorySlugs(["voices", "visons", "opinion"], 9), // Opinion needs 7
       getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
       getTodaysPaper().catch(() => null),
       getSupplement().catch(() => null),
@@ -92,13 +111,15 @@ export default async function Home() {
     const usedIds = new Set([heroPost.id]);
 
     const featuredPost =
-      [featuredPicks[1], featuredPicks[0], recentPosts[1], recentPosts[0]]
-        .find((p) => p && !usedIds.has(p.id)) ?? heroPost;
+      [featuredPicks[1], featuredPicks[0], recentPosts[1], recentPosts[0]].find(
+        (p) => p && !usedIds.has(p.id),
+      ) ?? heroPost;
     usedIds.add(featuredPost.id);
 
     const editorialPost =
-      [...editorialPicks, recentPosts[2], recentPosts[1], recentPosts[0]]
-        .find((p) => p && !usedIds.has(p.id)) ?? undefined;
+      [...editorialPicks, recentPosts[2], recentPosts[1], recentPosts[0]].find(
+        (p) => p && !usedIds.has(p.id),
+      ) ?? undefined;
     if (editorialPost) usedIds.add(editorialPost.id);
 
     // localPost shown in the left column sidebar — must not repeat heroPost or editorialPost
@@ -107,12 +128,15 @@ export default async function Home() {
 
     // Fill editorial section to at least 5 posts — supplement with recent posts when the
     // editorial/the-dg-view categories don't have enough content in WordPress
-    const editorialFilled = editorialPicks.length >= 5
-      ? editorialPicks
-      : [
-          ...editorialPicks,
-          ...recentPosts.filter((p) => !editorialPicks.some((e) => e.id === p.id)),
-        ].slice(0, 5);
+    const editorialFilled =
+      editorialPicks.length >= 5
+        ? editorialPicks
+        : [
+            ...editorialPicks,
+            ...recentPosts.filter(
+              (p) => !editorialPicks.some((e) => e.id === p.id),
+            ),
+          ].slice(0, 5);
 
     // Combine all fetched posts for EditorsPicks in NegrosAndSports
     const allPostsForEditorsPicks = [
@@ -123,11 +147,16 @@ export default async function Home() {
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i); // deduplicate
 
     // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([heroPost.id, featuredPost.id, ...(editorialPost ? [editorialPost.id] : [])]);
+    const shownInMainContent = new Set([
+      heroPost.id,
+      featuredPost.id,
+      ...(editorialPost ? [editorialPost.id] : []),
+    ]);
 
     // TopStories: filter out posts already rendered in the MainContent hero/featured slots
-    const topStoriesPool = (featuredPicks.length >= 4 ? featuredPicks : recentPosts)
-      .filter((p) => !shownInMainContent.has(p.id));
+    const topStoriesPool = (
+      featuredPicks.length >= 4 ? featuredPicks : recentPosts
+    ).filter((p) => !shownInMainContent.has(p.id));
 
     // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
     const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
@@ -146,7 +175,10 @@ export default async function Home() {
               <PublicationCard
                 title="Today's Paper"
                 imageUrl={todaysPaper?.imageUrl || "/todaysnewspaper.png"}
-                link={todaysPaper?.link || "https://dailyguardian.com.ph/todays-paper/"}
+                link={
+                  todaysPaper?.link ||
+                  "https://dailyguardian.com.ph/todays-paper/"
+                }
                 embedSrc={todaysPaper?.embedSrc}
                 pdfUrl={todaysPaper?.pdfUrl}
                 content={todaysPaper?.content}
@@ -177,8 +209,9 @@ export default async function Home() {
         />
         <EditorialStories title={"EDITORIAL"} stories={editorialFilled} />
         <OpinionSection posts={voicesPicks} />
-        <DGDriveReels />
-        <EnhancedVideoSection videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS} />
+        <EnhancedVideoSection
+          videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS}
+        />
       </div>
     );
   } catch (err) {

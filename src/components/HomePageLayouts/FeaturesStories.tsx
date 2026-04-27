@@ -44,7 +44,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               {/* Top-Left Main Story */}
               {mainStory && (
-                <article className="pr-6 md:pr-8">
+                <article className="pl-4 pr-6 md:pl-4 md:pr-8">
                   <Link href={`/blog/${mainStory.uid}`} className="block group">
                     <AnimatedHeadline
                       as="h3"

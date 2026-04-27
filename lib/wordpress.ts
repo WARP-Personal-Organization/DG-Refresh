@@ -101,7 +101,8 @@ export function stripHtml(html: string): string {
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&#8230;/g, "...")
+    .replace(/&hellip;/g, "…")
+    .replace(/&#8230;/g, "…")
     .replace(/&#8220;/g, "\u201C")
     .replace(/&#8221;/g, "\u201D")
     .replace(/&#8217;/g, "\u2019")
@@ -112,6 +113,7 @@ export function stripHtml(html: string): string {
     .replace(/&rdquo;/g, "\u201D")
     .replace(/&ndash;/g, "\u2013")
     .replace(/&mdash;/g, "\u2014")
+    .replace(/\s*\[\u2026\]\s*$/, "")
     .trim();
 }
 
@@ -191,12 +193,57 @@ export function transformPost(wpPost: WPPost): Post {
   const tagTerms =
     terms.find((group) => group.some((t) => t.taxonomy === "post_tag")) ?? [];
 
+  // WP post_tag is always empty for DG posts — use category names as tags instead.
+  // Filter out the generic top-level section slugs so only meaningful labels remain
+  // (e.g. "IMPULSES", "LOCAL NEWS", "ABOVE THE BELT", not "OPINION" / "NEWS").
+  const TOP_LEVEL_SLUGS = new Set([
+    ...Object.keys(CATEGORY_MAP),
+    ...Object.keys(SUBCATEGORY_MAP),
+    "uncategorized", "general",
+  ]);
+  const derivedTags =
+    tagTerms.length > 0
+      ? tagTerms.map((t) => t.name)
+      : categoryTerms
+          .filter((t) => !TOP_LEVEL_SLUGS.has(t.slug))
+          .map((t) => t.name);
+
   const categorySlugs = categoryTerms.map((c) => c.slug);
   const category = mapCategory(categorySlugs);
-  const subcategory = mapSubcategory(categorySlugs);
+  const subcategoryMapped = mapSubcategory(categorySlugs);
+
+  // Column / series name: the secondary category that isn't a top-level section slug.
+  // e.g. opinion post → "IMPULSES", "ABOVE THE BELT", "MAAYONG AGA, ILOILO!"
+  // e.g. local news   → already handled by subcategoryMapped ("local", "negros", etc.)
+  const SECTION_SLUGS = new Set([
+    ...Object.keys(CATEGORY_MAP),
+    ...Object.keys(SUBCATEGORY_MAP),
+    "uncategorized", "general",
+  ]);
+  const columnTerm = categoryTerms.find((t) => !SECTION_SLUGS.has(t.slug));
+  const subcategory = subcategoryMapped || columnTerm?.name || "";
 
   const rawContent = wpPost.content?.rendered ?? "";
-  const excerpt = stripHtml(wpPost.excerpt?.rendered ?? "");
+  const rawExcerpt = stripHtml(wpPost.excerpt?.rendered ?? "");
+
+  // Extract real columnist name from the content's first paragraph.
+  // DG marks the byline as: <p>By <em>Author Name</em></p>
+  // This is unambiguous — the <em> tag wraps exactly the name, nothing else.
+  const bylineEmMatch = rawContent.match(/<p[^>]*>\s*By\s+<em>([^<]+)<\/em>\s*<\/p>/i);
+  const bylineName = bylineEmMatch?.[1]?.trim() ?? null;
+
+  const wpAuthorName = authorItem?.name ?? "";
+  const isGenericUser =
+    !wpAuthorName ||
+    wpAuthorName.toLowerCase().includes("daily guardian") ||
+    wpAuthorName.toLowerCase() === "staff writer";
+  const author =
+    (!isGenericUser ? wpAuthorName : null) ?? bylineName ?? "Staff Writer";
+
+  // Strip "By [Name]" from the excerpt so article summaries start cleanly.
+  const excerpt = bylineName
+    ? rawExcerpt.replace(new RegExp(`^By\\s+${bylineName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*`, "i"), "").trim()
+    : rawExcerpt;
 
   return {
     id: wpPost.id,
@@ -216,11 +263,11 @@ export function transformPost(wpPost: WPPost): Post {
             alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
           }
         : null,
-      author: authorItem?.name ?? "Staff Writer",
+      author,
       published_date: wpPost.date,
       updated_date: wpPost.modified,
       reading_time: estimateReadingTime(rawContent),
-      tags: tagTerms.map((t) => t.name),
+      tags: derivedTags,
       meta_description: excerpt.substring(0, 160),
       original_link: wpPost.link ?? "",
     },
@@ -473,6 +520,52 @@ export async function getPostsByCategorySlugs(
     console.error("Failed to fetch posts for category IDs:", ids, err);
     return { posts: [], totalPages: 1, total: 0 };
   }
+}
+
+// Convert an author name to a URL-safe slug
+// e.g. "Atty. Eduardo T. Reyes III" → "atty-eduardo-t-reyes-iii"
+export function authorToSlug(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // strip diacritics
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")    // drop punctuation (dots, commas, etc.)
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+// Normalize a name for loose comparison (remove dots, lowercase, collapse spaces)
+function normalizeName(name: string): string {
+  return name.toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
+}
+
+// Fetch opinion posts by a specific columnist, matched via WP full-text search
+// then filtered to only posts where the extracted byline matches the author.
+export async function getOpinionPostsByAuthor(
+  authorName: string,
+  perPage = 12,
+  page = 1,
+): Promise<{ posts: Post[]; totalPages: number; total: number }> {
+  const cats = await wpFetch<WPCategory[]>("/categories", { slug: "opinion" }).catch(() => []);
+  const catId = cats[0]?.id;
+  if (!catId) return { posts: [], totalPages: 1, total: 0 };
+
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
+    categories: catId,
+    search: authorName,
+    per_page: perPage,
+    page,
+    _embed: 1,
+    orderby: "date",
+    order: "desc",
+  });
+
+  const target = normalizeName(authorName);
+  const posts = data
+    .map(transformPost)
+    .filter((p) => normalizeName(p.data.author) === target);
+
+  return { posts, totalPages, total };
 }
 
 interface WPPage {
