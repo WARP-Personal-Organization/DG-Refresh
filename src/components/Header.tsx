@@ -216,7 +216,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
                     <img
                       src="/black_dg.png"
                       alt="Daily Guardian"
-                      className="h-10 sm:h-12 md:h-16 lg:h-20 xl:h-24 w-auto drop-shadow-lg"
+                      className="h-10 sm:h-12 md:h-16 lg:h-20 xl:h-24 w-auto max-w-[120px] sm:max-w-[150px] md:max-w-[200px] lg:max-w-none object-contain drop-shadow-lg"
                     />
                   </div>
                 </div>
