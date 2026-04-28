@@ -25,13 +25,23 @@ const T = {
 };
 
 export default function LoadingScreen() {
-  const [show,    setShow]    = useState(false);
-  const [fading,  setFading]  = useState(false);
-  const [chars,   setChars]   = useState(0);
-  const [caretOn, setCaretOn] = useState(true);
-  const svgRef   = useRef<SVGSVGElement>(null);
-  const rafRef   = useRef<number>(0);
-  const startRef = useRef<number>(0);
+  const [show,      setShow]      = useState(false);
+  const [fading,    setFading]    = useState(false);
+  const [chars,     setChars]     = useState(0);
+  const [caretOn,   setCaretOn]   = useState(true);
+  const svgRef      = useRef<SVGSVGElement>(null);
+  const rafRef      = useRef<number>(0);
+  const startRef    = useRef<number>(0);
+  const animDone    = useRef(false);
+  const pageReady   = useRef(false);
+
+  const tryFade = () => {
+    if (animDone.current && pageReady.current) {
+      setFading(true);
+      document.documentElement.classList.remove("dg-first-load");
+      setTimeout(() => setShow(false), T.fade);
+    }
+  };
 
   useEffect(() => {
     if (sessionStorage.getItem("dg_intro")) return;
@@ -97,18 +107,26 @@ export default function LoadingScreen() {
     }
     rafRef.current = requestAnimationFrame(tick);
 
-    const fadeTimer = setTimeout(() => {
-      setFading(true);
-      document.documentElement.classList.remove("dg-first-load");
+    // Mark animation done and attempt fade
+    const animTimer = setTimeout(() => {
+      animDone.current = true;
+      tryFade();
     }, T.total);
-    const hideTimer = setTimeout(() => setShow(false), T.total + T.fade);
+
+    // Mark page ready when all resources are loaded
+    const onLoad = () => { pageReady.current = true; tryFade(); };
+    if (document.readyState === "complete") {
+      pageReady.current = true;
+    } else {
+      window.addEventListener("load", onLoad);
+    }
 
     return () => {
       typeTimers.forEach(clearTimeout);
       clearTimeout(caretStop);
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
+      clearTimeout(animTimer);
       cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("load", onLoad);
     };
   }, []);
 
