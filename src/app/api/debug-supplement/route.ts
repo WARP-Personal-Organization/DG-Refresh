@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-const SUPPLEMENT_URL = "https://dailyguardian.com.ph/3d-flip-book/supplement/";
-const WP_API = "https://dailyguardian.com.ph/wp-json/wp/v2";
+const SUPPLEMENT_URL = "https://old.dailyguardian.com.ph/3d-flip-book/supplement/";
+const WP_API = "https://old.dailyguardian.com.ph/wp-json/wp/v2";
 
 export async function GET() {
   const results: Record<string, unknown> = {};

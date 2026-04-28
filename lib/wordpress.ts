@@ -2,7 +2,7 @@
 // WordPress REST API integration for Daily Guardian
 // API base: https://dailyguardian.com.ph/wp-json/wp/v2
 
-const WP_API_BASE = "https://dailyguardian.com.ph/wp-json/wp/v2";
+const WP_API_BASE = process.env.WORDPRESS_API_URL ?? "https://old.dailyguardian.com.ph/wp-json/wp/v2";
 
 // ─── Raw WordPress API Types ──────────────────────────────────────────────────
 
@@ -199,7 +199,8 @@ export function transformPost(wpPost: WPPost): Post {
   const TOP_LEVEL_SLUGS = new Set([
     ...Object.keys(CATEGORY_MAP),
     ...Object.keys(SUBCATEGORY_MAP),
-    "uncategorized", "general",
+    "uncategorized",
+    "general",
   ]);
   const derivedTags =
     tagTerms.length > 0
@@ -218,7 +219,8 @@ export function transformPost(wpPost: WPPost): Post {
   const SECTION_SLUGS = new Set([
     ...Object.keys(CATEGORY_MAP),
     ...Object.keys(SUBCATEGORY_MAP),
-    "uncategorized", "general",
+    "uncategorized",
+    "general",
   ]);
   const columnTerm = categoryTerms.find((t) => !SECTION_SLUGS.has(t.slug));
   const subcategory = subcategoryMapped || columnTerm?.name || "";
@@ -229,7 +231,9 @@ export function transformPost(wpPost: WPPost): Post {
   // Extract real columnist name from the content's first paragraph.
   // DG marks the byline as: <p>By <em>Author Name</em></p>
   // This is unambiguous — the <em> tag wraps exactly the name, nothing else.
-  const bylineEmMatch = rawContent.match(/<p[^>]*>\s*By\s+<em>([^<]+)<\/em>\s*<\/p>/i);
+  const bylineEmMatch = rawContent.match(
+    /<p[^>]*>\s*By\s+<em>([^<]+)<\/em>\s*<\/p>/i,
+  );
   const bylineName = bylineEmMatch?.[1]?.trim() ?? null;
 
   const wpAuthorName = authorItem?.name ?? "";
@@ -242,7 +246,15 @@ export function transformPost(wpPost: WPPost): Post {
 
   // Strip "By [Name]" from the excerpt so article summaries start cleanly.
   const excerpt = bylineName
-    ? rawExcerpt.replace(new RegExp(`^By\\s+${bylineName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*`, "i"), "").trim()
+    ? rawExcerpt
+        .replace(
+          new RegExp(
+            `^By\\s+${bylineName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*`,
+            "i",
+          ),
+          "",
+        )
+        .trim()
     : rawExcerpt;
 
   return {
@@ -529,7 +541,7 @@ export function authorToSlug(name: string): string {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "") // strip diacritics
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")    // drop punctuation (dots, commas, etc.)
+    .replace(/[^a-z0-9\s]/g, "") // drop punctuation (dots, commas, etc.)
     .trim()
     .replace(/\s+/g, "-");
 }
@@ -546,19 +558,24 @@ export async function getOpinionPostsByAuthor(
   perPage = 12,
   page = 1,
 ): Promise<{ posts: Post[]; totalPages: number; total: number }> {
-  const cats = await wpFetch<WPCategory[]>("/categories", { slug: "opinion" }).catch(() => []);
+  const cats = await wpFetch<WPCategory[]>("/categories", {
+    slug: "opinion",
+  }).catch(() => []);
   const catId = cats[0]?.id;
   if (!catId) return { posts: [], totalPages: 1, total: 0 };
 
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>("/posts", {
-    categories: catId,
-    search: authorName,
-    per_page: perPage,
-    page,
-    _embed: 1,
-    orderby: "date",
-    order: "desc",
-  });
+  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+    "/posts",
+    {
+      categories: catId,
+      search: authorName,
+      per_page: perPage,
+      page,
+      _embed: 1,
+      orderby: "date",
+      order: "desc",
+    },
+  );
 
   const target = normalizeName(authorName);
   const posts = data
@@ -684,19 +701,29 @@ async function fetchPublicationByPageSlug(
 export async function getTodaysPaper(): Promise<Publication> {
   return fetchPublicationByPageSlug(
     "todays-paper",
-    "https://dailyguardian.com.ph/todays-paper/",
+    "https://old.dailyguardian.com.ph/todays-paper/",
     "Today's Paper",
   );
 }
 
 export async function getSupplement(): Promise<Publication> {
-  const SUPPLEMENT_URL = "https://dailyguardian.com.ph/3d-flip-book/supplement/";
-  const slugsToTry = ["supplement", "e-supplement", "dg-supplement", "weekly-supplement"];
+  const SUPPLEMENT_URL =
+    "https://old.dailyguardian.com.ph/3d-flip-book/supplement/";
+  const slugsToTry = [
+    "supplement",
+    "e-supplement",
+    "dg-supplement",
+    "weekly-supplement",
+  ];
 
   let imageOnlyResult: Publication | null = null;
 
   for (const slug of slugsToTry) {
-    const pub = await fetchPublicationByPageSlug(slug, SUPPLEMENT_URL, "Supplement");
+    const pub = await fetchPublicationByPageSlug(
+      slug,
+      SUPPLEMENT_URL,
+      "Supplement",
+    );
     if (pub.pdfUrl || pub.embedSrc) return pub; // ideal — has something to render
     if (pub.imageUrl && !imageOnlyResult) imageOnlyResult = pub; // save thumbnail as fallback
   }
@@ -731,14 +758,16 @@ export async function getSupplement(): Promise<Publication> {
     // fall through
   }
 
-  return imageOnlyResult ?? {
-    imageUrl: null,
-    link: SUPPLEMENT_URL,
-    title: "Supplement",
-    content: "",
-    embedSrc: null,
-    pdfUrl: null,
-  };
+  return (
+    imageOnlyResult ?? {
+      imageUrl: null,
+      link: SUPPLEMENT_URL,
+      title: "Supplement",
+      content: "",
+      embedSrc: null,
+      pdfUrl: null,
+    }
+  );
 }
 
 export interface PaperEdition {
@@ -767,7 +796,9 @@ export async function getPaperEditions(limit = 30): Promise<PaperEdition[]> {
       _fields: "id,date,title,source_url",
     });
     return items
-      .filter((m) => /^PDF-[A-Za-z]+-\d+-\d+$/.test(m.title.rendered.replace(/\.pdf$/i, "")))
+      .filter((m) =>
+        /^PDF-[A-Za-z]+-\d+-\d+$/.test(m.title.rendered.replace(/\.pdf$/i, "")),
+      )
       .map((m) => ({
         id: m.id,
         date: m.date,
@@ -780,7 +811,9 @@ export async function getPaperEditions(limit = 30): Promise<PaperEdition[]> {
 }
 
 // Fetch past supplement editions (special issues) from the WP media library.
-export async function getSupplementEditions(limit = 20): Promise<PaperEdition[]> {
+export async function getSupplementEditions(
+  limit = 20,
+): Promise<PaperEdition[]> {
   try {
     const items = await wpFetch<WPMediaItem[]>("/media", {
       mime_type: "application/pdf",
@@ -825,7 +858,9 @@ export interface WPComment {
   status: string;
 }
 
-export async function getCommentsByPostId(postId: number): Promise<WPComment[]> {
+export async function getCommentsByPostId(
+  postId: number,
+): Promise<WPComment[]> {
   return wpFetch<WPComment[]>("/comments", {
     post: postId,
     per_page: 100,

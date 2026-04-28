@@ -155,7 +155,7 @@ export default function NegrosAndSportsStories({
                 imageUrl={supplement?.imageUrl || "/Supplement.PNG"}
                 link={
                   supplement?.link ||
-                  "https://dailyguardian.com.ph/3d-flip-book/supplement/"
+                  "https://old.dailyguardian.com.ph/3d-flip-book/supplement/"
                 }
                 embedSrc={supplement?.embedSrc}
                 pdfUrl={supplement?.pdfUrl}
