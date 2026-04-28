@@ -300,7 +300,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
                   Alerts
                 </button>
                 <button className="flex items-center justify-center gap-2 border border-gray-600 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-gray-700/50">
-                  <User size={16} />
                   Sign In
                 </button>
               </div>
