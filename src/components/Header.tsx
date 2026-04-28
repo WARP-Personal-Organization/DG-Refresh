@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Calendar, MapPin, Search, User } from "lucide-react";
+import { Bell, Calendar, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
@@ -225,9 +225,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
 
             {/* Right Section */}
             <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
-              <button className="md:hidden text-black hover:text-[#fcee16] transition-colors duration-200 p-2">
-                <User size={18} />
-              </button>
             </div>
           </div>
         </div>

@@ -293,6 +293,11 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
           {navigationData.map((item) => (
             <li key={item.name} className="border-b border-white/5">
               <div className="flex items-center justify-between">
+                {item.href === "/other-pages" ? (
+                  <span className="flex-1 px-5 py-4 text-[11px] font-black tracking-widest uppercase text-white/80">
+                    {item.name}
+                  </span>
+                ) : (
                 <Link
                   href={item.href}
                   onClick={closeMobileMenu}
@@ -300,6 +305,7 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                 >
                   {item.name}
                 </Link>
+                )}
                 {item.dropdown && (
                   <button
                     onClick={() => toggleMobileDropdown(item.name)}
@@ -325,13 +331,15 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                       {sub.name}
                     </Link>
                   ))}
-                  <Link
-                    href={item.href}
-                    onClick={closeMobileMenu}
-                    className="block pl-8 pr-5 py-3 text-[10px] font-black tracking-widest uppercase text-[#fcee16] hover:text-[#fcee16]/70 border-t border-white/5 transition-colors"
-                  >
-                    View All {item.name} →
-                  </Link>
+                  {item.href !== "/other-pages" && (
+                    <Link
+                      href={item.href}
+                      onClick={closeMobileMenu}
+                      className="block pl-8 pr-5 py-3 text-[10px] font-black tracking-widest uppercase text-[#fcee16] hover:text-[#fcee16]/70 border-t border-white/5 transition-colors"
+                    >
+                      View All {item.name} →
+                    </Link>
+                  )}
                 </div>
               )}
             </li>

@@ -99,6 +99,7 @@ export function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")
     .replace(/&amp;/g, "&")
+    .replace(/&#038;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&hellip;/g, "…")
