@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   getPostsByCategorySlugs,
+  getPostBySlug,
   getWPSlugsForCategory,
 } from "../../../lib/wordpress";
 import CategoryPageComponent from "../../components/CategoryPage";
@@ -41,6 +42,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   if (!posts || posts.length === 0) {
+    const post = await getPostBySlug(categorySlug);
+    if (post) {
+      redirect(`/blog/${categorySlug}`);
+    }
     notFound();
   }
 
