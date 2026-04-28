@@ -95,6 +95,11 @@ export interface Author {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function rewriteMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.replace("https://dailyguardian.com.ph/", "https://old.dailyguardian.com.ph/");
+}
+
 export function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")
@@ -272,7 +277,7 @@ export function transformPost(wpPost: WPPost): Post {
       editors_pick: false,
       featured_image: media
         ? {
-            url: media.source_url,
+            url: rewriteMediaUrl(media.source_url) ?? media.source_url,
             alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
           }
         : null,
@@ -654,7 +659,7 @@ async function fetchPublicationByPageSlug(
     if (page) {
       const content = page.content?.rendered ?? "";
       return {
-        imageUrl: page._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
+        imageUrl: rewriteMediaUrl(page._embedded?.["wp:featuredmedia"]?.[0]?.source_url),
         link: page.link,
         title: fallbackTitle,
         content,
