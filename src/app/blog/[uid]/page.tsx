@@ -197,17 +197,18 @@ export default async function BlogPost({ params }: BlogPageProps) {
         {/* Article Content (WordPress HTML) */}
         <div
           className="prose prose-lg prose-invert max-w-none
-            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-lg prose-p:font-open-sans
-            prose-h1:text-white prose-h1:font-roboto
-            prose-h2:text-white prose-h2:font-roboto
-            prose-h3:text-white prose-h3:font-roboto
+            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-lg prose-p:font-open-sans prose-p:mb-6
+            prose-h1:text-white prose-h1:font-roboto prose-h1:mt-8 prose-h1:mb-4
+            prose-h2:text-white prose-h2:font-roboto prose-h2:mt-8 prose-h2:mb-4
+            prose-h3:text-white prose-h3:font-roboto prose-h3:mt-6 prose-h3:mb-3
             prose-strong:text-white prose-strong:font-bold
             prose-em:text-[#fcee16] prose-em:italic
             prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
-            prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200
+            prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200 prose-li:mb-2
             prose-img:rounded-lg prose-img:border prose-img:border-gray-700
             prose-pre:bg-gray-800 prose-pre:rounded-lg
-            prose-code:text-green-400"
+            prose-code:text-green-400
+            [&_p]:mb-6 [&_p+p]:mt-0"
           dangerouslySetInnerHTML={{ __html: post.data.content }}
         />
 
