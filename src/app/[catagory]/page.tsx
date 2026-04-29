@@ -77,11 +77,27 @@ export async function generateMetadata({ params }: Props) {
   const categoryName =
     resolvedParams.catagory.charAt(0).toUpperCase() +
     resolvedParams.catagory.slice(1);
+  const url = `https://dailyguardian.com.ph/${resolvedParams.catagory}`;
+  const description = `Read the latest ${categoryName.toLowerCase()} articles and news from Daily Guardian — Western Visayas' leading news publication.`;
 
   return {
-    title: `${categoryName} Articles | Daily Guardian`,
-    description: `Read the latest ${categoryName.toLowerCase()} articles and news from Daily Guardian.`,
-    keywords: `${categoryName}, news, articles, Daily Guardian, ${resolvedParams.catagory}`,
+    title: `${categoryName} News`,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title: `${categoryName} News | Daily Guardian`,
+      description,
+      siteName: "Daily Guardian",
+      images: [{ url: "/black_dg.png", width: 1200, height: 630, alt: "Daily Guardian" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${categoryName} News | Daily Guardian`,
+      description,
+      images: ["/black_dg.png"],
+    },
   };
 }
 

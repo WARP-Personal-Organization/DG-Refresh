@@ -60,8 +60,43 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const readingTime = `${post.data.reading_time} min`;
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyguardian.com.ph"}/blog/${post.uid}`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: post.data.title,
+    description: post.data.meta_description || post.data.summary || "",
+    url: articleUrl,
+    datePublished: post.data.published_date,
+    dateModified: post.data.updated_date || post.data.published_date,
+    author: {
+      "@type": "Person",
+      name: post.data.author || "Daily Guardian",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Daily Guardian",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://dailyguardian.com.ph/black_dg.png",
+      },
+    },
+    image: post.data.featured_image?.url
+      ? {
+          "@type": "ImageObject",
+          url: post.data.featured_image.url,
+          width: 1200,
+          height: 630,
+        }
+      : undefined,
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+  };
+
   return (
     <div className="bg-[#1b1a1b] min-h-screen font-open-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className="bg-[#1b1a1b] border-b border-default sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <nav className="text-sm font-bold tracking-wider text-white uppercase flex items-center gap-2.5">
@@ -384,37 +419,39 @@ export async function generateMetadata({ params }: BlogPageProps) {
   try {
     const resolvedParams = await params;
     const post = await getPostBySlug(resolvedParams.uid);
-    if (!post) return { title: "Article Not Found | Daily Guardian" };
+    if (!post) return { title: "Article Not Found" };
+
+    const url = `https://dailyguardian.com.ph/blog/${resolvedParams.uid}`;
+    const description = post.data.meta_description || post.data.summary || "";
+    const image = post.data.featured_image?.url;
 
     return {
-      title: `${post.data.title} | Daily Guardian`,
-      description: post.data.meta_description || post.data.summary,
+      title: post.data.title,
+      description,
+      alternates: { canonical: url },
       openGraph: {
+        type: "article",
+        url,
         title: post.data.title,
-        description: post.data.meta_description || post.data.summary,
-        images: post.data.featured_image?.url
-          ? [
-              {
-                url: post.data.featured_image.url,
-                width: 1200,
-                height: 630,
-                alt: post.data.featured_image.alt || post.data.title,
-              },
-            ]
+        description,
+        siteName: "Daily Guardian",
+        publishedTime: post.data.published_date,
+        authors: post.data.author ? [post.data.author] : ["Daily Guardian"],
+        section: post.data.category || "News",
+        images: image
+          ? [{ url: image, width: 1200, height: 630, alt: post.data.featured_image?.alt || post.data.title }]
           : [],
       },
       twitter: {
         card: "summary_large_image",
         title: post.data.title,
-        description: post.data.meta_description || post.data.summary,
-        images: post.data.featured_image?.url
-          ? [post.data.featured_image.url]
-          : [],
+        description,
+        images: image ? [image] : [],
       },
     };
   } catch {
     return {
-      title: "Article Not Found | Daily Guardian",
+      title: "Article Not Found",
       description: "The requested article could not be found.",
     };
   }

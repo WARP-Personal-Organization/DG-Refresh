@@ -11,7 +11,6 @@ interface MainContentProps {
   localposts?: Post;
 }
 
-// Compact Article Separator Component
 const ArticleSeparator: React.FC = () => {
   return (
     <div className="flex items-center justify-center py-2 my-3">
@@ -46,7 +45,7 @@ const MainContent: React.FC<MainContentProps> = ({
         <div className="lg:col-span-2 flex flex-col justify-between h-full">
           <article>
             <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
-              {heroPost.data.category || "News"}
+              {heroPost.data.subcategory || heroPost.data.category || "News"}
             </p>
             <Link href={`/blog/${heroPost.uid}`} className="block group">
               <AnimatedHeadline
@@ -67,23 +66,17 @@ const MainContent: React.FC<MainContentProps> = ({
               <>
                 <ArticleSeparator />
                 <article className="pt-4">
-                  <Link
-                    href={`/blog/${editorialPost.uid}`}
-                    className="block group"
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="text-accent text-lg font-roboto font-bold"></div>
-                      <div className="flex-1">
-                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair">
-                          <span className="text-gray-400 font-normal text-sm">
-                            The DG View.
-                          </span>{" "}
-                          {editorialPost.data.title}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          The editorial board
-                        </p>
-                      </div>
+                  <Link href={`/blog/${editorialPost.uid}`} className="block group">
+                    <div className="flex-1">
+                      <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
+                        {editorialPost.data.subcategory || editorialPost.data.category || "Editorial"}
+                      </p>
+                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
+                        {editorialPost.data.title}
+                      </p>
+                      {editorialPost.data.author && (
+                        <p className="text-xs text-gray-500 mt-0.5">{editorialPost.data.author}</p>
+                      )}
                     </div>
                   </Link>
                 </article>
@@ -94,23 +87,17 @@ const MainContent: React.FC<MainContentProps> = ({
               <>
                 <ArticleSeparator />
                 <article className="pt-4">
-                  <Link
-                    href={`/blog/${localposts.uid}`}
-                    className="block group"
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="text-accent text-lg font-roboto font-bold"></div>
-                      <div className="flex-1">
-                        <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair">
-                          <span className="text-gray-400 font-normal text-sm">
-                            The DG View.
-                          </span>{" "}
-                          {localposts.data.title}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          The editorial board
-                        </p>
-                      </div>
+                  <Link href={`/blog/${localposts.uid}`} className="block group">
+                    <div className="flex-1">
+                      <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
+                        {localposts.data.subcategory || localposts.data.category || "Local"}
+                      </p>
+                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
+                        {localposts.data.title}
+                      </p>
+                      {localposts.data.author && (
+                        <p className="text-xs text-gray-500 mt-0.5">{localposts.data.author}</p>
+                      )}
                     </div>
                   </Link>
                 </article>
@@ -150,7 +137,7 @@ const MainContent: React.FC<MainContentProps> = ({
               </div>
 
               <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1 font-sans text-center">
-                {featuredPost.data.category || "Featured"}
+                {featuredPost.data.subcategory || featuredPost.data.category || "Featured"}
               </p>
 
               <h2 className="relative text-3xl lg:text-4xl font-playfair font-bold text-accent leading-tight max-w-2xl break-words text-center mx-auto group-hover:text-accent/80 transition-colors duration-300">

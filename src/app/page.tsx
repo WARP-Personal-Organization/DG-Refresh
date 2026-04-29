@@ -16,6 +16,7 @@ import EnhancedVideoSection from "@/components/VideosSection";
 import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
 import {
   getAllPosts,
+  getBannerNewsBySubcategory,
   getPostsByCategorySlugs,
   getTodaysPaper,
   getSupplement,
@@ -29,6 +30,7 @@ export default async function Home() {
     // Fetch each section's data in parallel with targeted amounts
     const [
       recentPosts,
+      bannerBySubcategory,
       localResult,
       negrosResult,
       sportsResult,
@@ -44,28 +46,16 @@ export default async function Home() {
       paperEditions,
       supplementEditions,
     ] = await Promise.all([
-      getAllPosts(20), // hero + featured fallback
-      getPostsByCategorySlugs(
-        ["local", "local-news", "iloilo", "western-visayas"],
-        6,
-      ), // LocalStories needs 4 + 1 for hero
-      getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5), // Negros section needs 4
-      getPostsByCategorySlugs(["sports"], 8), // Sports needs 6
-      getPostsByCategorySlugs(
-        [
-          "feature",
-          "features",
-          "entertainment",
-          "lifestyle",
-          "health",
-          "technology",
-        ],
-        10,
-      ), // Features needs 8
-      getPostsByCategorySlugs(["initiatives"], 5), // Initiatives needs 3
-      getPostsByCategorySlugs(["national", "national-news"], 5), // Nation needs 3
-      getPostsByCategorySlugs(["editorial", "the-dg-view"], 8), // Editorial needs 5 + 1 for hero
-      getPostsByCategorySlugs(["voices", "visons", "opinion"], 9), // Opinion needs 7
+      getAllPosts(20),
+      getBannerNewsBySubcategory(30), // banner news grouped by subcategory
+      getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),
+      getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
+      getPostsByCategorySlugs(["sports"], 8),
+      getPostsByCategorySlugs(["feature", "features", "entertainment", "lifestyle", "health", "technology"], 10),
+      getPostsByCategorySlugs(["initiatives"], 5),
+      getPostsByCategorySlugs(["national", "national-news"], 5),
+      getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
+      getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),
       getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
       getTodaysPaper().catch(() => null),
       getSupplement().catch(() => null),
@@ -74,12 +64,31 @@ export default async function Home() {
       getSupplementEditions(10).catch(() => []),
     ]);
 
-    const localPicks = localResult.posts;
-    const negrosPicks = negrosResult.posts;
-    const sportsPicks = sportsResult.posts;
+    // Banner news per section — fall back to regular category posts if no banner news for that section
+    const bannerPicks = [
+      ...Object.values(bannerBySubcategory).flat(),
+    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+
+    const localPicks = [
+      ...(bannerBySubcategory["local"] ?? []),
+      ...localResult.posts,
+    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+
+    const negrosPicks = [
+      ...(bannerBySubcategory["negros"] ?? []),
+      ...negrosResult.posts,
+    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+
+    const sportsPicks = [
+      ...(bannerBySubcategory["sports"] ?? []),
+      ...sportsResult.posts,
+    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
     const featuredPicksAsCategory = featuresResult.posts;
     const initiativesPicks = initiativesResult.posts;
-    const nationalPicks = nationalResult.posts;
+    const nationalPicks = [
+      ...(bannerBySubcategory["national-news"] ?? []),
+      ...nationalResult.posts,
+    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
     const editorialPicks = editorialResult.posts;
     const voicesPicks = voicesResult.posts;
 
@@ -103,26 +112,15 @@ export default async function Home() {
       );
     }
 
-    // Hero fallback chain: featured → local → editorial → latest
-    const heroPost =
-      featuredPicks[0] || localPicks[0] || editorialPicks[0] || recentPosts[0];
+    // Hero and featured use banner news; editorial and local use their own sources
+    const heroPost = bannerPicks[0] || featuredPicks[0] || localPicks[0] || recentPosts[0];
+    const featuredPost = bannerPicks[1] || bannerPicks[0] || recentPosts[1] || recentPosts[0];
 
-    // Each subsequent slot picks the first candidate that isn't already shown
-    const usedIds = new Set([heroPost.id]);
+    const usedIds = new Set([heroPost.id, featuredPost.id]);
 
-    const featuredPost =
-      [featuredPicks[1], featuredPicks[0], recentPosts[1], recentPosts[0]].find(
-        (p) => p && !usedIds.has(p.id),
-      ) ?? heroPost;
-    usedIds.add(featuredPost.id);
-
-    const editorialPost =
-      [...editorialPicks, recentPosts[2], recentPosts[1], recentPosts[0]].find(
-        (p) => p && !usedIds.has(p.id),
-      ) ?? undefined;
+    const editorialPost = editorialPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (editorialPost) usedIds.add(editorialPost.id);
 
-    // localPost shown in the left column sidebar — must not repeat heroPost or editorialPost
     const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (localPost) usedIds.add(localPost.id);
 

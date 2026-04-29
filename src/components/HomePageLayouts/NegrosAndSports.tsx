@@ -61,7 +61,7 @@ export default function NegrosAndSportsStories({
                   )}
                   <div className="space-y-3">
                     <span className="text-[#fbd203] text-xs font-bold uppercase tracking-widest font-roboto">
-                      {mainNegrosStory.data.category || "News"}
+                      {mainNegrosStory.data.subcategory || mainNegrosStory.data.category || "News"}
                     </span>
                     <AnimatedHeadline
                       as="h3"
@@ -117,7 +117,7 @@ export default function NegrosAndSportsStories({
                           </div>
                         )}
                         <p className="text-accent text-xs font-semibold uppercase mb-1 font-sans">
-                          {story.data.category || "Sports"}
+                          {story.data.subcategory || story.data.category || "Sports"}
                         </p>
                         <h4 className="text-lg font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                           {story.data.title || "Untitled Article"}

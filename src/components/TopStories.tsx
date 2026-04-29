@@ -66,7 +66,7 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
                 <div className="space-y-3">
                   {/* Category */}
                   <div className="text-yellow-500 text-sm font-medium uppercase tracking-wide">
-                    {story.data.category || "News"}
+                    {story.data.subcategory || story.data.category || "News"}
                   </div>
 
                   {/* Headline */}

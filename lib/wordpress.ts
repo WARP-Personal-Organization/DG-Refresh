@@ -135,6 +135,8 @@ function estimateReadingTime(htmlContent: string): number {
 
 const CATEGORY_MAP: Record<string, string> = {
   news: "news",
+  "banner-news": "news",
+  "banner news": "news",
   sports: "sports",
   business: "business",
   features: "feature",
@@ -498,6 +500,25 @@ export async function getPostsByCategory(
     },
   );
   return { posts: data.map(transformPost), totalPages, total };
+}
+
+// Fetch banner-news posts and group them by subcategory/category
+// Used to populate section heroes with banner news relevant to each section
+export async function getBannerNewsBySubcategory(
+  perPage = 30,
+): Promise<Record<string, Post[]>> {
+  const { posts } = await getPostsByCategorySlugs(
+    ["banner-news", "banner news"],
+    perPage,
+  );
+
+  const grouped: Record<string, Post[]> = {};
+  for (const post of posts) {
+    const key = post.data.subcategory || post.data.category || "news";
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(post);
+  }
+  return grouped;
 }
 
 // Resolve multiple WP category slugs to IDs, then fetch paginated posts
