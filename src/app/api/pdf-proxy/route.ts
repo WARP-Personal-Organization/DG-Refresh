@@ -7,16 +7,22 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Missing url parameter", { status: 400 });
   }
 
-  // Only allow fetching from the Daily Guardian domain
-  if (!url.startsWith("https://dailyguardian.com.ph/") && !url.startsWith("https://old.dailyguardian.com.ph/")) {
+  const ALLOWED_ORIGINS = [
+    "https://dailyguardian.com.ph/",
+    "https://old.dailyguardian.com.ph/",
+    "https://bit.ly/",
+  ];
+
+  if (!ALLOWED_ORIGINS.some((o) => url.startsWith(o))) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  // Rewrite main domain URLs to old subdomain where files are actually stored
+  // Rewrite main domain to old subdomain; bit.ly links will be followed via redirect
   const fetchUrl = url.replace("https://dailyguardian.com.ph/", "https://old.dailyguardian.com.ph/");
 
   try {
     const res = await fetch(fetchUrl, {
+      redirect: "follow",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

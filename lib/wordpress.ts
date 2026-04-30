@@ -726,10 +726,56 @@ async function fetchPublicationByPageSlug(
 }
 
 export async function getTodaysPaper(): Promise<Publication> {
-  return fetchPublicationByPageSlug(
-    "todays-paper",
-    "https://old.dailyguardian.com.ph/todays-paper/",
-    "Today's Paper",
+  const FLIPBOOK_URL = "https://old.dailyguardian.com.ph/3d-flip-book/todays-paper/";
+
+  // Try WP REST API first (slug may vary)
+  const slugsToTry = ["todays-paper", "today-paper", "today-s-paper", "daily-paper"];
+  let imageOnlyResult: Publication | null = null;
+
+  for (const slug of slugsToTry) {
+    const pub = await fetchPublicationByPageSlug(slug, FLIPBOOK_URL, "Today's Paper");
+    if (pub.pdfUrl || pub.embedSrc) return pub;
+    if (pub.imageUrl && !imageOnlyResult) imageOnlyResult = pub;
+  }
+
+  // Direct HTML scrape of the 3D FlipBook page — FB3D_CLIENT_DATA is injected
+  // via wp_localize_script and only appears in a full page render, not the REST API.
+  try {
+    const res = await withTimeout(
+      fetch(FLIPBOOK_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
+      }),
+      8000,
+    );
+    if (res.ok) {
+      const html = await res.text();
+      const pdfUrl = extractPdfUrl(html, FLIPBOOK_URL);
+      if (pdfUrl) {
+        return {
+          ...(imageOnlyResult ?? {
+            imageUrl: null,
+            title: "Today's Paper",
+            content: "",
+            embedSrc: null,
+          }),
+          link: FLIPBOOK_URL,
+          pdfUrl,
+        };
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  return (
+    imageOnlyResult ?? {
+      imageUrl: null,
+      link: FLIPBOOK_URL,
+      title: "Today's Paper",
+      content: "",
+      embedSrc: null,
+      pdfUrl: null,
+    }
   );
 }
 
