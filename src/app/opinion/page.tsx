@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 import VoicesPage from "@/components/VoicesPage";
 import { getPostsByCategorySlugs } from "../../../lib/wordpress";

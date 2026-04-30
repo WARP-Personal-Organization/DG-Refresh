@@ -1,5 +1,5 @@
 // app/blog/[uid]/page.tsx
-export const revalidate = 60;
+export const revalidate = 600;
 
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";

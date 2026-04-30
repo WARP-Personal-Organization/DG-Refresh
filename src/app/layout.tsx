@@ -14,7 +14,7 @@ import {
 } from "../../lib/wordpress";
 import "./globals.css";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -153,7 +153,7 @@ export default async function RootLayout({
           gtag('config', 'G-FTDWF3L7Z8');
         `}</Script>
         <LoadingScreen />
-        <AutoRefresh intervalMs={60_000} />
+        <AutoRefresh intervalMs={300_000} />
         <Header posts={posts} breakingPost={breakingPost} />
         <NavigationBar navPosts={navPosts} />
         <main>{children}</main>

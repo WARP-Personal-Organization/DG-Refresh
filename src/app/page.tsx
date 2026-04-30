@@ -1,5 +1,5 @@
 // app/page.tsx
-export const revalidate = 60;
+export const revalidate = 300;
 
 import Header from "@/components/Header";
 import EditorialStories from "@/components/HomePageLayouts/EditorialStories";

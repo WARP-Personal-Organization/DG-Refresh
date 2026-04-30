@@ -1,7 +1,7 @@
 import { getTodaysPaper, getPaperEditions } from "../../../lib/wordpress";
 import TodaysPaperClient from "./TodaysPaperClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 1800;
 
 export default async function TodaysPaperPage() {
   const [paper, editions] = await Promise.all([
