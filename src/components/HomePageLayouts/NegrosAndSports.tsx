@@ -153,10 +153,7 @@ export default function NegrosAndSportsStories({
               <PublicationCard
                 title="Supplement"
                 imageUrl={supplement?.imageUrl || "/Supplement.PNG"}
-                link={
-                  supplement?.link ||
-                  "https://old.dailyguardian.com.ph/3d-flip-book/supplement/"
-                }
+                link={supplement?.link || "/"}
                 embedSrc={supplement?.embedSrc}
                 pdfUrl={supplement?.pdfUrl}
                 content={supplement?.content}

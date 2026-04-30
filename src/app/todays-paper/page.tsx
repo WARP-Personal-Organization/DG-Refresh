@@ -1,18 +1,22 @@
-import { redirect } from "next/navigation";
-import { getTodaysPaper } from "../../../lib/wordpress";
+import { getTodaysPaper, getPaperEditions } from "../../../lib/wordpress";
+import TodaysPaperClient from "./TodaysPaperClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function TodaysPaperPage() {
-  const paper = await getTodaysPaper();
+  const [paper, editions] = await Promise.all([
+    getTodaysPaper().catch(() => null),
+    getPaperEditions(30).catch(() => []),
+  ]);
 
-  if (paper.pdfUrl) {
-    redirect(paper.pdfUrl);
-  }
-
-  if (paper.link) {
-    redirect(paper.link);
-  }
-
-  redirect("/");
+  return (
+    <TodaysPaperClient
+      title="Today's Paper"
+      link={paper?.link || "/"}
+      pdfUrl={paper?.pdfUrl}
+      embedSrc={paper?.embedSrc}
+      imageUrl={paper?.imageUrl || "/todaysnewspaper.png"}
+      editions={editions}
+    />
+  );
 }

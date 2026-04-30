@@ -173,10 +173,7 @@ export default async function Home() {
               <PublicationCard
                 title="Today's Paper"
                 imageUrl={todaysPaper?.imageUrl || "/todaysnewspaper.png"}
-                link={
-                  todaysPaper?.link ||
-                  "https://dailyguardian.com.ph/todays-paper/"
-                }
+                link={todaysPaper?.link || "/"}
                 embedSrc={todaysPaper?.embedSrc}
                 pdfUrl={todaysPaper?.pdfUrl}
                 content={todaysPaper?.content}
