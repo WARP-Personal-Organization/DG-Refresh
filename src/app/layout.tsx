@@ -10,6 +10,7 @@ import {
   getAllPosts,
   getLayoutPosts,
   getPostsByCategorySlugs,
+  type Post,
 } from "../../lib/wordpress";
 import "./globals.css";
 
@@ -81,6 +82,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const empty = { posts: [] as Post[], total: 0 };
   const [
     posts,
     recentNav,
@@ -90,16 +92,16 @@ export default async function RootLayout({
     featuresNav,
     initiativesNav,
   ] = await Promise.all([
-    getLayoutPosts(),
-    getAllPosts(20),
-    getPostsByCategorySlugs(["sports"], 4),
-    getPostsByCategorySlugs(["voices", "visons", "opinion"], 4),
-    getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4),
+    getLayoutPosts().catch(() => [] as Post[]),
+    getAllPosts(20).catch(() => [] as Post[]),
+    getPostsByCategorySlugs(["sports"], 4).catch(() => empty),
+    getPostsByCategorySlugs(["voices", "visons", "opinion"], 4).catch(() => empty),
+    getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4).catch(() => empty),
     getPostsByCategorySlugs(
       ["feature", "features", "entertainment", "lifestyle", "health"],
       4,
-    ),
-    getPostsByCategorySlugs(["initiatives"], 4),
+    ).catch(() => empty),
+    getPostsByCategorySlugs(["initiatives"], 4).catch(() => empty),
   ]);
 
   // Merge all nav posts, deduplicated — each category is guaranteed representation
