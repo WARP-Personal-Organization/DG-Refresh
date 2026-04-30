@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: "/e-paper", destination: "/", permanent: false },
+      { source: "/e-paper/", destination: "/", permanent: false },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "dailyguardian.com.ph" },
