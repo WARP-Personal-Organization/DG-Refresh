@@ -1,7 +1,7 @@
 import { getSupplement, getSupplementEditions } from "../../../lib/wordpress";
 import SupplementClient from "./SupplementClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 1800;
 
 export default async function SupplementPage() {
   const [supplement, editions] = await Promise.all([
