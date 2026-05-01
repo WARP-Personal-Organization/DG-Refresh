@@ -312,71 +312,110 @@ export function transformAuthor(wpUser: WPUser): Author {
 
 // ─── API Fetch ────────────────────────────────────────────────────────────────
 
-// Rejects after `ms` milliseconds with a timeout error.
-// Using Promise.race (not AbortController) avoids conflicts with
-// Next.js 15's fetch instrumentation for ISR/Data Cache on Vercel.
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`WP API timeout after ${ms}ms`)), ms),
-    ),
-  ]);
+// WP server can be slow — 15 s gives enough headroom without hanging the page.
+const DEFAULT_TIMEOUT_MS = 15_000;
+
+// AbortController properly cancels the in-flight HTTP request when the timeout
+// fires, freeing server connections. The old Promise.race approach left the
+// underlying fetch running even after the race resolved.
+function timedAbort(ms: number): { signal: AbortSignal; clear: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, clear: () => clearTimeout(timer) };
 }
 
 async function wpFetch<T>(
   endpoint: string,
   params: Record<string, string | number | boolean> = {},
+  revalidate = 300,
 ): Promise<T> {
   const url = new URL(`${WP_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([key, value]) =>
     url.searchParams.set(key, String(value)),
   );
 
-  const res = await withTimeout(
-    fetch(url.toString(), {
-      next: { revalidate: 300 },
+  const { signal, clear } = timedAbort(DEFAULT_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      signal,
+      next: { revalidate },
       headers: { Accept: "application/json" },
-    }),
-    8000,
-  );
-
-  if (!res.ok) {
-    throw new Error(
-      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-    );
+    });
+    if (!res.ok) {
+      throw new Error(`WordPress API error ${res.status}: ${url.pathname}${url.search}`);
+    }
+    return res.json() as Promise<T>;
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`WP API timeout: ${url.pathname}`);
+    }
+    throw err;
+  } finally {
+    clear();
   }
-
-  return res.json();
 }
 
 async function wpFetchPaginated<T>(
   endpoint: string,
   params: Record<string, string | number | boolean> = {},
+  revalidate = 300,
 ): Promise<{ data: T; totalPages: number; total: number }> {
   const url = new URL(`${WP_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([key, value]) =>
     url.searchParams.set(key, String(value)),
   );
 
-  const res = await withTimeout(
-    fetch(url.toString(), {
-      next: { revalidate: 300 },
+  const { signal, clear } = timedAbort(DEFAULT_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      signal,
+      next: { revalidate },
       headers: { Accept: "application/json" },
-    }),
-    8000,
-  );
-
-  if (!res.ok) {
-    throw new Error(
-      `WordPress API error ${res.status}: ${url.pathname}${url.search}`,
-    );
+    });
+    if (!res.ok) {
+      throw new Error(`WordPress API error ${res.status}: ${url.pathname}${url.search}`);
+    }
+    const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
+    const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
+    const data = (await res.json()) as T;
+    return { data, totalPages, total };
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`WP API timeout: ${url.pathname}`);
+    }
+    throw err;
+  } finally {
+    clear();
   }
+}
 
-  const totalPages = parseInt(res.headers.get("X-WP-TotalPages") ?? "1", 10);
-  const total = parseInt(res.headers.get("X-WP-Total") ?? "0", 10);
-  const data = (await res.json()) as T;
-  return { data, totalPages, total };
+// Batch-resolve multiple category slugs → IDs in ONE request instead of N.
+// Uses PHP array syntax (slug[]=a&slug[]=b) which WP REST API parses natively.
+// Categories rarely change → cache for 24 hours to nearly eliminate this call.
+async function resolveCategoryIds(slugs: string[]): Promise<number[]> {
+  if (slugs.length === 0) return [];
+
+  const url = new URL(`${WP_API_BASE}/categories`);
+  slugs.forEach((s) => url.searchParams.append("slug[]", s));
+  url.searchParams.set("per_page", "100");
+  url.searchParams.set("_fields", "id,slug");
+
+  const { signal, clear } = timedAbort(DEFAULT_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      signal,
+      next: { revalidate: 86_400 }, // 24 h — categories are stable
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return [];
+    const categories = (await res.json()) as Array<{ id: number; slug: string }>;
+    const wanted = new Set(slugs);
+    return categories.filter((c) => wanted.has(c.slug)).map((c) => c.id);
+  } catch {
+    return [];
+  } finally {
+    clear();
+  }
 }
 
 // ─── App category/subcategory → WP category slug(s) ──────────────────────────
@@ -521,22 +560,15 @@ export async function getBannerNewsBySubcategory(
   return grouped;
 }
 
-// Resolve multiple WP category slugs to IDs, then fetch paginated posts
+// Resolve multiple WP category slugs → IDs in ONE batched request, then fetch posts.
+// Previously made N separate /categories calls (one per slug). Now a single request
+// handles all slugs, cached for 24 hours since categories rarely change.
 export async function getPostsByCategorySlugs(
   slugs: string[],
   perPage = 20,
   page = 1,
 ): Promise<{ posts: Post[]; totalPages: number; total: number }> {
-  const categoryResults = await Promise.all(
-    slugs.map((slug) =>
-      wpFetch<WPCategory[]>("/categories", { slug }).catch(
-        () => [] as WPCategory[],
-      ),
-    ),
-  );
-  const ids = categoryResults.flatMap((cats) =>
-    cats[0]?.id ? [cats[0].id] : [],
-  );
+  const ids = await resolveCategoryIds(slugs).catch(() => [] as number[]);
 
   if (ids.length === 0) {
     return { posts: [], totalPages: 1, total: 0 };
@@ -741,12 +773,11 @@ export async function getTodaysPaper(): Promise<Publication> {
   // Direct HTML scrape of the 3D FlipBook page — FB3D_CLIENT_DATA is injected
   // via wp_localize_script and only appears in a full page render, not the REST API.
   try {
-    const res = await withTimeout(
-      fetch(FLIPBOOK_URL, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
-      }),
-      8000,
-    );
+    const { signal, clear: clearFlipbook } = timedAbort(DEFAULT_TIMEOUT_MS);
+    const res = await fetch(FLIPBOOK_URL, {
+      signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
+    }).finally(() => clearFlipbook());
     if (res.ok) {
       const html = await res.text();
       const pdfUrl = extractPdfUrl(html, FLIPBOOK_URL);
@@ -805,12 +836,11 @@ export async function getSupplement(): Promise<Publication> {
   // only runs during a full page render — it never appears in content.rendered from
   // the REST API. Fetch the actual HTML page so extractPdfUrl can parse it.
   try {
-    const res = await withTimeout(
-      fetch(SUPPLEMENT_URL, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
-      }),
-      8000,
-    );
+    const { signal, clear: clearSupplement } = timedAbort(DEFAULT_TIMEOUT_MS);
+    const res = await fetch(SUPPLEMENT_URL, {
+      signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; DGReader/1.0)" },
+    }).finally(() => clearSupplement());
     if (res.ok) {
       const html = await res.text();
       const pdfUrl = extractPdfUrl(html, SUPPLEMENT_URL);
