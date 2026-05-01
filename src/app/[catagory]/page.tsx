@@ -42,7 +42,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   if (!posts || posts.length === 0) {
-    const post = await getPostBySlug(categorySlug);
+    let post = null;
+    try {
+      post = await getPostBySlug(categorySlug);
+    } catch {
+      // WP API unreachable — treat as no matching post
+    }
     if (post) {
       redirect(`/blog/${categorySlug}`);
     }
