@@ -41,6 +41,14 @@ body {
   overflow-x: hidden;
 }
 
+.prose a {
+  color: #fbd203 !important;
+  text-decoration: underline;
+}
+.prose a:hover {
+  color: #fbd203cc !important;
+}
+
 /* Override Facebook Page Plugin injected wrapper classes that clip the embed */
 ._1dro, ._2ph- {
   overflow: visible !important;

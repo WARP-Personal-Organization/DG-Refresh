@@ -126,8 +126,17 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
           </div>
 
           {/* === SIDEBAR === */}
-          <aside className="lg:col-span-1 lg:border-l lg:border-accent lg:pl-8">
+          <aside className="lg:col-span-1 lg:border-l lg:border-accent lg:pl-8 flex flex-col gap-6">
             <FacebookPagePlugin />
+            <div className="rounded-xl overflow-hidden border border-accent/20">
+              <iframe
+                src="https://communities.rappler.com/channel-embed/zrqaCHLqMOVpuPEEoc?redirected_from=dailyguardian_embed&cta_text=Join%20the%20conversation"
+                width="300"
+                height="376"
+                style={{ backgroundColor: "#ffffff", border: 0, width: "100%" }}
+                title="Rappler Communities"
+              />
+            </div>
           </aside>
         </div>
       </div>

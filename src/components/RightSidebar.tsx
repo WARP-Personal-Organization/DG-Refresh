@@ -199,6 +199,15 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
           </p>
         </div>
       )}
+
+      <div className="rounded-xl overflow-hidden border border-accent/20">
+        <iframe
+          src="https://communities.rappler.com/channel-embed/zrqaCHLqMOVpuPEEoc?redirected_from=dailyguardian_embed&cta_text=Join%20the%20conversation"
+          width="300"
+          height="376"
+          style={{ backgroundColor: "#ffffff", border: 0 }}
+        />
+      </div>
     </aside>
   );
 };
