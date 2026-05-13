@@ -143,14 +143,14 @@ export default async function RootLayout({
         />
         {/* Google Analytics */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-FTDWF3L7Z8"
+          src="https://www.googletagmanager.com/gtag/js?id=G-SQ61FCPRV9"
           strategy="afterInteractive"
         />
         <Script id="ga4-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-FTDWF3L7Z8');
+          gtag('config', 'G-SQ61FCPRV9');
         `}</Script>
         <LoadingScreen />
         <AutoRefresh intervalMs={300_000} />
