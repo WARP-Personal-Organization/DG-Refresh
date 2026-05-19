@@ -134,10 +134,16 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
+        {/* AnyMind360 — programmatic ad partner */}
+        <Script
+          src="//anymind360.com/js/8074/ats.js"
+          strategy="afterInteractive"
+        />
         {/* Google AdSense — auto ads */}
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1002683760929339"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+          data-ad-client="ca-pub-1002683760929339"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
