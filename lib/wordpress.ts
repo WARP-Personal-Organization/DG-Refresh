@@ -37,6 +37,11 @@ export interface WPPost {
       Array<{ id: number; name: string; slug: string; taxonomy: string }>
     >;
   };
+  // Yoast SEO fallback — used when /wp-json/wp/v2/media/{id} returns rest_forbidden
+  // for newly uploaded attachments, which empties wp:featuredmedia in _embed.
+  yoast_head_json?: {
+    og_image?: Array<{ url: string; width?: number; height?: number; type?: string }>;
+  };
 }
 
 export interface WPUser {
@@ -277,12 +282,22 @@ export function transformPost(wpPost: WPPost): Post {
       is_featured: wpPost.sticky,
       is_breaking_news: false,
       editors_pick: false,
-      featured_image: media
-        ? {
+      featured_image: (() => {
+        if (media?.source_url) {
+          return {
             url: rewriteMediaUrl(media.source_url) ?? media.source_url,
             alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
-          }
-        : null,
+          };
+        }
+        const ogUrl = wpPost.yoast_head_json?.og_image?.[0]?.url;
+        if (ogUrl) {
+          return {
+            url: rewriteMediaUrl(ogUrl) ?? ogUrl,
+            alt: stripHtml(wpPost.title?.rendered ?? ""),
+          };
+        }
+        return null;
+      })(),
       author,
       published_date: wpPost.date,
       updated_date: wpPost.modified,
