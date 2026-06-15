@@ -19,14 +19,14 @@ export default function CartoonCard({ cartoons }: { cartoons: Post[] }) {
 
       {/* Thumbnail */}
       <Link href={`/blog/${c.uid}`} className="block relative group overflow-hidden">
-        <div className="relative aspect-[3/4] overflow-hidden bg-[#f4f0eb]">
+        <div className="relative aspect-[2/1] overflow-hidden bg-[#f4f0eb]">
           {c.data.featured_image?.url ? (
             <Image
               src={c.data.featured_image.url}
               alt={c.data.featured_image.alt || c.data.title}
               fill
-              className="object-contain transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 1024px) 50vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 33vw"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
