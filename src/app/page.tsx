@@ -63,10 +63,19 @@ export default async function Home() {
       getSupplementEditions(10).catch(() => []),
     ]);
 
-    // Banner news per section — fall back to regular category posts if no banner news for that section
+    // Banner news per section — fall back to regular category posts if no banner news for that section.
+    // Sorted by date (newest first) so the hero mirrors the old site's homepage,
+    // where the latest Banner News stories lead in chronological order. Grouping
+    // by subcategory above otherwise scrambles the order.
     const bannerPicks = [
       ...Object.values(bannerBySubcategory).flat(),
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+    ]
+      .filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i)
+      .sort(
+        (a, b) =>
+          new Date(b.data.published_date).getTime() -
+          new Date(a.data.published_date).getTime(),
+      );
 
     const localPicks = [
       ...(bannerBySubcategory["local"] ?? []),
@@ -111,22 +120,25 @@ export default async function Home() {
       );
     }
 
-    // Hero and featured use banner news; editorial and local use their own sources
+    // The hero block mirrors the old site's homepage: the four latest Banner News
+    // stories, in date order, fill MainContent's four slots (lead, featured, and
+    // the two secondary items). Falls back to featured/local/recent only when
+    // there aren't enough banner-news posts.
     const heroPost = bannerPicks[0] || featuredPicks[0] || localPicks[0] || recentPosts[0];
-    const featuredPost = bannerPicks[1] || bannerPicks[0] || recentPosts[1] || recentPosts[0];
+    const featuredPost = bannerPicks[1] || recentPosts[1] || recentPosts[0];
+    const thirdBanner = bannerPicks[2] ?? undefined;
+    const fourthBanner = bannerPicks[3] ?? undefined;
 
-    const usedIds = new Set([heroPost.id, featuredPost.id]);
-
-    const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
-    if (localPost) usedIds.add(localPost.id);
-
-    // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([heroPost.id, featuredPost.id]);
+    // Everything shown in the hero — excluded from downstream sections so the
+    // same banner stories don't repeat further down the page.
+    const usedIds = new Set(
+      [heroPost, featuredPost, thirdBanner, fourthBanner].flatMap((p) =>
+        p ? [p.id] : [],
+      ),
+    );
 
     // TopStories shows the freshest posts only (no stickies-pinned older items).
-    const topStoriesPool = recentPosts.filter(
-      (p) => !shownInMainContent.has(p.id),
-    );
+    const topStoriesPool = recentPosts.filter((p) => !usedIds.has(p.id));
 
     // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
     const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
@@ -138,7 +150,8 @@ export default async function Home() {
             <MainContent
               heroPost={heroPost}
               featuredPost={featuredPost}
-              localposts={localPost}
+              editorialPost={thirdBanner}
+              localposts={fourthBanner}
             />
             <div className="flex flex-col gap-6 self-start lg:sticky lg:top-4">
               <PublicationCard
