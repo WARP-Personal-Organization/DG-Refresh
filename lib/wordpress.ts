@@ -72,10 +72,11 @@ export interface Post {
     content: string;
     category: string;
     subcategory: string;
+    locality: string; // specific WV province for local news (e.g. "Negros", "Capiz"); "" otherwise
     is_featured: boolean;
     is_breaking_news: boolean;
     editors_pick: boolean;
-    featured_image: { url: string | null; alt: string } | null;
+    featured_image: { url: string | null; alt: string; width?: number; height?: number } | null;
     author: string;
     published_date: string;
     updated_date: string;
@@ -128,6 +129,94 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
+// Strip the featured image from the article body if WP duplicated it there.
+export function stripDuplicateFeaturedImage(
+  html: string,
+  featuredUrl: string | null | undefined,
+): string {
+  if (!featuredUrl || !html) return html;
+  return stripImagesFromContent(html, [featuredUrl]);
+}
+
+// Normalized identity for an uploaded image, collapsing the variant suffixes
+// DG's CMS and WordPress generate for the SAME source photo:
+//   -1024x683 (size), -scaled/-rotated (WP), -w/-wm/-web (DG web/watermark copy),
+//   and -1/-2/-3 (WP re-upload counters added on filename clashes).
+// Two URLs that normalize to the same key are treated as the same picture, so a
+// post whose featured image is "foo-w.jpg" and body image is "foo-1.jpg" no
+// longer renders the same photo twice. Trade-off: a genuine sequence like
+// photo-1.jpg / photo-2.jpg also collapses — but DG's real multi-photo galleries
+// use distinct descriptive filenames, not bare numeric counters.
+function imageKey(url: string): string {
+  const file = url.split("/").pop()?.split("?")[0] ?? url;
+  const dot = file.lastIndexOf(".");
+  let name = dot === -1 ? file : file.slice(0, dot);
+  const ext = dot === -1 ? "" : file.slice(dot).toLowerCase();
+  let prev = "";
+  while (prev !== name) {
+    prev = name;
+    name = name
+      .replace(/-\d+x\d+$/i, "") // size variant
+      .replace(/-(scaled|rotated)$/i, "") // WP markers
+      .replace(/-(w|wm|web)$/i, "") // DG web/watermark copy
+      .replace(/-\d+$/, ""); // WP re-upload counter
+  }
+  return (name + ext).toLowerCase();
+}
+
+// Remove from the body any <img> (and its <figure>/<a> wrapper) whose image
+// matches — by normalized key — one of the given URLs. Matching by key (not by
+// substring) means a body copy named "-1" is stripped even when the gallery
+// kept the "-w" variant of the same photo.
+export function stripImagesFromContent(html: string, urls: string[]): string {
+  if (!html || urls.length === 0) return html;
+  const keys = new Set(urls.map(imageKey));
+  const blockMatches = (block: string): boolean => {
+    const src = block.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+    return !!src && keys.has(imageKey(src));
+  };
+  return html
+    .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, (b) =>
+      blockMatches(b) ? "" : b,
+    )
+    .replace(/<img[^>]*>/gi, (t) => (blockMatches(t) ? "" : t));
+}
+
+// Pull every <img src="..."> from WP article HTML, with alt text when present.
+// Used to detect multi-image posts and render them in a top-of-article carousel.
+export interface ContentImage {
+  url: string;
+  alt: string;
+}
+
+export function extractContentImages(html: string): ContentImage[] {
+  if (!html) return [];
+  const results: ContentImage[] = [];
+  const re = /<img[^>]*>/gi;
+  const matches = html.match(re) ?? [];
+  for (const tag of matches) {
+    const src = tag.match(/\bsrc=["']([^"']+)["']/i)?.[1];
+    if (!src) continue;
+    const alt = tag.match(/\balt=["']([^"']*)["']/i)?.[1] ?? "";
+    results.push({ url: rewriteMediaUrl(src) ?? src, alt });
+  }
+  return results;
+}
+
+// Deduplicate images that are the same picture (see imageKey for what counts as
+// "same" — size, scaled, web/watermark, and re-upload-counter variants).
+export function dedupeImagesByFilename(images: ContentImage[]): ContentImage[] {
+  const seen = new Set<string>();
+  const out: ContentImage[] = [];
+  for (const img of images) {
+    const key = imageKey(img.url);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(img);
+  }
+  return out;
+}
+
 function estimateReadingTime(htmlContent: string): number {
   const text = stripHtml(htmlContent);
   const wordCount = text.trim().split(/\s+/).length;
@@ -172,6 +261,43 @@ const SUBCATEGORY_MAP: Record<string, string> = {
   "the-dg-view": "editorial",
   // Add more as needed after inspecting /wp-json/wp/v2/categories
 };
+
+// Specific WV provinces/cities → display name. Used to label local news by its
+// actual locality (NEGROS, CAPIZ, …) instead of the umbrella "LOCAL". Iloilo is
+// deliberately excluded so home-province posts stay "Local".
+const LOCALITY_BY_SLUG: Record<string, string> = {
+  negros: "Negros",
+  "negros-news": "Negros",
+  "negros-occidental": "Negros",
+  "negros-oriental": "Negros",
+  bacolod: "Bacolod",
+  capiz: "Capiz",
+  roxas: "Capiz",
+  antique: "Antique",
+  aklan: "Aklan",
+  kalibo: "Aklan",
+  boracay: "Aklan",
+  guimaras: "Guimaras",
+};
+
+// Best-effort province from a headline, used only when a news post has no
+// province category. Word-boundary matched to avoid false hits; "Roxas" must be
+// "Roxas City" (the place) so it doesn't catch the surname. Iloilo is omitted so
+// home-province stories stay "Local".
+function localityFromTitle(title: string): string {
+  const t = title.toLowerCase();
+  const checks: Array<[RegExp, string]> = [
+    [/\bguimaras\b/, "Guimaras"],
+    [/\bbacolod\b/, "Bacolod"],
+    [/\bnegros\b/, "Negros"],
+    [/\bcapiz\b/, "Capiz"],
+    [/\broxas city\b/, "Capiz"],
+    [/\bantique\b/, "Antique"],
+    [/\b(?:aklan|kalibo|boracay)\b/, "Aklan"],
+  ];
+  for (const [re, name] of checks) if (re.test(t)) return name;
+  return "";
+}
 
 function mapCategory(slugs: string[]): string {
   for (const slug of slugs) {
@@ -238,6 +364,20 @@ export function transformPost(wpPost: WPPost): Post {
   const columnTerm = categoryTerms.find((t) => !SECTION_SLUGS.has(t.slug));
   const subcategory = subcategoryMapped || columnTerm?.name || "";
 
+  // Specific Western Visayas locality shown in hero/top-story labels in place of
+  // the generic "LOCAL" (e.g. NEGROS, CAPIZ). Only for news posts. Prefer a
+  // province category; otherwise fall back to a province named in the headline
+  // ("…ferry shortage in Guimaras" → Guimaras). Iloilo is intentionally omitted —
+  // it's the home bucket and stays "Local". Region-wide/place-less headlines
+  // (e.g. "Western Visayas opens…") also stay "Local".
+  let locality = "";
+  if (category === "news") {
+    const localityTerm = categorySlugs.find((s) => LOCALITY_BY_SLUG[s]);
+    locality = localityTerm
+      ? LOCALITY_BY_SLUG[localityTerm]
+      : localityFromTitle(stripHtml(wpPost.title?.rendered ?? ""));
+  }
+
   const rawContent = wpPost.content?.rendered ?? "";
   const rawExcerpt = stripHtml(wpPost.excerpt?.rendered ?? "");
 
@@ -254,8 +394,7 @@ export function transformPost(wpPost: WPPost): Post {
     !wpAuthorName ||
     wpAuthorName.toLowerCase().includes("daily guardian") ||
     wpAuthorName.toLowerCase() === "staff writer";
-  const author =
-    (!isGenericUser ? wpAuthorName : null) ?? bylineName ?? "Staff Writer";
+  const author = (!isGenericUser ? wpAuthorName : null) ?? bylineName ?? "";
 
   // Strip "By [Name]" from the excerpt so article summaries start cleanly.
   const excerpt = bylineName
@@ -279,6 +418,7 @@ export function transformPost(wpPost: WPPost): Post {
       content: rawContent,
       category,
       subcategory,
+      locality,
       is_featured: wpPost.sticky,
       is_breaking_news: false,
       editors_pick: false,
@@ -287,13 +427,17 @@ export function transformPost(wpPost: WPPost): Post {
           return {
             url: rewriteMediaUrl(media.source_url) ?? media.source_url,
             alt: media.alt_text || stripHtml(wpPost.title?.rendered ?? ""),
+            width: media.media_details?.width,
+            height: media.media_details?.height,
           };
         }
-        const ogUrl = wpPost.yoast_head_json?.og_image?.[0]?.url;
-        if (ogUrl) {
+        const og = wpPost.yoast_head_json?.og_image?.[0];
+        if (og?.url) {
           return {
-            url: rewriteMediaUrl(ogUrl) ?? ogUrl,
+            url: rewriteMediaUrl(og.url) ?? og.url,
             alt: stripHtml(wpPost.title?.rendered ?? ""),
+            width: og.width,
+            height: og.height,
           };
         }
         return null;
@@ -657,6 +801,187 @@ export async function getOpinionPostsByAuthor(
     .filter((p) => normalizeName(p.data.author) === target);
 
   return { posts, totalPages, total };
+}
+
+// One entry per columnist for the Opinion directory.
+export interface ColumnistSummary {
+  column: string; // the column's display title, e.g. "PROMETHEUS"
+  author: string; // the columnist's name, e.g. "Lcid Crescent Fernandez"
+  slug: string; // WP category slug — links to the column's archive
+  image: { url: string; alt: string } | null;
+}
+
+// Curated columnist roster — mirrors the old site's Opinion landing page.
+// Each column is a WP category; deriving this list from post bylines proved
+// unreliable (bylines come in several formats and the WP author is generic),
+// so the roster is fixed here. `headshot` is the columnist's portrait pulled
+// from the old site's media library (the column/author banner, face on the
+// left — see ColumnistCard's object-left crop). When set, it's used directly;
+// otherwise we fall back to the column's latest post banner (fetchColumnImage).
+// To add/remove a columnist, edit this list. Slugs are real opinion categories.
+const OPINION_ROSTER: ReadonlyArray<{
+  column: string;
+  slug: string;
+  author: string;
+  headshot?: string;
+}> = [
+  { column: "EDUCATION UPDATES", slug: "education-updates", author: "Dr. Rex Casiple", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/EDUCATION-UPDATES.png" },
+  { column: "REFLECTIONS", slug: "reflections", author: "Fr. Roy Cimagala", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/REFLECTIONS.png" },
+  { column: "HOT & SPICY", slug: "hot-spicy", author: "Artchil Fernandez", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/HOT-SPICY-1-1.png" },
+  { column: "PROMETHEUS", slug: "prometheus", author: "Lcid Crescent Fernandez", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/prometheus-x-Lcid-Crescent-Fernandez-VP-Externalnew.jpg" },
+  { column: "BARE FACTS", slug: "bare-facts", author: "Engr. Edgar Mana-ay", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/bare-facts2023.jpg" },
+  { column: "FOCUS", slug: "focus", author: "Modesto P. Sa-onoy", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/focus-x-Modesto-Sa-onoy-23.jpg" },
+  { column: "BEYOND THE NUMBERS", slug: "beyond-the-numbers", author: "John Carlo Tria", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/beyond-the-numbers1.jpg" },
+  { column: "ABOVE THE BELT", slug: "above-the-belt", author: "Alex P. Vidal", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/ABOVE-THE-BELT.png" },
+  { column: "ON WHITSUN WINGS", slug: "on-whitsun-wings", author: "Lucell Larawan", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/on-whitsun1.jpg" },
+  { column: "COFFEEBREAK", slug: "coffeebreak", author: 'Manuel "Boy" Mejorada', headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/coffeebreak1.jpg" },
+  { column: "MIDDLE CLASS ICONOCLAST", slug: "middle-class-iconoclast", author: "Reyshimar Arguelles", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/middle-class-iconoclast.jpg" },
+  { column: "POST AND LINTEL", slug: "post-and-lintel", author: "Arch. Eric L. Demingoy", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/post-and-lintel1.jpg" },
+  { column: "SHOUT OUT", slug: "shout-out", author: "Francis Allan L. Angelo", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/shout-out1.jpg" },
+  { column: "COLUMNY", slug: "columny", author: "Limuel S. Celebria", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2025/07/Lemonade-xLimuel-S-Celebria.jpg" },
+  { column: "LEGAL HARBINGER", slug: "legal-harbinger", author: "Atty. Eduardo Reyes III", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/Atty-Eduardo-Reyes-III-x-Legal-Harbinger-23.jpg" },
+  { column: "CRUISING BY", slug: "cruising-by", author: "Terri Amador", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/cruising-by-TERRI-AMADOR-a.jpg" },
+  { column: "ZOOMER THOUGHTS", slug: "zoomer-thoughts", author: "Joshua Corcuera", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/04/Zoomer-Thoughts.png" },
+  { column: "BUSINESS OBSERVER", slug: "business-observer", author: "Art Jimenez", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/02/business-observer-x-Art-Jimenez.jpg" },
+  { column: "PEOPLE POWWOW", slug: "people-powwow", author: "Herbert Vego", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/10/PEOPLE-POWWOW-x-Herbert-Vego-1-new.jpg" },
+  { column: "IMPULSES", slug: "impulses", author: "Dr. Herman M. Lagon", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2025/05/Herman-M-Lagon-x-Impulses.jpg" },
+  { column: "AMICUS CURIOUS", slug: "amicus-curious", author: "Jose Mari BFU Tirol", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/07/Amicus-Curious-x-Jose-Mari-BFU-Tirol.jpg" },
+  { column: "ILONGGO ENGINEER", slug: "ilonggo-engineer", author: "Engr. Ray Adrian Macalalag", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2025/01/Ilonggo-Engineer-x-Ray-Adrian-Macalalag-24.jpg" },
+  { column: "LAYLA", slug: "layla", author: "Hera Barrameda", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/layla-x-hera-barrameda-23.jpg" },
+  { column: "SO TO SAY", slug: "so-to-say", author: "Klaus Doring", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/So-To-Say-x-Klaus-Doring-23.jpg" },
+  { column: "THE RATIONAL DECIDENDI", slug: "the-rational-decidendi", author: "Atty. Anfred P. Panes, LL.M.", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/07/The-Rational-Decidendi.jpg" },
+  { column: "ON THE SPOT", slug: "on-the-spot", author: "PSMS Francisco Lindero", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/07/on-the-spot.jpg" },
+  { column: "GENDER MATTERS", slug: "gender-matters", author: "Mary Barby P. Badayos-Jover, PhD", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/01/gender-matters-x-Badayos-Jover1.jpg" },
+  { column: "NORTH STAR", slug: "north-star", author: "Engr. Carlos V. Cornejo", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/North-Star-Engr-Carlos-V-Cornejo.jpg" },
+  { column: "FACTUALITY", slug: "factuality", author: "Ted Aldwin Ong", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/Ted-Aldwin-Ong-x-Factuality.jpg" },
+  { column: "DURA LEX, SED LEX", slug: "dura-lex-sed-lex", author: "Atty. Rolex T. Suplico", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2026/03/5th-District-Board-Member-Rolex-T-Suplico.jpg" },
+  { column: "CIGARETTES", slug: "cigarettes", author: "Raoul Suarez", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/RAOUL-SUAREZ-X-CIGARETTES-1-23.jpg" },
+  { column: "BALINTATAW", slug: "balintataw", author: "Jaime Babiera", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/balintataw-1.jpg" },
+  { column: "RANT AND RAVE", slug: "rant-and-rave", author: "Joseph B.A Marzan", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/RANT-AND-RAVE-JOSEPH-MARZAN1.jpg" },
+  { column: "CONTEMPLATIONS", slug: "contemplations", author: "Shay Cullen", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/Shay-Cullen-x-Contemplations-23.jpg" },
+  { column: "BEYOND THE BEND", slug: "beyond-the-bend", author: "Michael Henry Yusingco, LL.M", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/12/Michael-Henry-Yusingco-x-beyond-the-bend.jpg" },
+];
+
+// Resolve category slugs → a slug→id map in ONE request (vs N).
+async function resolveCategoryIdMap(
+  slugs: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (slugs.length === 0) return map;
+
+  const url = new URL(`${WP_API_BASE}/categories`);
+  slugs.forEach((s) => url.searchParams.append("slug[]", s));
+  url.searchParams.set("per_page", "100");
+  url.searchParams.set("_fields", "id,slug");
+
+  const { signal, clear } = timedAbort(DEFAULT_TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), {
+      signal,
+      next: { revalidate: 86_400 }, // 24 h — categories are stable
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return map;
+    const cats = (await res.json()) as Array<{ id: number; slug: string }>;
+    for (const c of cats) map.set(c.slug, c.id);
+    return map;
+  } catch {
+    return map;
+  } finally {
+    clear();
+  }
+}
+
+// Pull the latest banner image for a single column category. Opinion posts often
+// have a rest_forbidden featured_media (empty wp:featuredmedia), so we lean on
+// transformPost, which falls back to the Yoast og_image when needed.
+async function fetchColumnImage(
+  catId: number,
+  fallbackAlt: string,
+): Promise<{ url: string; alt: string } | null> {
+  try {
+    const posts = await wpFetch<WPPost[]>("/posts", {
+      categories: catId,
+      per_page: 1,
+      _embed: 1,
+      orderby: "date",
+      order: "desc",
+    });
+    const img = posts[0] ? transformPost(posts[0]).data.featured_image : null;
+    if (!img?.url) return null;
+    return { url: img.url, alt: img.alt || fallbackAlt };
+  } catch {
+    return null;
+  }
+}
+
+// Build the FULL columnist directory from the curated roster, attaching each
+// column's latest banner image (fetched live per category, in parallel). Returns
+// every columnist regardless of image availability — the UI falls back to a
+// monogram tile when a column has no usable image.
+export async function getOpinionColumnists(): Promise<ColumnistSummary[]> {
+  // Only columns without a curated headshot need a live banner lookup.
+  const needsImage = OPINION_ROSTER.filter((r) => !r.headshot);
+  const idMap = await resolveCategoryIdMap(
+    needsImage.map((r) => r.slug),
+  ).catch(() => new Map<string, number>());
+
+  const fetched = await Promise.all(
+    needsImage.map((r) => {
+      const catId = idMap.get(r.slug);
+      return catId ? fetchColumnImage(catId, r.column) : Promise.resolve(null);
+    }),
+  );
+  const fetchedBySlug = new Map(
+    needsImage.map((r, i) => [r.slug, fetched[i]]),
+  );
+
+  return OPINION_ROSTER.map((r) => ({
+    column: r.column,
+    author: r.author,
+    slug: r.slug,
+    image: r.headshot
+      ? { url: r.headshot, alt: r.author }
+      : fetchedBySlug.get(r.slug) ?? null,
+  }));
+}
+
+// Look up a curated columnist by their column's category slug (e.g. "prometheus").
+export function findColumnistBySlug(
+  slug: string,
+): { column: string; author: string; slug: string; headshot?: string } | null {
+  return OPINION_ROSTER.find((r) => r.slug === slug) ?? null;
+}
+
+// Fetch a column's posts by its category slug — reliable for the columnist pages
+// where byline-based lookup fails (e.g. plain "By Name" posts resolve no author).
+export async function getOpinionPostsByColumnSlug(
+  slug: string,
+  perPage = 12,
+  page = 1,
+): Promise<{ posts: Post[]; totalPages: number; total: number }> {
+  const idMap = await resolveCategoryIdMap([slug]).catch(
+    () => new Map<string, number>(),
+  );
+  const catId = idMap.get(slug);
+  if (!catId) return { posts: [], totalPages: 1, total: 0 };
+
+  try {
+    const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
+      "/posts",
+      {
+        categories: catId,
+        per_page: perPage,
+        page,
+        _embed: 1,
+        orderby: "date",
+        order: "desc",
+      },
+    );
+    return { posts: data.map(transformPost), totalPages, total };
+  } catch {
+    return { posts: [], totalPages: 1, total: 0 };
+  }
 }
 
 interface WPPage {
