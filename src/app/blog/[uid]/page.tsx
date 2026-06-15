@@ -1,6 +1,7 @@
 // app/blog/[uid]/page.tsx
 export const revalidate = 600;
 
+import ArticleImageCarousel from "@/components/ArticleImageCarousel";
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";
 import {
@@ -18,8 +19,15 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCommentsByPostId, getPostBySlug, getRelatedPosts } from "../../../../lib/wordpress";
-import type { Post } from "../../../../lib/wordpress";
+import {
+  dedupeImagesByFilename,
+  extractContentImages,
+  getCommentsByPostId,
+  getPostBySlug,
+  getRelatedPosts,
+  stripImagesFromContent,
+} from "../../../../lib/wordpress";
+import type { ContentImage, Post } from "../../../../lib/wordpress";
 
 interface BlogPageProps {
   params: Promise<{ uid: string }>;
@@ -59,6 +67,27 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const updateDate = formatDate(post.data.updated_date);
   const readingTime = `${post.data.reading_time} min`;
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyguardian.com.ph"}/blog/${post.uid}`;
+
+  // Auto-detect multi-image posts: combine the featured image with every <img>
+  // in the body, dedupe by filename, and render as a carousel when count > 1.
+  // The carousel images are then stripped from the body so they don't render twice.
+  const featuredImage: ContentImage | null = post.data.featured_image?.url
+    ? {
+        url: post.data.featured_image.url,
+        alt: post.data.featured_image.alt || post.data.title,
+      }
+    : null;
+  const bodyImages = extractContentImages(post.data.content);
+  const gallery = dedupeImagesByFilename(
+    featuredImage ? [featuredImage, ...bodyImages] : bodyImages,
+  );
+  const useCarousel = gallery.length > 1;
+  const articleContent = useCarousel
+    ? stripImagesFromContent(post.data.content, gallery.map((g) => g.url))
+    : stripImagesFromContent(
+        post.data.content,
+        featuredImage ? [featuredImage.url] : [],
+      );
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -150,12 +179,6 @@ export default async function BlogPost({ params }: BlogPageProps) {
             {post.data.title}
           </h1>
 
-          {post.data.summary && (
-            <div className="text-xl text-gray-300 leading-relaxed mb-6 font-light font-open-sans">
-              <p>{post.data.summary}</p>
-            </div>
-          )}
-
           <div className="flex flex-wrap items-center gap-6 py-4 border-t border-b border-gray-700">
             <span className="flex items-center gap-2 text-gray-400 text-sm font-open-sans">
               <Clock size={16} className="text-[#fcee16]" />
@@ -176,24 +199,35 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </header>
 
-        {/* Featured Image */}
-        {post.data.featured_image?.url && (
-          <figure className="mb-8">
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
-              <Image
-                src={post.data.featured_image.url}
-                alt={post.data.featured_image.alt || "Article image"}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            {post.data.featured_image.alt && (
-              <figcaption className="mt-3 text-sm text-gray-400 italic font-open-sans">
-                {post.data.featured_image.alt}
-              </figcaption>
-            )}
-          </figure>
+        {/* Featured Image — single shot when only 1 image, carousel when >1 */}
+        {useCarousel ? (
+          <ArticleImageCarousel images={gallery} />
+        ) : (
+          featuredImage && (
+            <figure className="mb-8">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
+                <Image
+                  src={featuredImage.url}
+                  alt={featuredImage.alt || "Article image"}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              {featuredImage.alt && (
+                <figcaption className="mt-3 text-sm text-gray-400 italic font-open-sans">
+                  {featuredImage.alt}
+                </figcaption>
+              )}
+            </figure>
+          )
+        )}
+
+        {/* Lede / summary — sits below the image, above the byline */}
+        {post.data.summary && (
+          <div className="text-xl text-gray-300 leading-relaxed mb-8 font-light font-open-sans">
+            <p>{post.data.summary}</p>
+          </div>
         )}
 
         {/* Author and Date Info */}
@@ -203,9 +237,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
               <User size={18} className="text-[#1b1a1b]" />
             </div>
             <div>
-              <p className="font-medium text-white font-open-sans">
-                By {post.data.author || "Staff Writer"}
-              </p>
+              {post.data.author && (
+                <p className="font-medium text-white font-open-sans">
+                  By {post.data.author}
+                </p>
+              )}
               <div className="flex items-center gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-1 font-open-sans">
                   <Calendar size={12} />
@@ -244,7 +280,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             prose-pre:bg-gray-800 prose-pre:rounded-lg
             prose-code:text-green-400
             [&_p]:mb-6 [&_p+p]:mt-0"
-          dangerouslySetInnerHTML={{ __html: post.data.content }}
+          dangerouslySetInnerHTML={{ __html: articleContent }}
         />
 
         {/* Article Meta Information */}
@@ -307,7 +343,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             </h4>
             <div className="flex items-center gap-3">
               <Link
-                href="https://facebook.com/dailyguardian"
+                href="https://www.facebook.com/DailyGuardianPH/"
                 className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="Facebook"
               >
@@ -317,9 +353,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
                 />
               </Link>
               <Link
-                href="https://twitter.com/dailyguardian"
+                href="https://x.com/dailyguardianph"
                 className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
-                aria-label="Twitter"
+                aria-label="X (Twitter)"
               >
                 <Twitter
                   size={18}
@@ -327,7 +363,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
                 />
               </Link>
               <Link
-                href="https://instagram.com/dailyguardian"
+                href="https://www.instagram.com/dailyguardianph"
                 className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="Instagram"
               >
@@ -423,7 +459,18 @@ export async function generateMetadata({ params }: BlogPageProps) {
 
     const url = `https://dailyguardian.com.ph/blog/${resolvedParams.uid}`;
     const description = post.data.meta_description || post.data.summary || "";
-    const image = post.data.featured_image?.url;
+    const featured = post.data.featured_image;
+    // Logo fallback uses the wordmark's real dimensions so FB doesn't crop based
+    // on a fabricated 1200x630 claim. A dedicated 1200x630 share asset would
+    // render larger in feeds — drop one at /public/black_dg.png to override.
+    const ogImage = featured?.url
+      ? {
+          url: featured.url,
+          width: featured.width ?? 1200,
+          height: featured.height ?? 630,
+          alt: featured.alt || post.data.title,
+        }
+      : { url: "/black_dg.png", width: 536, height: 128, alt: "Daily Guardian" };
 
     return {
       title: post.data.title,
@@ -438,15 +485,13 @@ export async function generateMetadata({ params }: BlogPageProps) {
         publishedTime: post.data.published_date,
         authors: post.data.author ? [post.data.author] : ["Daily Guardian"],
         section: post.data.category || "News",
-        images: image
-          ? [{ url: image, width: 1200, height: 630, alt: post.data.featured_image?.alt || post.data.title }]
-          : [],
+        images: [ogImage],
       },
       twitter: {
         card: "summary_large_image",
         title: post.data.title,
         description,
-        images: image ? [image] : [],
+        images: [ogImage.url],
       },
     };
   } catch {

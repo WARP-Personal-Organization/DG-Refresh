@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 const Footer: React.FC = () => {
@@ -103,58 +103,63 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Footer Content - REVISED FOR COMPACTNESS */}
-      <div className=" bg-accent    px-4 py-8">
-        <div className="bg-acccent mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <Link href="/" className="inline-block">
+      {/* Main Footer Content — 3-column balance: brand · contact · social */}
+      <div className="bg-accent px-4 py-8">
+        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+          {/* Brand */}
+          <Link href="/" className="inline-block justify-self-center md:justify-self-start">
             <img
-              src="/black_dg.png" // Assuming this is your logo path
+              src="/black_dg.png"
               alt="Daily Guardian"
-              className="h-20 w-auto" // Adjusted height
+              className="h-20 w-auto"
             />
           </Link>
 
-          {/* Social Media Icons */}
-          <div className="flex items-center gap-3">
+          {/* Tagline + contact */}
+          <div className="text-center text-background space-y-2">
+            <p className="font-roboto font-bold text-sm uppercase tracking-[0.3em]">
+              We Write &middot; You Decide
+            </p>
+            <p className="text-xs flex items-center justify-center gap-2 font-open-sans">
+              <MapPin size={12} /> Iloilo City, Philippines
+            </p>
+            <a
+              href="mailto:dailyguardian@dailyguardian.com.ph"
+              className="text-xs flex items-center justify-center gap-2 font-open-sans hover:underline"
+            >
+              <Mail size={12} /> dailyguardian@dailyguardian.com.ph
+            </a>
+          </div>
+
+          {/* Social */}
+          <div className="flex items-center gap-3 justify-self-center md:justify-self-end">
             <Link
-              href="https://facebook.com/dailyguardian"
+              href="https://www.facebook.com/DailyGuardianPH/"
               className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
               aria-label="Facebook"
             >
-              <Facebook
-                size={18}
-                className="text-gray-400 group-hover:text-background"
-              />
+              <Facebook size={18} className="text-gray-400 group-hover:text-background" />
             </Link>
             <Link
-              href="https://twitter.com/dailyguardian"
+              href="https://x.com/dailyguardianph"
               className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
-              aria-label="Twitter"
+              aria-label="X (Twitter)"
             >
-              <Twitter
-                size={18}
-                className="text-gray-400 group-hover:text-background"
-              />
+              <Twitter size={18} className="text-gray-400 group-hover:text-background" />
             </Link>
             <Link
-              href="https://instagram.com/dailyguardian"
+              href="https://www.instagram.com/dailyguardianph"
               className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
               aria-label="Instagram"
             >
-              <Instagram
-                size={18}
-                className="text-gray-400 group-hover:text-background"
-              />
+              <Instagram size={18} className="text-gray-400 group-hover:text-background" />
             </Link>
             <Link
               href="https://youtube.com/dailyguardian"
               className="w-9 h-9 bg-gray-800 hover:bg-accent rounded-lg flex items-center justify-center transition-colors duration-200 group"
               aria-label="YouTube"
             >
-              <Youtube
-                size={18}
-                className="text-gray-400 group-hover:text-background"
-              />
+              <Youtube size={18} className="text-gray-400 group-hover:text-background" />
             </Link>
           </div>
         </div>

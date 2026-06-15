@@ -1,7 +1,6 @@
 import AutoRefresh from "@/components/AutoRefresh";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import LoadingScreen from "@/components/LoadingScreen";
 import NavigationBar from "@/components/Navigation";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
@@ -58,12 +57,12 @@ export const metadata: Metadata = {
     description:
       "Daily Guardian is Western Visayas' leading news publication. Get the latest local, national, and international news.",
     url: SITE_URL,
-    images: [{ url: "/black_dg.png", width: 1200, height: 630, alt: "Daily Guardian" }],
+    images: [{ url: "/black_dg.png", width: 536, height: 128, alt: "Daily Guardian" }],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@dailyguardian",
-    creator: "@dailyguardian",
+    site: "@dailyguardianph",
+    creator: "@dailyguardianph",
     title: "Daily Guardian | We Write, You Decide",
     description: "Daily Guardian is Western Visayas' leading news publication.",
     images: ["/black_dg.png"],
@@ -123,14 +122,6 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Runs synchronously before React — blocks page on first visit with no flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(!sessionStorage.getItem('dg_intro'))document.documentElement.classList.add('dg-first-load')}catch(e){}`,
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
       >
@@ -158,7 +149,6 @@ export default async function RootLayout({
           gtag('js', new Date());
           gtag('config', 'G-SQ61FCPRV9');
         `}</Script>
-        <LoadingScreen />
         <AutoRefresh intervalMs={300_000} />
         <Header posts={posts} breakingPost={breakingPost} />
         <NavigationBar navPosts={navPosts} />

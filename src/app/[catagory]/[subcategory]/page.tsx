@@ -16,8 +16,13 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostsByCategorySlugs, getWPSlugsForSubcategory } from "../../../../lib/wordpress";
+import {
+  getBannerNewsBySubcategory,
+  getPostsByCategorySlugs,
+  getWPSlugsForSubcategory,
+} from "../../../../lib/wordpress";
 import type { Post } from "../../../../lib/wordpress";
+import BannerNewsBlock from "../../../components/BannerNewsBlock";
 import Pagination from "../../../components/Pagination";
 
 const POSTS_PER_PAGE = 9;
@@ -55,10 +60,30 @@ export async function generateMetadata({
   const subcategoryValue = slugToSubcategory(resolvedParams.subcategory);
   const displayName = formatSubcategoryName(subcategoryValue);
 
+  const title = `${displayName} - Latest Articles | Daily Guardian`;
+  const description = `Read the latest ${displayName} articles from Daily Guardian.`;
+  const url = `https://dailyguardian.com.ph/${resolvedParams.catagory}/${resolvedParams.subcategory}`;
+  const ogImage = { url: "/black_dg.png", width: 536, height: 128, alt: "Daily Guardian" };
+
   return {
-    title: `${displayName} - Latest Articles | Daily Guardian`,
-    description: `Read the latest ${displayName} articles from Daily Guardian.`,
+    title,
+    description,
     keywords: `${displayName}, news, Daily Guardian, ${subcategoryValue}`,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title,
+      description,
+      siteName: "Daily Guardian",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage.url],
+    },
   };
 }
 
@@ -233,12 +258,21 @@ export default async function SubCategoryPage({
   let posts: Post[] = [];
   let totalPages = 1;
   let fetchError = false;
+  // Banner-news only shows on page 1 of the listing — paginated views stay
+  // a plain chronological feed.
+  let bannerNews: Post[] = [];
 
   try {
     const wpSlugs = getWPSlugsForSubcategory(subcategoryValue);
-    const result = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+    const [result, bannerBySub] = await Promise.all([
+      getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page),
+      page === 1
+        ? getBannerNewsBySubcategory(30).catch(() => ({}) as Record<string, Post[]>)
+        : Promise.resolve({} as Record<string, Post[]>),
+    ]);
     posts = result.posts;
     totalPages = result.totalPages;
+    bannerNews = (bannerBySub[subcategoryValue] ?? []).slice(0, 4);
   } catch (error) {
     console.error("Error fetching subcategory articles:", error);
     fetchError = true;
@@ -298,6 +332,10 @@ export default async function SubCategoryPage({
             </div>
           </div>
         </div>
+
+        {bannerNews.length > 0 && (
+          <BannerNewsBlock posts={bannerNews} />
+        )}
 
         {breakingNews.length > 0 && (
           <section className="mb-8">
