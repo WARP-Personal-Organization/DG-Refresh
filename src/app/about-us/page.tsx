@@ -8,28 +8,28 @@ export const metadata: Metadata = {
 };
 
 const FALLBACK_PHOTO =
-  "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Sub-Photo-1024x1024-1.jpg";
+  "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Sub-Photo-1024x1024-1.jpg";
 
 const management = [
   {
     name: "Lemuel T. Fernandez",
     role: "Founding Publisher",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Lemuel-Fernandez-Publisher.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Lemuel-Fernandez-Publisher.jpg",
   },
   {
     name: "Lawrence Clark D. Fernandez",
     role: "Publisher",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Lawrence-Clark-Fernandez-General-Manager.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Lawrence-Clark-Fernandez-General-Manager.jpg",
   },
   {
     name: "Francis Allan L. Angelo",
     role: "Editor-in-Chief",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2021/10/FAA2.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/10/FAA2.jpg",
   },
   {
     name: "Lcid Crescent D. Fernandez",
     role: "VP External",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Lcid-Crescent-Fernandez-VP-External1.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Lcid-Crescent-Fernandez-VP-External1.jpg",
   },
 ];
 
@@ -42,17 +42,17 @@ const editorial = [
   {
     name: "Joseph Bernard Marzan",
     role: "Senior Reporter",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2021/10/241079043_1458172951221024_5452883474456689570_n.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/10/241079043_1458172951221024_5452883474456689570_n.jpg",
   },
   {
     name: "Dolly Yasa",
     role: "Reporter",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Dolly-Yasa-Reporter.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Dolly-Yasa-Reporter.jpg",
   },
   {
     name: "Glazyl Jane Masculino",
     role: "Reporter",
-    photo: "https://dailyguardian.com.ph/wp-content/uploads/2022/06/Glazyl-Jane-Marie-Masculino-Reporter.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Glazyl-Jane-Marie-Masculino-Reporter.jpg",
   },
 ];
 
