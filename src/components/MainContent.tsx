@@ -37,6 +37,17 @@ const MainContent: React.FC<MainContentProps> = ({
     );
   }
 
+  // Hide the "NEWS" default pill — only show a section label when WP gives us
+  // something more specific than the generic news bucket.
+  const labelFor = (p: Post): string | null => {
+    // Specific province (Negros, Capiz, …) beats the generic "local"/section.
+    const candidate = p.data.locality || p.data.subcategory || p.data.category;
+    if (!candidate || candidate.toLowerCase() === "news") return null;
+    return candidate;
+  };
+  const heroLabel = labelFor(heroPost);
+  const featuredLabel = labelFor(featuredPost);
+
   return (
     <main className="lg:col-span-3 w-full p-0 m-0">
       {/* === MAIN GRID (40/60 split) === */}
@@ -44,9 +55,11 @@ const MainContent: React.FC<MainContentProps> = ({
         {/* === LEFT COLUMN (MAIN HERO STORY - 2/5 width) === */}
         <div className="lg:col-span-2 flex flex-col justify-between h-full">
           <article>
-            <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
-              {heroPost.data.subcategory || heroPost.data.category || "News"}
-            </p>
+            {heroLabel && (
+              <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
+                {heroLabel}
+              </p>
+            )}
             <Link href={`/blog/${heroPost.uid}`} className="block group">
               <AnimatedHeadline
                 as="h1"
@@ -69,7 +82,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   <Link href={`/blog/${editorialPost.uid}`} className="block group">
                     <div className="flex-1">
                       <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
-                        {editorialPost.data.subcategory || editorialPost.data.category || "Editorial"}
+                        {editorialPost.data.locality || editorialPost.data.subcategory || editorialPost.data.category || "Editorial"}
                       </p>
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
                         {editorialPost.data.title}
@@ -90,7 +103,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   <Link href={`/blog/${localposts.uid}`} className="block group">
                     <div className="flex-1">
                       <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
-                        {localposts.data.subcategory || localposts.data.category || "Local"}
+                        {localposts.data.locality || localposts.data.subcategory || localposts.data.category || "Local"}
                       </p>
                       <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
                         {localposts.data.title}
@@ -136,9 +149,11 @@ const MainContent: React.FC<MainContentProps> = ({
                 <div className="flex-1 h-px bg-accent"></div>
               </div>
 
-              <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1 font-sans text-center">
-                {featuredPost.data.subcategory || featuredPost.data.category || "Featured"}
-              </p>
+              {featuredLabel && (
+                <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1 font-sans text-center">
+                  {featuredLabel}
+                </p>
+              )}
 
               <h2 className="relative text-3xl lg:text-4xl font-playfair font-bold text-accent leading-tight max-w-2xl break-words text-center mx-auto group-hover:text-accent/80 transition-colors duration-300">
                 {featuredPost.data.title}
