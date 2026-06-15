@@ -44,8 +44,8 @@ export default function LoadingScreen() {
   };
 
   useEffect(() => {
-    if (sessionStorage.getItem("dg_intro")) return;
-    sessionStorage.setItem("dg_intro", "1");
+    if (localStorage.getItem("dg_intro")) return;
+    localStorage.setItem("dg_intro", "1");
     setShow(true);
     startRef.current = performance.now();
 
@@ -132,7 +132,7 @@ export default function LoadingScreen() {
 
   if (!show) return null;
 
-  const sections = ["NEWS", "VOICES", "BUSINESS", "SPORTS", "FEATURES", "INITIATIVE"];
+  const sections = ["NEWS", "OPINION", "BUSINESS", "SPORTS", "FEATURES", "INITIATIVE"];
 
   return (
     <>
@@ -390,7 +390,7 @@ export default function LoadingScreen() {
           {[
             { cls: "dg-col-0", side: "left",  offset: "0",     label: "LOCAL"   },
             { cls: "dg-col-1", side: "left",  offset: "10.5vw", label: "SPORTS"  },
-            { cls: "dg-col-2", side: "right", offset: "10.5vw", label: "VOICES"  },
+            { cls: "dg-col-2", side: "right", offset: "10.5vw", label: "OPINION"  },
             { cls: "dg-col-3", side: "right", offset: "0",      label: "CULTURE" },
           ].map(({ cls, side, offset, label }) => (
             <div key={label} className={cls} style={{

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import type { Post } from "../../lib/wordpress";
-import { authorToSlug } from "../../lib/wordpress";
+import type { ColumnistSummary, Post } from "../../lib/wordpress";
 
 interface VoicesPageProps {
-  posts: Post[];
+  columnists: ColumnistSummary[];
+  recentPosts: Post[];
 }
 
 const formatDate = (s: string) =>
@@ -27,40 +27,42 @@ function initialsOf(name: string) {
     .toUpperCase();
 }
 
-interface Columnist {
-  author: string;
-  latestPost: Post;
-}
-
-// ── Columnist card — mirrors About Us StaffCard ────────────────────────────────
-const ColumnistCard: React.FC<{ c: Columnist }> = ({ c }) => {
-  const photo = c.latestPost.data.featured_image?.url ?? null;
+// ── Columnist card — circular headshot cropped from the column banner ──────────
+const ColumnistCard: React.FC<{ c: ColumnistSummary }> = ({ c }) => {
+  const photo = c.image?.url ?? null;
   const initials = initialsOf(c.author);
 
   return (
-    <Link href={`/opinion/${authorToSlug(c.author)}`} className="block group">
-      <div className="flex flex-col items-center text-center gap-3">
-        {/* Avatar */}
-        {photo ? (
-          <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-gray-800 group-hover:border-[#fcee16] transition-all duration-300 shadow-xl flex-shrink-0">
-            <Image
-              src={photo}
-              alt={c.author}
-              fill
-              className="object-cover"
-              sizes="112px"
-            />
+    <Link href={`/opinion/${c.slug}`} className="block group">
+      <div className="flex flex-col items-center text-center transition-transform duration-300 group-hover:-translate-y-1">
+        {/* Avatar — the face sits on the left of each banner, so crop left */}
+        <div className="relative mb-4">
+          <div className="absolute -inset-1 rounded-full bg-[#fcee16] opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-25" />
+          <div className="relative h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-full bg-[#111] ring-2 ring-gray-700 transition-all duration-300 group-hover:ring-[#fcee16]">
+            {photo ? (
+              <Image
+                src={photo}
+                alt={c.author}
+                fill
+                className="object-cover object-left grayscale-[0.2] transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
+                sizes="120px"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                <span className="font-roboto text-2xl font-black text-[#fcee16]/70">
+                  {initials}
+                </span>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="w-28 h-28 rounded-full border-4 border-gray-800 group-hover:border-[#fcee16] transition-all duration-300 shadow-xl bg-gray-800 flex items-center justify-center flex-shrink-0">
-            <span className="font-roboto font-bold text-2xl text-[#fcee16]/70">
-              {initials}
-            </span>
-          </div>
-        )}
+        </div>
 
-        {/* Author name */}
-        <p className="font-roboto font-bold text-white text-xs uppercase tracking-wide leading-snug group-hover:text-[#fcee16] transition-colors duration-200 px-1">
+        {/* Column title — the hero */}
+        <h3 className="font-roboto text-sm font-black uppercase leading-tight tracking-wide text-[#fcee16]">
+          {c.column}
+        </h3>
+        {/* Columnist name */}
+        <p className="mt-1 font-open-sans text-[11px] uppercase tracking-wider text-gray-400 transition-colors duration-200 group-hover:text-white">
           {c.author}
         </p>
       </div>
@@ -101,19 +103,8 @@ const ArticleCard: React.FC<{ post: Post }> = ({ post }) => (
 );
 
 // ── Main component ─────────────────────────────────────────────────────────────
-const VoicesPage: React.FC<VoicesPageProps> = ({ posts }) => {
-  // One card per unique author (most recent post per columnist)
-  const seen = new Set<string>();
-  const columnists: Columnist[] = [];
-  for (const p of posts) {
-    const key = (p.data.author || "Staff Writer").toLowerCase().trim();
-    if (key === "staff writer") continue; // skip unresolved bylines
-    if (seen.has(key)) continue;
-    seen.add(key);
-    columnists.push({ author: p.data.author, latestPost: p });
-  }
-
-  const latestOpinions = posts.slice(0, 6);
+const VoicesPage: React.FC<VoicesPageProps> = ({ columnists, recentPosts }) => {
+  const latestOpinions = recentPosts.slice(0, 6);
 
   return (
     <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
@@ -128,7 +119,7 @@ const VoicesPage: React.FC<VoicesPageProps> = ({ posts }) => {
             </span>
           </div>
           <h1 className="font-roboto font-black text-6xl md:text-7xl lg:text-8xl text-white leading-tight uppercase mb-6">
-            Voices
+            Opinion
           </h1>
           <p className="font-open-sans text-gray-400 text-lg max-w-2xl leading-relaxed">
             Independent perspectives from Daily Guardian&apos;s columnists and contributors.
@@ -148,9 +139,9 @@ const VoicesPage: React.FC<VoicesPageProps> = ({ posts }) => {
         {columnists.length === 0 ? (
           <p className="text-gray-500 text-center py-16">No columnists found.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-10">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
             {columnists.map((c, i) => (
-              <ColumnistCard key={`${c.author}-${i}`} c={c} />
+              <ColumnistCard key={`${c.slug}-${i}`} c={c} />
             ))}
           </div>
         )}

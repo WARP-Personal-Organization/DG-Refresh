@@ -2,7 +2,7 @@
 export const revalidate = 300;
 
 import Header from "@/components/Header";
-import EditorialStories from "@/components/HomePageLayouts/EditorialStories";
+import EditorialCartoonOpinion from "@/components/HomePageLayouts/EditorialCartoonOpinion";
 import FeaturesStories from "@/components/HomePageLayouts/FeaturesStories";
 import InitiativeAndNationStories from "@/components/HomePageLayouts/InitiativeAndNationStories";
 import LocalStories from "@/components/HomePageLayouts/LocalStories";
@@ -10,7 +10,6 @@ import NegrosAndSportsStories from "@/components/HomePageLayouts/NegrosAndSports
 import TopStories from "@/components/HomePageLayouts/TopStories";
 import MainContent from "@/components/MainContent";
 import NavigationBar from "@/components/Navigation";
-import OpinionSection from "@/components/Opinion";
 import { PublicationCard } from "@/components/PublicationCard";
 import EnhancedVideoSection from "@/components/VideosSection";
 import { getChannelVideos, FALLBACK_VIDEOS } from "../../lib/youtube";
@@ -118,43 +117,16 @@ export default async function Home() {
 
     const usedIds = new Set([heroPost.id, featuredPost.id]);
 
-    const editorialPost = editorialPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
-    if (editorialPost) usedIds.add(editorialPost.id);
-
     const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (localPost) usedIds.add(localPost.id);
 
-    // Fill editorial section to at least 5 posts — supplement with recent posts when the
-    // editorial/the-dg-view categories don't have enough content in WordPress
-    const editorialFilled =
-      editorialPicks.length >= 5
-        ? editorialPicks
-        : [
-            ...editorialPicks,
-            ...recentPosts.filter(
-              (p) => !editorialPicks.some((e) => e.id === p.id),
-            ),
-          ].slice(0, 5);
-
-    // Combine all fetched posts for EditorsPicks in NegrosAndSports
-    const allPostsForEditorsPicks = [
-      ...recentPosts,
-      ...localPicks,
-      ...negrosPicks,
-      ...sportsPicks,
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i); // deduplicate
-
     // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([
-      heroPost.id,
-      featuredPost.id,
-      ...(editorialPost ? [editorialPost.id] : []),
-    ]);
+    const shownInMainContent = new Set([heroPost.id, featuredPost.id]);
 
-    // TopStories: filter out posts already rendered in the MainContent hero/featured slots
-    const topStoriesPool = (
-      featuredPicks.length >= 4 ? featuredPicks : recentPosts
-    ).filter((p) => !shownInMainContent.has(p.id));
+    // TopStories shows the freshest posts only (no stickies-pinned older items).
+    const topStoriesPool = recentPosts.filter(
+      (p) => !shownInMainContent.has(p.id),
+    );
 
     // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
     const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
@@ -167,9 +139,8 @@ export default async function Home() {
               heroPost={heroPost}
               featuredPost={featuredPost}
               localposts={localPost}
-              editorialPost={editorialPost}
             />
-            <div className="flex flex-col gap-6 self-start sticky top-4">
+            <div className="flex flex-col gap-6 self-start lg:sticky lg:top-4">
               <PublicationCard
                 title="Today's Paper"
                 imageUrl={todaysPaper?.imageUrl || "/todaysnewspaper.png"}
@@ -185,15 +156,12 @@ export default async function Home() {
         </div>
         <TopStories title={"Top Stories"} stories={topStoriesPool} />
         <LocalStories title={"LOCAL"} stories={localStoriesData} />
+        <LocalStories title={"NEGROS"} stories={negrosPicks} />
         <NegrosAndSportsStories
-          negrosTitle={"NEGROS"}
-          negrosStories={negrosPicks}
           sportsTitle={"Banner News"}
           sportsStories={sportsPicks}
-          allPosts={allPostsForEditorsPicks}
           supplement={supplement}
           supplementEditions={supplementEditions}
-          cartoons={cartoonResult.posts}
         />
         <FeaturesStories title={"FEATURES"} stories={featuredPicksAsCategory} />
         <InitiativeAndNationStories
@@ -202,8 +170,11 @@ export default async function Home() {
           nationTitle={"NATION"}
           nationStories={nationalPicks}
         />
-        <EditorialStories title={"EDITORIAL"} stories={editorialFilled} />
-        <OpinionSection posts={voicesPicks} />
+        <EditorialCartoonOpinion
+          editorialPosts={editorialPicks}
+          cartoons={cartoonResult.posts}
+          opinionPosts={voicesPicks}
+        />
         {/* <EnhancedVideoSection
           videos={youtubeVideos.length > 0 ? youtubeVideos : FALLBACK_VIDEOS}
         /> */}

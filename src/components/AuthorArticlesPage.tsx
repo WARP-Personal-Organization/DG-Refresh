@@ -84,7 +84,7 @@ const AuthorArticlesPage: React.FC<AuthorArticlesPageProps> = ({
       <section className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 md:px-10 pt-10 pb-14">
 
-          {/* Back to Voices */}
+          {/* Back to Opinion */}
           <Link
             href="/opinion"
             className="inline-flex items-center gap-2 text-gray-400 hover:text-[#fcee16] text-sm font-open-sans transition-colors mb-10 group"
@@ -92,17 +92,17 @@ const AuthorArticlesPage: React.FC<AuthorArticlesPageProps> = ({
             <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            All Voices
+            All Opinion
           </Link>
 
           <div className="flex items-center gap-6">
             {/* Avatar */}
             {avatarPhoto ? (
-              <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-800 flex-shrink-0 shadow-xl">
+              <div className="relative w-24 h-24 rounded-md overflow-hidden border-4 border-gray-800 flex-shrink-0 shadow-xl">
                 <Image src={avatarPhoto} alt={authorName} fill className="object-cover" sizes="96px" />
               </div>
             ) : (
-              <div className="w-24 h-24 rounded-full border-4 border-gray-800 flex-shrink-0 shadow-xl bg-gray-800 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-md border-4 border-gray-800 flex-shrink-0 shadow-xl bg-gray-800 flex items-center justify-center">
                 <span className="font-roboto font-bold text-2xl text-[#fcee16]/70">{initials}</span>
               </div>
             )}

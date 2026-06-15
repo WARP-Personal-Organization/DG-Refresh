@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -9,18 +9,6 @@ import type { Post } from "../../../lib/wordpress";
 interface CartoonAndLottoProps {
   cartoons: Post[];
 }
-
-const LOTTO_GAMES = [
-  "6/42",
-  "6/45",
-  "6/49",
-  "6/55",
-  "6/58",
-  "3D",
-  "4D",
-  "6D",
-  "2D",
-];
 
 export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
   const [idx, setIdx] = useState(0);
@@ -33,52 +21,23 @@ export default function CartoonAndLotto({ cartoons }: CartoonAndLottoProps) {
 
   return (
     <section className="bg-[#1b1a1b]">
-      {/* ── LOTTO STRIP ─────────────────────────────────────────────── */}
+      {/* ── LOTTO BANNER ────────────────────────────────────────────── */}
       <a
         href="https://www.pcso.gov.ph/"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center w-full overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(90deg, #00206e 0%, #0044cc 50%, #00206e 100%)",
-          minHeight: "52px",
-        }}
+        className="block w-full"
         aria-label="PCSO Lotto Results"
       >
-        {/* Label */}
-        <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-white/20 h-full self-stretch">
-          <span
-            className="text-[#fcee16] font-black text-xs md:text-sm uppercase tracking-widest whitespace-nowrap"
-            style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
-          >
-            PCSO LOTTO
-          </span>
-        </div>
-
-        {/* Game pills */}
-        <div className="flex items-center gap-2 px-4 overflow-x-auto scrollbar-none flex-1 py-3">
-          {LOTTO_GAMES.map((g) => (
-            <span
-              key={g}
-              className="flex-shrink-0 text-[10px] md:text-xs font-black text-white border border-white/25 rounded-sm px-2.5 py-1 uppercase tracking-wider bg-white/10 group-hover:border-[#fcee16]/50 transition-colors"
-              style={{ fontFamily: "Impact, Arial Black, sans-serif" }}
-            >
-              {g}
-            </span>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="flex-shrink-0 flex items-center gap-1.5 px-4 border-l border-white/20 h-full self-stretch">
-          <span className="text-white/70 group-hover:text-[#fcee16] text-[10px] md:text-xs font-roboto uppercase tracking-widest whitespace-nowrap transition-colors hidden sm:block">
-            Results
-          </span>
-          <ExternalLink
-            size={12}
-            className="text-white/50 group-hover:text-[#fcee16] transition-colors"
-          />
-        </div>
+        <Image
+          src="https://old.dailyguardian.com.ph/wp-content/uploads/2026/03/PCSO-lets-play-lottoxx.webp"
+          alt="PCSO — Let's Play Lotto"
+          width={700}
+          height={180}
+          priority
+          className="w-full h-auto"
+          sizes="100vw"
+        />
       </a>
 
       {/* ── CARTOON SECTION ─────────────────────────────────────────── */}

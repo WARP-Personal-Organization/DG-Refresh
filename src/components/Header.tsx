@@ -186,9 +186,9 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
           </div>
 
           {/* Main Header */}
-          <div className="flex justify-between items-center px-4">
-            {/* Left Section */}
-            <div className="flex-1 flex items-center gap-2 sm:gap-4">
+          <div className="flex justify-between items-center px-2 sm:px-4 gap-2">
+            {/* Left Section — natural width on mobile so the logo sits closer */}
+            <div className="flex-none sm:flex-1 flex items-center gap-2 sm:gap-4">
               <button
                 onClick={openSearchModal}
                 className="hidden lg:flex items-center gap-2 text-black hover:text-[#fcee16] transition-colors duration-200 group"
@@ -208,23 +208,23 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
               </button>
             </div>
 
-            {/* Centered Logo */}
-            <div className="flex-1 text-center px-2">
+            {/* Centered Logo — grows to fill the mobile row, balancing the search button */}
+            <div className="flex-1 text-center px-0 sm:px-2">
               <Link href="/" className="block">
                 <div className="relative flex flex-col items-center">
                   <div className="relative">
                     <img
                       src="/black_dg.png"
                       alt="Daily Guardian"
-                      className="h-16 sm:h-16 md:h-16 lg:h-20 xl:h-24 w-auto max-w-[180px] sm:max-w-[180px] md:max-w-[200px] lg:max-w-none object-contain drop-shadow-lg"
+                      className="h-12 sm:h-16 md:h-16 lg:h-20 xl:h-24 w-auto max-w-full sm:max-w-[180px] md:max-w-[200px] lg:max-w-none object-contain drop-shadow-lg"
                     />
                   </div>
                 </div>
               </Link>
             </div>
 
-            {/* Right Section */}
-            <div className="flex-1 flex justify-end items-center gap-2 sm:gap-3">
+            {/* Right Section — hidden on mobile so the logo isn't pushed left of centre */}
+            <div className="hidden sm:flex flex-1 justify-end items-center gap-2 sm:gap-3">
             </div>
           </div>
         </div>
@@ -279,7 +279,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
                   "Local News",
                   "Sports",
                   "Business",
-                  "voices",
+                  "Opinion",
                   "Community",
                   "Events",
                 ].map((item) => (

@@ -95,7 +95,7 @@ const ArticlePreview: React.FC<{
   isFirst?: boolean;
 }> = ({ post, index, isFirst = false }) => {
   const title = post.data.title || "Untitled Article";
-  const author = post.data.author || "Staff Writer";
+  const author = post.data.author;
   const category = getCategoryDisplayName(post.data.category);
   const time = formatTimeAgo(post.data.published_date || post.data.updated_date);
   const summary = post.data.summary
@@ -143,7 +143,11 @@ const ArticlePreview: React.FC<{
           )}
 
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-400 font-medium">{author}</span>
+            {author ? (
+              <span className="text-gray-400 font-medium">{author}</span>
+            ) : (
+              <span />
+            )}
             <div className="flex items-center gap-1 text-gray-500">
               <Clock size={10} className="text-accent/70" />
               <span>{time}</span>

@@ -115,7 +115,7 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
               const articleSummary = article.data.summary
                 ? article.data.summary.substring(0, 150) + "..."
                 : "";
-              const authorName = article.data.author || "Staff Writer";
+              const authorName = article.data.author;
               const featuredImage = article.data.featured_image;
 
               return (
@@ -145,12 +145,14 @@ const SubcategoryPage: React.FC<SubcategoryPageProps> = ({
                       )}
 
                       <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <span className="text-yellow-400">By</span>
-                          <span className="font-medium text-yellow-400">
-                            {authorName}
-                          </span>
-                        </div>
+                        {authorName && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-yellow-400">By</span>
+                            <span className="font-medium text-yellow-400">
+                              {authorName}
+                            </span>
+                          </div>
+                        )}
                         {article.data.category && (
                           <div className="flex items-center gap-1">
                             <span className="px-2 py-1 bg-gray-800 text-yellow-400 rounded text-xs font-medium uppercase tracking-wide">

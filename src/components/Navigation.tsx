@@ -19,7 +19,7 @@ const navigationData = [
     ],
   },
   {
-    name: "Voices",
+    name: "Opinion",
     href: "/opinion",
     categoryKeywords: ["opinion", "voices", "editorial"],
   },

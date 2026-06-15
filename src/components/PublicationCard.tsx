@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, Eye } from "lucide-react";
+import { ChevronDown, Download, Eye } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { PaperEdition } from "../../lib/wordpress";
@@ -76,9 +76,24 @@ export const PublicationCard = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-[#fcee16]/10">
-          <span className="text-sm font-black uppercase tracking-widest font-roboto text-[#fcee16] block mb-2">
-            {title}
-          </span>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-sm font-black uppercase tracking-widest font-roboto text-[#fcee16]">
+              {title}
+            </span>
+            {activePdfUrl && (
+              <a
+                href={activePdfUrl}
+                download
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-[#fcee16] transition-colors font-roboto uppercase tracking-wider"
+                aria-label={`Download ${activeLabel} PDF`}
+              >
+                <Download size={12} />
+                <span>Download</span>
+              </a>
+            )}
+          </div>
 
           {/* Edition selector */}
           {editions.length > 0 ? (
