@@ -159,7 +159,8 @@ function imageKey(url: string): string {
       .replace(/-\d+x\d+$/i, "") // size variant
       .replace(/-(scaled|rotated)$/i, "") // WP markers
       .replace(/-(w|wm|web)$/i, "") // DG web/watermark copy
-      .replace(/-\d+$/, ""); // WP re-upload counter
+      .replace(/-\d+$/, "") // WP re-upload counter
+      .replace(/\d+$/, ""); // DG bare-digit suffix (e.g. hub → hub1)
   }
   return (name + ext).toLowerCase();
 }
