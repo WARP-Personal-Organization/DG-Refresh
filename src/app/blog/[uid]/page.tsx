@@ -1,7 +1,6 @@
 // app/blog/[uid]/page.tsx
 export const revalidate = 600;
 
-import ArticleImageCarousel from "@/components/ArticleImageCarousel";
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";
 import {
@@ -11,7 +10,6 @@ import {
   Facebook,
   Instagram,
   MessageCircle,
-  Tag,
   Twitter,
   User,
   Youtube,
@@ -20,8 +18,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  dedupeImagesByFilename,
-  extractContentImages,
   getCommentsByPostId,
   getPostBySlug,
   getRelatedPosts,
@@ -68,26 +64,19 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const readingTime = `${post.data.reading_time} min`;
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyguardian.com.ph"}/blog/${post.uid}`;
 
-  // Auto-detect multi-image posts: combine the featured image with every <img>
-  // in the body, dedupe by filename, and render as a carousel when count > 1.
-  // The carousel images are then stripped from the body so they don't render twice.
+  // Show the featured image once at the top of the article.
+  // Body images remain inline where the editor placed them — only the featured
+  // image is stripped from the body to avoid rendering it twice.
   const featuredImage: ContentImage | null = post.data.featured_image?.url
     ? {
         url: post.data.featured_image.url,
         alt: post.data.featured_image.alt || post.data.title,
       }
     : null;
-  const bodyImages = extractContentImages(post.data.content);
-  const gallery = dedupeImagesByFilename(
-    featuredImage ? [featuredImage, ...bodyImages] : bodyImages,
+  const articleContent = stripImagesFromContent(
+    post.data.content,
+    featuredImage ? [featuredImage.url] : [],
   );
-  const useCarousel = gallery.length > 1;
-  const articleContent = useCarousel
-    ? stripImagesFromContent(post.data.content, gallery.map((g) => g.url))
-    : stripImagesFromContent(
-        post.data.content,
-        featuredImage ? [featuredImage.url] : [],
-      );
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -142,10 +131,10 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
       </header>
 
-      <article className="max-w-4xl mx-auto px-4 py-8">
+      <article className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
         {/* Tags & Badges */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-3">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {post.data.is_breaking_news && (
               <span className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200">
                 BREAKING NEWS
@@ -174,12 +163,12 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </div>
 
         {/* Headline */}
-        <header className="mb-8">
-          <h1 className="text-4xl lg:text-5xl font-roboto font-bold text-white leading-tight mb-6">
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-5xl font-roboto font-bold text-white leading-tight mb-4 sm:mb-6">
             {post.data.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-6 py-4 border-t border-b border-gray-700">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-3 sm:py-4 border-t border-b border-gray-700">
             <span className="flex items-center gap-2 text-gray-400 text-sm font-open-sans">
               <Clock size={16} className="text-[#fcee16]" />
               {readingTime} read
@@ -199,138 +188,79 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </header>
 
-        {/* Featured Image — single shot when only 1 image, carousel when >1 */}
-        {useCarousel ? (
-          <ArticleImageCarousel images={gallery} />
-        ) : (
-          featuredImage && (
-            <figure className="mb-8">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
-                <Image
-                  src={featuredImage.url}
-                  alt={featuredImage.alt || "Article image"}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              {featuredImage.alt && (
-                <figcaption className="mt-3 text-sm text-gray-400 italic font-open-sans">
-                  {featuredImage.alt}
-                </figcaption>
-              )}
-            </figure>
-          )
+        {/* Featured Image */}
+        {featuredImage && (
+          <figure className="mb-8">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
+              <Image
+                src={featuredImage.url}
+                alt={featuredImage.alt || "Article image"}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+            {featuredImage.alt && (
+              <figcaption className="mt-3 text-sm text-gray-400 italic font-open-sans">
+                {featuredImage.alt}
+              </figcaption>
+            )}
+          </figure>
         )}
 
         {/* Lede / summary — sits below the image, above the byline */}
         {post.data.summary && (
-          <div className="text-xl text-gray-300 leading-relaxed mb-8 font-light font-open-sans">
+          <div className="text-base sm:text-xl text-gray-300 leading-relaxed mb-6 sm:mb-8 font-light font-open-sans">
             <p>{post.data.summary}</p>
           </div>
         )}
 
         {/* Author and Date Info */}
-        <div className="flex flex-wrap items-center gap-6 mb-8 pb-6 border-b border-default">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#fcee16] rounded-full flex items-center justify-center">
-              <User size={18} className="text-[#1b1a1b]" />
-            </div>
-            <div>
-              {post.data.author && (
-                <p className="font-medium text-white font-open-sans">
-                  By {post.data.author}
-                </p>
-              )}
-              <div className="flex items-center gap-4 text-sm text-gray-400">
-                <div className="flex items-center gap-1 font-open-sans">
-                  <Calendar size={12} />
-                  <time>{publishDate}</time>
-                </div>
-                {updateDate && updateDate !== publishDate && (
-                  <div className="flex items-center gap-1 font-open-sans">
-                    <Clock size={12} />
-                    <span>Updated {updateDate}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+        <div className="flex items-center gap-3 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-default">
+          <div className="w-10 h-10 bg-[#fcee16] rounded-full flex items-center justify-center shrink-0">
+            <User size={18} className="text-[#1b1a1b]" />
           </div>
-
-          <div className="flex items-center gap-4 text-sm text-gray-400">
-            <div className="flex items-center gap-1 font-open-sans">
-              <Tag size={12} />
-              <span>{readingTime} read</span>
+          <div>
+            {post.data.author && (
+              <p className="font-medium text-white text-sm sm:text-base font-open-sans">
+                By {post.data.author}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-400 mt-0.5">
+              <div className="flex items-center gap-1 font-open-sans">
+                <Calendar size={11} />
+                <time>{publishDate}</time>
+              </div>
+              {updateDate && updateDate !== publishDate && (
+                <div className="flex items-center gap-1 font-open-sans">
+                  <Clock size={11} />
+                  <span>Updated {updateDate}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Article Content (WordPress HTML) */}
         <div
-          className="prose prose-lg prose-invert max-w-none
-            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-lg prose-p:font-open-sans prose-p:mb-6
-            prose-h1:text-white prose-h1:font-roboto prose-h1:mt-8 prose-h1:mb-4
-            prose-h2:text-white prose-h2:font-roboto prose-h2:mt-8 prose-h2:mb-4
-            prose-h3:text-white prose-h3:font-roboto prose-h3:mt-6 prose-h3:mb-3
+          className="prose prose-base sm:prose-lg prose-invert max-w-none
+            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-base prose-p:sm:text-lg prose-p:font-open-sans prose-p:mb-5 sm:prose-p:mb-6
+            prose-h1:text-white prose-h1:font-roboto prose-h1:mt-6 prose-h1:mb-3 sm:prose-h1:mt-8 sm:prose-h1:mb-4
+            prose-h2:text-white prose-h2:font-roboto prose-h2:mt-6 prose-h2:mb-3 sm:prose-h2:mt-8 sm:prose-h2:mb-4
+            prose-h3:text-white prose-h3:font-roboto prose-h3:mt-5 prose-h3:mb-2 sm:prose-h3:mt-6 sm:prose-h3:mb-3
             prose-strong:text-white prose-strong:font-bold
             prose-em:text-[#fcee16] prose-em:italic
             prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
             prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200 prose-li:mb-2
-            prose-img:rounded-lg prose-img:border prose-img:border-gray-700
-            prose-pre:bg-gray-800 prose-pre:rounded-lg
-            prose-code:text-green-400
-            [&_p]:mb-6 [&_p+p]:mt-0"
+            prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:w-full prose-img:h-auto
+            prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
+            prose-code:text-green-400 prose-code:text-sm
+            [&_p]:mb-5 [&_p+p]:mt-0
+            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full
+            [&_img]:!max-w-full [&_img]:!h-auto
+            [&_table]:w-full [&_table]:overflow-x-auto [&_table]:block"
           dangerouslySetInnerHTML={{ __html: articleContent }}
         />
-
-        {/* Article Meta Information */}
-        <div className="mt-8 p-6 bg-[#1b1a1b]/80 rounded-lg border border-gray-800">
-          <h3 className="text-lg font-bold text-white mb-4 font-roboto">
-            Article Information
-          </h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-open-sans">Category:</span>
-                <span className="text-white capitalize font-open-sans">
-                  {post.data.category || "N/A"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-open-sans">
-                  Subcategory:
-                </span>
-                <span className="text-white capitalize font-open-sans">
-                  {post.data.subcategory?.replace(/-/g, " ") || "N/A"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-open-sans">
-                  Reading Time:
-                </span>
-                <span className="text-white font-open-sans">{readingTime}</span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-open-sans">Published:</span>
-                <span className="text-white font-open-sans">{publishDate}</span>
-              </div>
-              {updateDate && updateDate !== publishDate && (
-                <div className="flex justify-between">
-                  <span className="text-gray-400 font-open-sans">Updated:</span>
-                  <span className="text-white font-open-sans">{updateDate}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-gray-400 font-open-sans">Tags:</span>
-                <span className="text-white font-open-sans">
-                  {post.data.tags.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Comment Section */}
         <CommentSection postId={post.id} initialComments={initialComments} />
@@ -344,7 +274,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
             <div className="flex items-center gap-3">
               <Link
                 href="https://www.facebook.com/DailyGuardianPH/"
-                className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                className="w-11 h-11 sm:w-9 sm:h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="Facebook"
               >
                 <Facebook
@@ -354,7 +284,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
               </Link>
               <Link
                 href="https://x.com/dailyguardianph"
-                className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                className="w-11 h-11 sm:w-9 sm:h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="X (Twitter)"
               >
                 <Twitter
@@ -364,7 +294,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
               </Link>
               <Link
                 href="https://www.instagram.com/dailyguardianph"
-                className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                className="w-11 h-11 sm:w-9 sm:h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="Instagram"
               >
                 <Instagram
@@ -374,7 +304,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
               </Link>
               <Link
                 href="https://youtube.com/dailyguardian"
-                className="w-9 h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
+                className="w-11 h-11 sm:w-9 sm:h-9 bg-gray-800 hover:bg-[#fcee16] rounded-lg flex items-center justify-center transition-colors duration-200 group"
                 aria-label="YouTube"
               >
                 <Youtube
@@ -420,7 +350,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
                         />
                       </div>
                     )}
-                    <div className="p-6 flex flex-col flex-1">
+                    <div className="p-4 sm:p-6 flex flex-col flex-1">
                       <h4 className="text-lg font-bold text-white group-hover:text-[#fcee16] transition-colors duration-200 font-roboto mb-2">
                         {articleTitle}
                       </h4>

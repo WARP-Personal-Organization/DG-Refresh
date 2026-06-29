@@ -54,3 +54,21 @@ body {
   overflow: visible !important;
   height: auto !important;
 }
+
+/* Responsive iframes in article body (YouTube, Facebook video, etc.)
+   WordPress embeds often carry fixed width/height attributes that overflow on mobile. */
+.prose iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+}
+
+/* Responsive images in article body — override any WP inline style="width:Xpx" */
+.prose figure,
+.prose figure img,
+.prose img {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+}

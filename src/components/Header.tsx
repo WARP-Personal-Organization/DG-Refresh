@@ -223,8 +223,8 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
               </Link>
             </div>
 
-            {/* Right Section — hidden on mobile so the logo isn't pushed left of centre */}
-            <div className="hidden sm:flex flex-1 justify-end items-center gap-2 sm:gap-3">
+            {/* Right Section — invisible on mobile but same width as the search button to keep logo centred */}
+            <div className="flex-none w-[34px] sm:flex-1 sm:w-auto flex justify-end items-center gap-2 sm:gap-3">
             </div>
           </div>
         </div>
