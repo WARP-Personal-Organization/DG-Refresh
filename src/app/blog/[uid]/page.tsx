@@ -17,10 +17,14 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ArticleGallery from "@/components/ArticleGallery";
 import {
+  addNofollowToExternalLinks,
+  extractGallery,
   getCommentsByPostId,
   getPostBySlug,
   getRelatedPosts,
+  stripGalleryStyles,
   stripImagesFromContent,
 } from "../../../../lib/wordpress";
 import type { ContentImage, Post } from "../../../../lib/wordpress";
@@ -62,20 +66,30 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const publishDate = formatDate(post.data.published_date);
   const updateDate = formatDate(post.data.updated_date);
   const readingTime = `${post.data.reading_time} min`;
-  const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyguardian.com.ph"}/blog/${post.uid}`;
+  const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.dailyguardian.com.ph"}/blog/${post.uid}`;
 
   // Show the featured image once at the top of the article.
   // Body images remain inline where the editor placed them — only the featured
   // image is stripped from the body to avoid rendering it twice.
+  // Also strip the bare-digit-1 DG watermark variant (e.g. hub.jpg → hub1.jpg)
+  // but NOT higher numbers (hub2, hub3…) which are distinct photos in a sequence.
   const featuredImage: ContentImage | null = post.data.featured_image?.url
     ? {
         url: post.data.featured_image.url,
         alt: post.data.featured_image.alt || post.data.title,
       }
     : null;
-  const articleContent = stripImagesFromContent(
-    post.data.content,
-    featuredImage ? [featuredImage.url] : [],
+  const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
+  const featuredVariants = featuredImage
+    ? [
+        featuredImage.url,
+        featuredImage.url.replace(/(\.[^./]+)$/, "1$1"), // hub.jpg → hub1.jpg
+      ]
+    : [];
+  const articleContent = addNofollowToExternalLinks(
+    stripGalleryStyles(
+      stripImagesFromContent(contentWithoutGallery, featuredVariants),
+    ),
   );
 
   const jsonLd = {
@@ -95,7 +109,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
       name: "Daily Guardian",
       logo: {
         "@type": "ImageObject",
-        url: "https://dailyguardian.com.ph/black_dg.png",
+        url: "https://www.dailyguardian.com.ph/black_dg.png",
       },
     },
     image: post.data.featured_image?.url
@@ -188,8 +202,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </header>
 
-        {/* Featured Image */}
-        {featuredImage && (
+        {/* Gallery — replaces featured image for photo-essay articles */}
+        {gallery.length > 0 && <ArticleGallery images={gallery} />}
+
+        {/* Featured Image — only when no gallery is present */}
+        {featuredImage && gallery.length === 0 && (
           <figure className="mb-8">
             <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
               <Image
@@ -244,7 +261,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
         {/* Article Content (WordPress HTML) */}
         <div
           className="prose prose-base sm:prose-lg prose-invert max-w-none
-            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-base prose-p:sm:text-lg prose-p:font-open-sans prose-p:mb-5 sm:prose-p:mb-6
+            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-base prose-p:sm:text-lg prose-p:font-open-sans prose-p:mb-7 sm:prose-p:mb-8
             prose-h1:text-white prose-h1:font-roboto prose-h1:mt-6 prose-h1:mb-3 sm:prose-h1:mt-8 sm:prose-h1:mb-4
             prose-h2:text-white prose-h2:font-roboto prose-h2:mt-6 prose-h2:mb-3 sm:prose-h2:mt-8 sm:prose-h2:mb-4
             prose-h3:text-white prose-h3:font-roboto prose-h3:mt-5 prose-h3:mb-2 sm:prose-h3:mt-6 sm:prose-h3:mb-3
@@ -255,8 +272,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
             prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:w-full prose-img:h-auto
             prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
             prose-code:text-green-400 prose-code:text-sm
-            [&_p]:mb-5 [&_p+p]:mt-0
-            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full
+            [&_p]:mb-7 [&_p+p]:mt-0
+            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure]:!mt-8 [&_figure]:!mb-10
+            [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full [&_figure_img]:!mb-0
+            [&_figcaption]:!mt-3 [&_figcaption]:!mb-0 [&_figcaption]:!text-sm [&_figcaption]:!text-gray-400 [&_figcaption]:!italic [&_figcaption]:!leading-snug
+            [&_.wp-caption-text]:!mt-3 [&_.wp-caption-text]:!mb-0 [&_.wp-caption-text]:!text-sm [&_.wp-caption-text]:!text-gray-400 [&_.wp-caption-text]:!italic [&_.wp-caption-text]:!leading-snug
             [&_img]:!max-w-full [&_img]:!h-auto
             [&_table]:w-full [&_table]:overflow-x-auto [&_table]:block"
           dangerouslySetInnerHTML={{ __html: articleContent }}
@@ -387,8 +407,11 @@ export async function generateMetadata({ params }: BlogPageProps) {
     const post = await getPostBySlug(resolvedParams.uid);
     if (!post) return { title: "Article Not Found" };
 
-    const url = `https://dailyguardian.com.ph/blog/${resolvedParams.uid}`;
-    const description = post.data.meta_description || post.data.summary || "";
+    const url = `https://www.dailyguardian.com.ph/blog/${resolvedParams.uid}`;
+    const rawDescription = post.data.meta_description || post.data.summary || "";
+    const description = rawDescription.length > 155
+      ? rawDescription.slice(0, 152) + "..."
+      : rawDescription;
     const featured = post.data.featured_image;
     // Logo fallback uses the wordmark's real dimensions so FB doesn't crop based
     // on a fabricated 1200x630 claim. A dedicated 1200x630 share asset would

@@ -72,3 +72,59 @@ body {
   width: 100% !important;
   height: auto !important;
 }
+
+/* ── td-gallery plugin: flatten slider into a photo grid ─────────────────────
+   The old site used a jQuery slider (td-gallery / td-doubleSlider). We don't
+   load that JS, so we hide the chrome (controls + thumbnail strip) and reflow
+   the slide items into a responsive 2-column grid instead. */
+.prose .td-gallery .td-gallery-slide-top,
+.prose .td-gallery .td-doubleSlider-2 {
+  display: none !important;
+}
+.prose .td-gallery .td-doubleSlider-1 .td-slider {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 480px) {
+  .prose .td-gallery .td-doubleSlider-1 .td-slider {
+    grid-template-columns: 1fr;
+  }
+}
+.prose .td-gallery .td-slide-item {
+  display: block !important;
+  position: static !important;
+  width: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+/* Reset the per-figure margins set by our prose overrides so the grid stays tight */
+.prose .td-gallery figure {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.prose .td-gallery figure a {
+  display: block;
+}
+.prose .td-gallery figure img {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  border-radius: 0.25rem;
+  display: block;
+}
+.prose .td-gallery .td-slide-caption {
+  display: block !important;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.4;
+  margin-top: 0.35rem !important;
+  padding: 0 !important;
+}
+.prose .td-gallery .td-gallery-slide-copywrite {
+  display: block !important;
+}

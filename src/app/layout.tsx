@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import NavigationBar from "@/components/Navigation";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import {
   getAllPosts,
@@ -18,20 +18,17 @@ export const revalidate = 300;
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["700"],
+  display: "swap",
 });
 
-const SITE_URL = "https://dailyguardian.com.ph";
+const SITE_URL = "https://www.dailyguardian.com.ph";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -123,12 +120,12 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
+        className={`${geistSans.variable} ${playfair.variable} antialiased`}
       >
         {/* AnyMind360 — programmatic ad partner */}
         <Script
           src="//anymind360.com/js/8074/ats.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         {/* Google AdSense — auto ads */}
         <Script

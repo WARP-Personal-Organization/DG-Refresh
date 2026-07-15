@@ -10,9 +10,10 @@ const navigationData = [
   {
     name: "News",
     href: "/news",
-    categoryKeywords: ["local", "news", "national", "negros", "capiz", "facts"],
+    categoryKeywords: ["local", "news", "national", "negros", "capiz", "facts", "nation"],
     dropdown: [
       { name: "LOCAL", href: "/news/local" },
+      { name: "NATION", href: "/news/nation" },
       { name: "FACTS FIRST PH", href: "/news/facts-first-ph" },
       { name: "CAPIZ", href: "/news/capiz" },
       { name: "NEGROS", href: "/news/negros" },

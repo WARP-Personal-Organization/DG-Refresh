@@ -2,6 +2,7 @@ export const slugToSubcategory = (slug: string): string => {
   const mapping: { [key: string]: string } = {
     // News subcategories
     local: "local",
+    nation: "nation",
     health: "health",
     "auto-racing": "auto-racing",
     "fact-check-news": "fact-check-news",
@@ -86,6 +87,7 @@ export const formatSubcategoryName = (subcategory: string): string => {
   const displayNames: { [key: string]: string } = {
     // News
     local: "Local News",
+    nation: "Nation",
     health: "Health",
     "auto-racing": "Auto Racing",
     "fact-check-news": "Fact Check News",

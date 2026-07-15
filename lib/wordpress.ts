@@ -159,8 +159,7 @@ function imageKey(url: string): string {
       .replace(/-\d+x\d+$/i, "") // size variant
       .replace(/-(scaled|rotated)$/i, "") // WP markers
       .replace(/-(w|wm|web)$/i, "") // DG web/watermark copy
-      .replace(/-\d+$/, "") // WP re-upload counter
-      .replace(/\d+$/, ""); // DG bare-digit suffix (e.g. hub → hub1)
+      .replace(/-\d+$/, ""); // WP re-upload counter
   }
   return (name + ext).toLowerCase();
 }
@@ -181,6 +180,99 @@ export function stripImagesFromContent(html: string, urls: string[]): string {
       blockMatches(b) ? "" : b,
     )
     .replace(/<img[^>]*>/gi, (t) => (blockMatches(t) ? "" : t));
+}
+
+// Add rel="nofollow noopener noreferrer" and target="_blank" to all external
+// <a> tags in WordPress article HTML so outbound links don't leak SEO authority.
+export function addNofollowToExternalLinks(html: string): string {
+  if (!html) return html;
+  return html.replace(/<a\s([^>]*)href=["']((https?:)?\/\/(?!(?:www\.)?dailyguardian\.com\.ph)[^"']+)["']([^>]*)>/gi, (_match, before, href, _proto, after) => {
+    const combined = (before + " " + after).replace(/\s*(rel|target)=["'][^"']*["']/gi, "").trim();
+    return `<a ${combined} href="${href}" rel="nofollow noopener noreferrer" target="_blank">`;
+  });
+}
+
+// Remove the inline <style> block injected by the td-gallery plugin into content.rendered.
+// That block sets thumbnail CSS keyed on #tdi_N IDs — useless without the slider JS.
+export function stripGalleryStyles(html: string): string {
+  if (!html) return html;
+  return html.replace(/<style[^>]*>[\s\S]*?#tdi_[\s\S]*?<\/style>\s*/gi, "");
+}
+
+export interface GalleryImage {
+  url: string;
+  caption: string;
+}
+
+// Extract the td-gallery slider from WP content, returning the images and the
+// HTML with the gallery block removed. Returns empty gallery + original html
+// when no gallery is detected.
+export function extractGallery(html: string): {
+  gallery: GalleryImage[];
+  html: string;
+} {
+  if (!html || !html.includes("td-gallery")) return { gallery: [], html };
+
+  const gallery: GalleryImage[] = [];
+
+  // Each slide has: <a class="slide-gallery-image-link" href="FULL_URL" data-caption="TEXT">
+  const linkRe = /<a\s[^>]*class="[^"]*slide-gallery-image-link[^"]*"[^>]*>/gi;
+  let m;
+  while ((m = linkRe.exec(html)) !== null) {
+    const tag = m[0];
+    const url = tag.match(/\bhref="([^"]+)"/i)?.[1];
+    const caption = tag.match(/\bdata-caption="([^"]*)"/i)?.[1] ?? "";
+    if (url) gallery.push({ url, caption });
+  }
+
+  if (gallery.length === 0) return { gallery: [], html };
+
+  // Remove the gallery block from the HTML. The block starts with either an
+  // optional <style> tag (thumbnail CSS keyed to #tdi_N) or the div itself.
+  // We find the div.td-gallery start, count nested <div> depth to find its
+  // closing tag, then remove that whole span (plus any preceding style block).
+  const galleryDivMatch = html.match(/<div[^>]*class="[^"]*td-gallery[^"]*"/i);
+  if (!galleryDivMatch || galleryDivMatch.index === undefined) {
+    // Fallback: strip everything before the first <p>
+    const firstPara = html.indexOf("<p>");
+    return { gallery, html: firstPara > 0 ? html.slice(firstPara) : html };
+  }
+
+  const divStart = galleryDivMatch.index;
+
+  // Walk forward from divStart counting <div> opens and </div> closes.
+  let depth = 0;
+  let pos = divStart;
+  while (pos < html.length) {
+    const nextOpen = html.indexOf("<div", pos);
+    const nextClose = html.indexOf("</div>", pos);
+    if (nextClose === -1) break;
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      // Only count if it's actually a div tag (not e.g. <divider>)
+      const ch = html[nextOpen + 4];
+      if (ch === " " || ch === ">" || ch === "\n" || ch === "\t" || ch === "\r") {
+        depth++;
+      }
+      pos = nextOpen + 4;
+    } else {
+      depth--;
+      pos = nextClose + 6;
+      if (depth <= 0) break;
+    }
+  }
+  const galleryEnd = pos;
+
+  // Also include a preceding <style> block if it targets the gallery IDs
+  const beforeGallery = html.slice(0, divStart);
+  const styleMatch = beforeGallery.match(/<style[^>]*>[\s\S]*?#tdi_[\s\S]*?<\/style>\s*$/i);
+  const blockStart = styleMatch
+    ? divStart - styleMatch[0].length
+    : divStart;
+
+  const stripped =
+    html.slice(0, blockStart).trimEnd() + "\n" + html.slice(galleryEnd).trimStart();
+
+  return { gallery, html: stripped };
 }
 
 // Pull every <img src="..."> from WP article HTML, with alt text when present.
@@ -605,6 +697,7 @@ const APP_CATEGORY_WP_SLUGS: Record<string, string[]> = {
 
 const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
   local: ["local-news"],
+  nation: ["nation"],
   negros: ["negros"],
   "national-news": ["nation"],
   editorial: ["editorial"],
@@ -646,6 +739,24 @@ export async function getLayoutPosts(perPage = 10): Promise<Post[]> {
     _fields: "id,slug,title,excerpt,sticky",
   }).catch(() => [] as WPPost[]);
   return wpPosts.map(transformPost);
+}
+
+// Minimal fetch for sitemap generation — no _embed so it's fast.
+export async function getPostSlugsForSitemap(
+  page: number,
+): Promise<Array<{ slug: string; date: string; modified: string }>> {
+  return wpFetch<Array<{ slug: string; date: string; modified: string }>>(
+    "/posts",
+    {
+      per_page: 100,
+      page,
+      status: "publish",
+      orderby: "date",
+      order: "desc",
+      _fields: "slug,date,modified",
+    },
+    86_400, // 24 h — sitemap data doesn't need to be fresh every 5 min
+  );
 }
 
 export async function getAllPosts(perPage = 40): Promise<Post[]> {
