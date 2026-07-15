@@ -703,6 +703,7 @@ const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
   editorial: ["editorial"],
   capiz: ["capiz"],
   "facts-first-ph": ["facts-first-ph"],
+  community: ["community"],
   motoring: ["motoring"],
   "tech-talk": ["tecktalk"],
   health: ["health"],

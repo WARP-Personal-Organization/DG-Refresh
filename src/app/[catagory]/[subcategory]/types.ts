@@ -10,6 +10,7 @@ export const slugToSubcategory = (slug: string): string => {
     negroes: "negroes",
 
     // Feature subcategories
+    community: "community",
     "health-wellness": "health-wellness",
     "medical-frontiers": "medical-frontiers",
     travel: "travel",
@@ -95,6 +96,7 @@ export const formatSubcategoryName = (subcategory: string): string => {
     negroes: "Negroes News",
 
     // Feature
+    community: "Community",
     "health-wellness": "Health & Wellness",
     "medical-frontiers": "Medical Frontiers",
     travel: "Travel",

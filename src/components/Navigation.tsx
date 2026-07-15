@@ -41,7 +41,7 @@ const navigationData = [
   {
     name: "Features",
     href: "/feature",
-    categoryKeywords: ["feature", "entertainment", "lifestyle", "health", "travel", "arts", "education", "environment"],
+    categoryKeywords: ["feature", "entertainment", "lifestyle", "health", "travel", "arts", "education", "environment", "community"],
     dropdown: [
       { name: "HEALTH", href: "/feature/health" },
       { name: "TRAVEL", href: "/feature/travel" },
@@ -50,6 +50,7 @@ const navigationData = [
       { name: "ARTS AND CULTURE", href: "/feature/arts-and-culture" },
       { name: "EDUCATION", href: "/feature/education" },
       { name: "ENVIRONMENT", href: "/feature/environment" },
+      { name: "COMMUNITY", href: "/feature/community" },
     ],
   },
   {
