@@ -25,9 +25,8 @@ import {
   getPostBySlug,
   getRelatedPosts,
   stripGalleryStyles,
-  stripImagesFromContent,
 } from "../../../../lib/wordpress";
-import type { ContentImage, Post } from "../../../../lib/wordpress";
+import type { Post } from "../../../../lib/wordpress";
 
 interface BlogPageProps {
   params: Promise<{ uid: string }>;
@@ -68,28 +67,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const readingTime = `${post.data.reading_time} min`;
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.dailyguardian.com.ph"}/blog/${post.uid}`;
 
-  // Show the featured image once at the top of the article.
-  // Body images remain inline where the editor placed them — only the featured
-  // image is stripped from the body to avoid rendering it twice.
-  // Also strip the bare-digit-1 DG watermark variant (e.g. hub.jpg → hub1.jpg)
-  // but NOT higher numbers (hub2, hub3…) which are distinct photos in a sequence.
-  const featuredImage: ContentImage | null = post.data.featured_image?.url
-    ? {
-        url: post.data.featured_image.url,
-        alt: post.data.featured_image.alt || post.data.title,
-      }
-    : null;
   const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
-  const featuredVariants = featuredImage
-    ? [
-        featuredImage.url,
-        featuredImage.url.replace(/(\.[^./]+)$/, "1$1"), // hub.jpg → hub1.jpg
-      ]
-    : [];
   const articleContent = addNofollowToExternalLinks(
-    stripGalleryStyles(
-      stripImagesFromContent(contentWithoutGallery, featuredVariants),
-    ),
+    stripGalleryStyles(contentWithoutGallery),
   );
 
   const jsonLd = {
@@ -202,35 +182,8 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </header>
 
-        {/* Gallery — replaces featured image for photo-essay articles */}
+        {/* Gallery — for photo-essay / td-gallery articles */}
         {gallery.length > 0 && <ArticleGallery images={gallery} />}
-
-        {/* Featured Image — only when no gallery is present */}
-        {featuredImage && gallery.length === 0 && (
-          <figure className="mb-8">
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-gray-700">
-              <Image
-                src={featuredImage.url}
-                alt={featuredImage.alt || "Article image"}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            {featuredImage.alt && (
-              <figcaption className="mt-3 text-sm text-gray-400 italic font-open-sans">
-                {featuredImage.alt}
-              </figcaption>
-            )}
-          </figure>
-        )}
-
-        {/* Lede / summary — sits below the image, above the byline */}
-        {post.data.summary && (
-          <div className="text-base sm:text-xl text-gray-300 leading-relaxed mb-6 sm:mb-8 font-light font-open-sans">
-            <p>{post.data.summary}</p>
-          </div>
-        )}
 
         {/* Author and Date Info */}
         <div className="flex items-center gap-3 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-default">
