@@ -31,11 +31,35 @@ const IconSafety = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
+const IconContributor = ({ className = "w-6 h-6" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a6 6 0 0111.573-2.226 3.75 3.75 0 014.133 4.303A4.5 4.5 0 0118 21a4.5 4.5 0 01-1.5-.226m-8.457-8.284a5.98 5.98 0 01-2.25.412 6 6 0 01-2.25-.412M12 6a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+  </svg>
+);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Policy data
 // ─────────────────────────────────────────────────────────────────────────────
 
-const policies = [
+type PolicySection = {
+  heading: string | null;
+  body?: string;
+  bulletsPreamble?: string;
+  bullets?: string[];
+  list?: { term: string; detail: string }[];
+};
+
+type Policy = {
+  id: string;
+  Icon: (props: { className?: string }) => React.JSX.Element;
+  label: string;
+  descriptor: string;
+  title: string;
+  sections: PolicySection[];
+};
+
+const policies: Policy[] = [
   {
     id: "corrections",
     Icon: IconCorrections,
@@ -246,6 +270,37 @@ const policies = [
       },
     ],
   },
+  {
+    id: "contributor-identity",
+    Icon: IconContributor,
+    label: "Contributor Identity",
+    descriptor: "Transparency & Ethics",
+    title: "CONTRIBUTOR IDENTITY AND TRANSPARENCY",
+    sections: [
+      {
+        heading: null,
+        body: "To maintain the integrity of our publication and uphold strict ethical journalism standards, we require full transparency from all guest columnists, op-ed contributors, and external writers. This policy is designed to prevent the use of pseudonyms, unverified identities, and undisclosed conflicts of interest.",
+      },
+      {
+        heading: "Required Information for Submission",
+        body: "Before any submission is reviewed for publication, contributors must provide the editorial board with the following verifiable information:",
+        list: [
+          { term: "Real Name", detail: "Your legal, verifiable identity. We do not accept or publish submissions under pseudonyms, aliases, or anonymous handles." },
+          { term: "General Location", detail: "Your current city, municipality, or province of residence." },
+          { term: "Profession and Affiliations", detail: "Your current job title, primary industry, and any organizational memberships relevant to your submission." },
+          { term: "Interest and Motivation", detail: "A brief statement explaining your connection to the specific issue you are writing about. This must include the disclosure of any financial, political, or personal stakes related to the topic." },
+        ],
+      },
+      {
+        heading: "Enforcement and Publication",
+        body: "Failure or refusal to provide this data will result in the immediate rejection of the submission. While sensitive contact information will remain strictly confidential for internal verification purposes, your real name and a brief summary of your professional background and motivation will be published alongside your work to provide our readers with accurate and transparent context.",
+      },
+      {
+        heading: "Contact Us",
+        body: "For questions about contributing to Daily Guardian or this policy, please contact our editorial team at editorial@dailyguardian.com.ph.",
+      },
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -281,7 +336,7 @@ function PolicyDivider() {
           />
           <span
             className="relative font-playfair font-bold text-accent/80 leading-none select-none"
-            style={{ fontSize: 10, letterSpacing: "0.05em" }}
+            style={{ fontSize: 12, letterSpacing: "0.05em" }}
           >
             DG
           </span>
@@ -303,22 +358,21 @@ function useActiveSection(ids: string[]) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const observers: IntersectionObserver[] = [];
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((entry) => entry.isIntersecting);
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+    );
 
     ids.forEach((id) => {
       const el = document.getElementById(id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActive(id);
-        },
-        { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
-      );
-      obs.observe(el);
-      observers.push(obs);
+      if (el) obs.observe(el);
     });
 
-    return () => observers.forEach((o) => o.disconnect());
+    return () => obs.disconnect();
   }, [ids]);
 
   return active;
@@ -537,18 +591,23 @@ export default function PoliciesPage() {
                         In this policy
                       </p>
                       <ul className="space-y-0.5">
-                        {policy.sections
-                          .filter((s) => s.heading)
-                          .map((section) => (
-                            <li key={section.heading}>
-                              <a
-                                href={`#${policy.id}`}
-                                className="toc-item block text-[13px] font-sans text-gray-500 py-[5px] pl-3 border-l-2 border-transparent transition-all duration-150 leading-snug"
-                              >
-                                {section.heading}
-                              </a>
-                            </li>
-                          ))}
+                        {policy.sections.reduce<React.ReactNode[]>(
+                          (items, section) => {
+                            if (!section.heading) return items;
+                            items.push(
+                              <li key={section.heading}>
+                                <a
+                                  href={`#${policy.id}`}
+                                  className="toc-item block text-[13px] font-sans text-gray-500 py-[5px] pl-3 border-l-2 border-transparent transition-all duration-150 leading-snug"
+                                >
+                                  {section.heading}
+                                </a>
+                              </li>,
+                            );
+                            return items;
+                          },
+                          [],
+                        )}
                       </ul>
                     </div>
                   </aside>
@@ -582,9 +641,9 @@ export default function PoliciesPage() {
                         {/* Bullet list */}
                         {section.bullets && (
                           <ul className="space-y-3 ml-1">
-                            {section.bullets.map((bullet, i) => (
+                            {section.bullets.map((bullet) => (
                               <li
-                                key={i}
+                                key={bullet}
                                 className="flex items-start gap-3 font-sans text-gray-400 text-[1.05rem] leading-[1.75]"
                               >
                                 <span className="flex-shrink-0 mt-[7px] w-1.5 h-1.5 bg-accent rotate-45 inline-block" />
@@ -597,9 +656,9 @@ export default function PoliciesPage() {
                         {/* Term + detail card list */}
                         {section.list && (
                           <div className="space-y-3">
-                            {section.list.map((item, i) => (
+                            {section.list.map((item) => (
                               <div
-                                key={i}
+                                key={item.term}
                                 className="policy-card group relative bg-white/[0.04] border border-white/[0.07] transition-colors duration-200 overflow-hidden"
                               >
                                 {/* Yellow top-left corner accent bar */}
