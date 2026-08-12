@@ -17,7 +17,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import ArticleGallery from "@/components/ArticleGallery";
 import {
   addTargetBlankToExternalLinks,
@@ -44,7 +44,7 @@ export async function generateStaticParams(): Promise<{ uid: string }[]> {
 }
 
 // WordPress article bodies legitimately embed video/social iframes (YouTube,
-// Vimeo, X, Facebook, Issuu). DOMPurify strips <iframe> by default, so it's
+// Vimeo, X, Facebook, Issuu). <iframe> is stripped by default, so it's
 // added back here — but only for these known-safe embed hosts, so a
 // compromised/malicious post can't smuggle in an iframe pointing anywhere else.
 const TRUSTED_EMBED_HOSTS = [
@@ -58,34 +58,63 @@ const TRUSTED_EMBED_HOSTS = [
   "issuu.com",
 ];
 
-DOMPurify.addHook("uponSanitizeElement", (node, data) => {
-  if (data.tagName !== "iframe") return;
-  const el = node as Element;
-  const src = el.getAttribute("src") ?? "";
+function isTrustedEmbedSrc(src: string): boolean {
   let host = "";
   try {
     host = new URL(src, "https://placeholder.invalid").hostname;
   } catch {
-    el.remove();
-    return;
+    return false;
   }
-  const isTrusted = TRUSTED_EMBED_HOSTS.some(
-    (allowed) => host === allowed || host.endsWith(`.${allowed}`),
-  );
-  if (!isTrusted) el.remove();
-});
+  return TRUSTED_EMBED_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
 
-// target="_blank" without rel="noopener noreferrer" lets the opened page
-// reach back into window.opener (reverse tabnabbing). Guarantee both tokens
-// on every target="_blank" anchor regardless of what rel WP content supplied.
-DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-  const el = node as Element;
-  if (el.tagName !== "A" || el.getAttribute("target") !== "_blank") return;
-  const relTokens = new Set((el.getAttribute("rel") ?? "").split(/\s+/).filter(Boolean));
-  relTokens.add("noopener");
-  relTokens.add("noreferrer");
-  el.setAttribute("rel", Array.from(relTokens).join(" "));
-});
+const ALLOWED_TAGS = [
+  "a", "abbr", "b", "blockquote", "br", "caption", "cite", "code", "col",
+  "colgroup", "dd", "del", "div", "dl", "dt", "em", "figcaption", "figure",
+  "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "img", "ins", "li", "mark",
+  "ol", "p", "pre", "q", "s", "small", "span", "strong", "sub", "sup",
+  "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul", "video",
+  "audio", "source", "track", "iframe",
+];
+
+const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions["allowedAttributes"] = {
+  "*": ["class", "id", "style", "title", "lang", "dir"],
+  a: ["href", "name", "target", "rel"],
+  img: ["src", "srcset", "sizes", "alt", "width", "height", "loading"],
+  video: ["src", "width", "height", "controls", "poster"],
+  audio: ["src", "controls"],
+  source: ["src", "srcset", "type", "media"],
+  iframe: ["src", "allow", "allowfullscreen", "frameborder", "scrolling", "width", "height", "title"],
+  table: ["width", "border", "cellpadding", "cellspacing"],
+  td: ["colspan", "rowspan"],
+  th: ["colspan", "rowspan"],
+};
+
+function sanitizeArticleHtml(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: ALLOWED_ATTRIBUTES,
+    allowProtocolRelative: true,
+    // Drop any iframe whose src isn't one of the known-safe embed hosts.
+    exclusiveFilter: (frame) =>
+      frame.tag === "iframe" && !isTrustedEmbedSrc(frame.attribs.src ?? ""),
+    // target="_blank" without rel="noopener noreferrer" lets the opened page
+    // reach back into window.opener (reverse tabnabbing). Guarantee both
+    // tokens on every target="_blank" anchor regardless of what rel the
+    // source HTML supplied.
+    transformTags: {
+      a: (tagName, attribs) => {
+        if (attribs.target === "_blank") {
+          const relTokens = new Set((attribs.rel ?? "").split(/\s+/).filter(Boolean));
+          relTokens.add("noopener");
+          relTokens.add("noreferrer");
+          attribs.rel = Array.from(relTokens).join(" ");
+        }
+        return { tagName, attribs };
+      },
+    },
+  });
+}
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return "";
@@ -126,12 +155,8 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.dailyguardian.com.ph"}/blog/${post.uid}`;
 
   const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
-  const articleContent = DOMPurify.sanitize(
+  const articleContent = sanitizeArticleHtml(
     addTargetBlankToExternalLinks(stripGalleryStyles(contentWithoutGallery)),
-    {
-      ADD_TAGS: ["iframe"],
-      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
-    },
   );
 
   const jsonLd = {

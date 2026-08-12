@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
   async redirects() {
     return [
       { source: "/e-paper", destination: "/", permanent: false },
