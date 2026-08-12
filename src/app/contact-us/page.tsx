@@ -78,7 +78,7 @@ function DGDivider() {
           />
           <span
             className="relative font-playfair font-bold text-accent/80 leading-none select-none"
-            style={{ fontSize: 10, letterSpacing: "0.05em" }}
+            style={{ fontSize: 12, letterSpacing: "0.05em" }}
           >
             DG
           </span>

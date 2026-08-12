@@ -13,10 +13,12 @@ interface RegionalStoriesProps {
   supplementEditions?: PaperEdition[];
 }
 
+const EMPTY_EDITIONS: PaperEdition[] = [];
+
 export default function NegrosAndSportsStories({
   sportsStories,
   supplement,
-  supplementEditions = [],
+  supplementEditions = EMPTY_EDITIONS,
 }: RegionalStoriesProps) {
   if (!sportsStories || sportsStories.length === 0) {
     return null;
@@ -50,6 +52,7 @@ export default function NegrosAndSportsStories({
                                 story.data.featured_image.alt || "Story image"
                               }
                               fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               className="object-cover"
                             />
                           </div>

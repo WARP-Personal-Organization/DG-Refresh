@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Calendar, MapPin, Search } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
@@ -18,6 +19,13 @@ interface HeaderProps {
   breakingPost?: Post | null;
 }
 
+const EMPTY_POSTS: Post[] = [];
+
+const getTemperatureDisplay = (celsius: number) => {
+  const fahrenheit = Math.round((celsius * 9) / 5 + 32);
+  return `${fahrenheit}°F`;
+};
+
 // Custom hook for weather data
 const useWeather = () => {
   const [weather, setWeather] = useState<WeatherData>({
@@ -28,6 +36,8 @@ const useWeather = () => {
   });
 
   useEffect(() => {
+    let demoTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
     const fetchWeather = async () => {
       try {
         const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || "demo_key";
@@ -35,7 +45,7 @@ const useWeather = () => {
         const lon = 122.5621;
 
         if (API_KEY === "demo_key") {
-          setTimeout(() => {
+          demoTimeoutId = setTimeout(() => {
             setWeather({
               temperature: 28,
               description: "Partly Cloudy",
@@ -78,13 +88,16 @@ const useWeather = () => {
 
     fetchWeather();
     const interval = setInterval(fetchWeather, 10 * 60 * 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(demoTimeoutId);
+    };
   }, []);
 
   return weather;
 };
 
-const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
+const Header: React.FC<HeaderProps> = ({ posts = EMPTY_POSTS, breakingPost }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const weather = useWeather();
@@ -113,11 +126,6 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const getTemperatureDisplay = (celsius: number) => {
-    const fahrenheit = Math.round((celsius * 9) / 5 + 32);
-    return `${fahrenheit}°F`;
-  };
-
   return (
     <>
       <header className=" bg-[#fbd203] to-black border-b-2 border-[#fcee16]/30 shadow-xl relative font-open-sans">
@@ -125,13 +133,17 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
           {/* Top Bar with Date and Weather */}
           <div className="hidden lg:flex justify-between items-center py-2 px-4 border-b border-default text-xs">
             <div className="flex items-center gap-3 text-black font-bold">
-              <time className="font-medium flex items-center gap-2 font-open-sans">
+              <time
+                className="font-medium flex items-center gap-2 font-open-sans"
+                suppressHydrationWarning
+              >
                 <Calendar size={12} className="text-black" />
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
                   day: "numeric",
+                  timeZone: "Asia/Manila",
                 })}
               </time>
               <span className="text-black">|</span>
@@ -167,10 +179,11 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
           <div className="lg:hidden flex justify-between items-center py-2 px-4 border-b border-default text-xs">
             <div className="flex items-center gap-2 text-black">
               <Calendar size={10} className="text-black" />
-              <time className="font-medium font-open-sans">
+              <time className="font-medium font-open-sans" suppressHydrationWarning>
                 {new Date().toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
+                  timeZone: "Asia/Manila",
                 })}
               </time>
             </div>
@@ -190,6 +203,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
             {/* Left Section — natural width on mobile so the logo sits closer */}
             <div className="flex-none sm:flex-1 flex items-center gap-2 sm:gap-4">
               <button
+                type="button"
                 onClick={openSearchModal}
                 className="hidden lg:flex items-center gap-2 text-black hover:text-[#fcee16] transition-colors duration-200 group"
               >
@@ -200,6 +214,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
                 <span className="text-sm font-medium font-roboto">Search</span>
               </button>
               <button
+                type="button"
                 onClick={openSearchModal}
                 className="lg:hidden text-black hover:text-[#fcee16] transition-colors duration-200 p-2"
                 aria-label="Search"
@@ -213,9 +228,12 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
               <Link href="/" className="block">
                 <div className="relative flex flex-col items-center">
                   <div className="relative">
-                    <img
+                    <Image
                       src="/black_dg.png"
                       alt="Daily Guardian"
+                      width={536}
+                      height={128}
+                      priority
                       className="h-12 sm:h-16 md:h-16 lg:h-20 xl:h-24 w-auto max-w-full sm:max-w-[180px] md:max-w-[200px] lg:max-w-none object-contain drop-shadow-lg"
                     />
                   </div>
@@ -235,6 +253,7 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
             <div className="max-w-7xl mx-auto px-4 py-6">
               <div className="mb-4">
                 <button
+                  type="button"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     openSearchModal();
@@ -295,11 +314,17 @@ const Header: React.FC<HeaderProps> = ({ posts = [], breakingPost }) => {
               </nav>
 
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-default">
-                <button className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 border border-[#fcee16]/50 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-[#fcee16]/10"
+                >
                   <Bell size={16} />
                   Alerts
                 </button>
-                <button className="flex items-center justify-center gap-2 border border-gray-600 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-gray-700/50">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 border border-gray-600 text-black font-bold py-3 px-4 rounded-lg font-roboto transition-all duration-300 hover:bg-gray-700/50"
+                >
                   Sign In
                 </button>
               </div>

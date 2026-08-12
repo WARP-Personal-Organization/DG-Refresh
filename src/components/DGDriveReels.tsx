@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Play, Volume2 } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 interface Reel {
@@ -129,13 +130,17 @@ export default function DGDriveReels() {
           </h2>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={() => scroll("left")}
+              aria-label="Scroll left"
               className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#fbd203] hover:text-black text-white flex items-center justify-center transition-colors"
             >
               <ChevronLeft size={18} />
             </button>
             <button
+              type="button"
               onClick={() => scroll("right")}
+              aria-label="Scroll right"
               className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#fbd203] hover:text-black text-white flex items-center justify-center transition-colors"
             >
               <ChevronRight size={18} />
@@ -165,10 +170,12 @@ export default function DGDriveReels() {
               }}
             >
               {/* Thumbnail */}
-              <img
+              <Image
                 src={reel.thumbnail}
                 alt={reel.title}
-                className="w-full h-full object-cover transition-transform duration-500"
+                fill
+                sizes="160px"
+                className="object-cover transition-transform duration-500"
                 style={{
                   transform: hoveredId === reel.id ? "scale(1.08)" : "scale(1)",
                 }}

@@ -28,6 +28,8 @@ const FLIPBOOK_SERVICES = [
   "yumpu.com",
 ];
 
+const PDF_RENDER_CONCURRENCY = 4;
+
 async function renderPdfToImages(url: string): Promise<string[]> {
   const pdfjsLib = await import("pdfjs-dist");
   pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -36,16 +38,26 @@ async function renderPdfToImages(url: string): Promise<string[]> {
     url: proxiedUrl,
     withCredentials: false,
   }).promise;
-  const images: string[] = [];
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
+
+  const renderPage = async (pageNumber: number): Promise<string> => {
+    const page = await pdf.getPage(pageNumber);
     const viewport = page.getViewport({ scale: 1.8 });
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     await page.render({ canvas, viewport } as Parameters<typeof page.render>[0])
       .promise;
-    images.push(canvas.toDataURL("image/jpeg", 0.85));
+    return canvas.toDataURL("image/jpeg", 0.85);
+  };
+
+  const pageNumbers = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+  const images: string[] = new Array(pageNumbers.length);
+  for (let start = 0; start < pageNumbers.length; start += PDF_RENDER_CONCURRENCY) {
+    const batch = pageNumbers.slice(start, start + PDF_RENDER_CONCURRENCY);
+    const rendered = await Promise.all(batch.map(renderPage));
+    rendered.forEach((img, i) => {
+      images[start + i] = img;
+    });
   }
   return images;
 }
@@ -142,6 +154,7 @@ function FlipbookModal({
             Open in new tab <ExternalLink size={14} />
           </a> */}
           <button
+            type="button"
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
             aria-label="Close"
@@ -160,6 +173,7 @@ function FlipbookModal({
             title={title}
             className="w-full h-full border-0"
             allowFullScreen
+            sandbox="allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
           />
         )}
 
@@ -214,7 +228,9 @@ function FlipbookModal({
 
                 <div className="flex items-center gap-6 flex-shrink-0 pb-2">
                   <button
+                    type="button"
                     onClick={prev}
+                    aria-label="Previous page"
                     className="w-11 h-11 rounded-full bg-[#fcee16] text-black flex items-center justify-center hover:bg-[#fcee16]/80 transition-colors shadow-lg"
                   >
                     <ChevronLeft size={22} />
@@ -223,7 +239,9 @@ function FlipbookModal({
                     {currentPage + 1} / {pages.length}
                   </span>
                   <button
+                    type="button"
                     onClick={next}
+                    aria-label="Next page"
                     className="w-11 h-11 rounded-full bg-[#fcee16] text-black flex items-center justify-center hover:bg-[#fcee16]/80 transition-colors shadow-lg"
                   >
                     <ChevronRight size={22} />

@@ -16,13 +16,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
+import DOMPurify from "isomorphic-dompurify";
 import ArticleGallery from "@/components/ArticleGallery";
 import {
-  addNofollowToExternalLinks,
+  addTargetBlankToExternalLinks,
   extractGallery,
   getCommentsByPostId,
   getPostBySlug,
+  getPostSlugsForSitemap,
   getRelatedPosts,
   stripGalleryStyles,
 } from "../../../../lib/wordpress";
@@ -31,6 +33,59 @@ import type { Post } from "../../../../lib/wordpress";
 interface BlogPageProps {
   params: Promise<{ uid: string }>;
 }
+
+// Prebuild the most recent articles at deploy time so the highest-traffic
+// pages are served from ISR cache immediately instead of cold-rendering on
+// first visit. Older/long-tail articles still render on-demand (fallback)
+// and get cached after their first hit.
+export async function generateStaticParams(): Promise<{ uid: string }[]> {
+  const recent = await getPostSlugsForSitemap(1).catch(() => []);
+  return recent.map((p) => ({ uid: p.slug }));
+}
+
+// WordPress article bodies legitimately embed video/social iframes (YouTube,
+// Vimeo, X, Facebook, Issuu). DOMPurify strips <iframe> by default, so it's
+// added back here — but only for these known-safe embed hosts, so a
+// compromised/malicious post can't smuggle in an iframe pointing anywhere else.
+const TRUSTED_EMBED_HOSTS = [
+  "youtube.com",
+  "youtube-nocookie.com",
+  "vimeo.com",
+  "twitter.com",
+  "x.com",
+  "facebook.com",
+  "instagram.com",
+  "issuu.com",
+];
+
+DOMPurify.addHook("uponSanitizeElement", (node, data) => {
+  if (data.tagName !== "iframe") return;
+  const el = node as Element;
+  const src = el.getAttribute("src") ?? "";
+  let host = "";
+  try {
+    host = new URL(src, "https://placeholder.invalid").hostname;
+  } catch {
+    el.remove();
+    return;
+  }
+  const isTrusted = TRUSTED_EMBED_HOSTS.some(
+    (allowed) => host === allowed || host.endsWith(`.${allowed}`),
+  );
+  if (!isTrusted) el.remove();
+});
+
+// target="_blank" without rel="noopener noreferrer" lets the opened page
+// reach back into window.opener (reverse tabnabbing). Guarantee both tokens
+// on every target="_blank" anchor regardless of what rel WP content supplied.
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  const el = node as Element;
+  if (el.tagName !== "A" || el.getAttribute("target") !== "_blank") return;
+  const relTokens = new Set((el.getAttribute("rel") ?? "").split(/\s+/).filter(Boolean));
+  relTokens.add("noopener");
+  relTokens.add("noreferrer");
+  el.setAttribute("rel", Array.from(relTokens).join(" "));
+});
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return "";
@@ -44,22 +99,25 @@ const formatDate = (dateString: string): string => {
 
 export default async function BlogPost({ params }: BlogPageProps) {
   const resolvedParams = await params;
-  let post: Post;
+
+  const found = await getPostBySlug(resolvedParams.uid).catch((error) => {
+    unstable_rethrow(error);
+    return null;
+  });
+  if (!found) notFound();
+  const post: Post = found;
+
   let relatedArticles: Post[] = [];
-
   let initialComments: Awaited<ReturnType<typeof getCommentsByPostId>> = [];
-
   try {
-    const found = await getPostBySlug(resolvedParams.uid);
-    if (!found) notFound();
-    post = found;
-
     [relatedArticles, initialComments] = await Promise.all([
       getRelatedPosts(resolvedParams.uid, post.data.category, 3),
       getCommentsByPostId(post.id),
     ]);
-  } catch {
-    notFound();
+  } catch (error) {
+    unstable_rethrow(error);
+    // Related articles / comments are supplementary — degrade gracefully
+    // rather than 404ing an otherwise-valid article page.
   }
 
   const publishDate = formatDate(post.data.published_date);
@@ -68,8 +126,12 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.dailyguardian.com.ph"}/blog/${post.uid}`;
 
   const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
-  const articleContent = addNofollowToExternalLinks(
-    stripGalleryStyles(contentWithoutGallery),
+  const articleContent = DOMPurify.sanitize(
+    addTargetBlankToExternalLinks(stripGalleryStyles(contentWithoutGallery)),
+    {
+      ADD_TAGS: ["iframe"],
+      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
+    },
   );
 
   const jsonLd = {
@@ -107,7 +169,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
     <div className="bg-[#1b1a1b] min-h-screen font-open-sans">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       <header className="bg-[#1b1a1b] border-b border-default sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -144,9 +208,9 @@ export default async function BlogPost({ params }: BlogPageProps) {
                 EDITOR&apos;S PICK
               </span>
             )}
-            {post.data.tags.map((tag, index) => (
+            {post.data.tags.map((tag) => (
               <Link
-                key={index}
+                key={tag}
                 href={`/tags/${tag.toLowerCase().replace(/\s+/g, "-")}`}
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white rounded text-xs font-bold uppercase tracking-wider transition-colors duration-200"
               >
@@ -172,7 +236,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
               url={articleUrl}
               text={post.data.summary || post.data.title || "Check out this article"}
             />
-            <button className="flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200">
+            <button
+              type="button"
+              aria-label="Bookmark article"
+              className="flex items-center gap-2 text-gray-400 hover:text-[#fcee16] transition-colors duration-200"
+            >
               <Bookmark size={16} />
             </button>
             <div className="flex items-center gap-2 text-gray-400">

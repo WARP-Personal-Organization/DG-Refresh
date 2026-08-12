@@ -57,6 +57,7 @@ export default function ArticleGallery({ images }: { images: GalleryImage[] }) {
         </span>
         {/* 44px minimum touch target */}
         <button
+          type="button"
           onClick={prev}
           className="flex items-center justify-center w-11 h-11 hover:text-white transition-colors rounded"
           aria-label="Previous image"
@@ -64,6 +65,7 @@ export default function ArticleGallery({ images }: { images: GalleryImage[] }) {
           <ChevronLeft size={18} />
         </button>
         <button
+          type="button"
           onClick={next}
           className="flex items-center justify-center w-11 h-11 hover:text-white transition-colors rounded"
           aria-label="Next image"
@@ -97,7 +99,8 @@ export default function ArticleGallery({ images }: { images: GalleryImage[] }) {
       <div className="flex gap-1.5 mt-1 overflow-x-auto pb-1 -mx-1 px-1">
         {images.map((img, i) => (
           <button
-            key={i}
+            key={img.url}
+            type="button"
             onClick={() => setCurrent(i)}
             className={`flex-none w-[72px] h-[54px] sm:w-[80px] sm:h-[60px] overflow-hidden rounded-sm border-2 transition-all ${
               i === current

@@ -129,66 +129,13 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
-// Strip the featured image from the article body if WP duplicated it there.
-export function stripDuplicateFeaturedImage(
-  html: string,
-  featuredUrl: string | null | undefined,
-): string {
-  if (!featuredUrl || !html) return html;
-  return stripImagesFromContent(html, [featuredUrl]);
-}
-
-// Normalized identity for an uploaded image, collapsing the variant suffixes
-// DG's CMS and WordPress generate for the SAME source photo:
-//   -1024x683 (size), -scaled/-rotated (WP), -w/-wm/-web (DG web/watermark copy),
-//   and -1/-2/-3 (WP re-upload counters added on filename clashes).
-// Two URLs that normalize to the same key are treated as the same picture, so a
-// post whose featured image is "foo-w.jpg" and body image is "foo-1.jpg" no
-// longer renders the same photo twice. Trade-off: a genuine sequence like
-// photo-1.jpg / photo-2.jpg also collapses — but DG's real multi-photo galleries
-// use distinct descriptive filenames, not bare numeric counters.
-function imageKey(url: string): string {
-  const file = url.split("/").pop()?.split("?")[0] ?? url;
-  const dot = file.lastIndexOf(".");
-  let name = dot === -1 ? file : file.slice(0, dot);
-  const ext = dot === -1 ? "" : file.slice(dot).toLowerCase();
-  let prev = "";
-  while (prev !== name) {
-    prev = name;
-    name = name
-      .replace(/-\d+x\d+$/i, "") // size variant
-      .replace(/-(scaled|rotated)$/i, "") // WP markers
-      .replace(/-(w|wm|web)$/i, "") // DG web/watermark copy
-      .replace(/-\d+$/, ""); // WP re-upload counter
-  }
-  return (name + ext).toLowerCase();
-}
-
-// Remove from the body any <img> (and its <figure>/<a> wrapper) whose image
-// matches — by normalized key — one of the given URLs. Matching by key (not by
-// substring) means a body copy named "-1" is stripped even when the gallery
-// kept the "-w" variant of the same photo.
-export function stripImagesFromContent(html: string, urls: string[]): string {
-  if (!html || urls.length === 0) return html;
-  const keys = new Set(urls.map(imageKey));
-  const blockMatches = (block: string): boolean => {
-    const src = block.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
-    return !!src && keys.has(imageKey(src));
-  };
-  return html
-    .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, (b) =>
-      blockMatches(b) ? "" : b,
-    )
-    .replace(/<img[^>]*>/gi, (t) => (blockMatches(t) ? "" : t));
-}
-
-// Add rel="nofollow noopener noreferrer" and target="_blank" to all external
-// <a> tags in WordPress article HTML so outbound links don't leak SEO authority.
-export function addNofollowToExternalLinks(html: string): string {
+// Add target="_blank" (dofollow) to all external <a> tags in WordPress article
+// HTML so outbound citations open in a new tab without losing SEO authority.
+export function addTargetBlankToExternalLinks(html: string): string {
   if (!html) return html;
   return html.replace(/<a\s([^>]*)href=["']((https?:)?\/\/(?!(?:www\.)?dailyguardian\.com\.ph)[^"']+)["']([^>]*)>/gi, (_match, before, href, _proto, after) => {
     const combined = (before + " " + after).replace(/\s*(rel|target)=["'][^"']*["']/gi, "").trim();
-    return `<a ${combined} href="${href}" rel="nofollow noopener noreferrer" target="_blank">`;
+    return `<a ${combined} href="${href}" rel="noopener noreferrer" target="_blank">`;
   });
 }
 
@@ -273,41 +220,6 @@ export function extractGallery(html: string): {
     html.slice(0, blockStart).trimEnd() + "\n" + html.slice(galleryEnd).trimStart();
 
   return { gallery, html: stripped };
-}
-
-// Pull every <img src="..."> from WP article HTML, with alt text when present.
-// Used to detect multi-image posts and render them in a top-of-article carousel.
-export interface ContentImage {
-  url: string;
-  alt: string;
-}
-
-export function extractContentImages(html: string): ContentImage[] {
-  if (!html) return [];
-  const results: ContentImage[] = [];
-  const re = /<img[^>]*>/gi;
-  const matches = html.match(re) ?? [];
-  for (const tag of matches) {
-    const src = tag.match(/\bsrc=["']([^"']+)["']/i)?.[1];
-    if (!src) continue;
-    const alt = tag.match(/\balt=["']([^"']*)["']/i)?.[1] ?? "";
-    results.push({ url: rewriteMediaUrl(src) ?? src, alt });
-  }
-  return results;
-}
-
-// Deduplicate images that are the same picture (see imageKey for what counts as
-// "same" — size, scaled, web/watermark, and re-upload-counter variants).
-export function dedupeImagesByFilename(images: ContentImage[]): ContentImage[] {
-  const seen = new Set<string>();
-  const out: ContentImage[] = [];
-  for (const img of images) {
-    const key = imageKey(img.url);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(img);
-  }
-  return out;
 }
 
 function estimateReadingTime(htmlContent: string): number {
@@ -437,9 +349,10 @@ export function transformPost(wpPost: WPPost): Post {
   const derivedTags =
     tagTerms.length > 0
       ? tagTerms.map((t) => t.name)
-      : categoryTerms
-          .filter((t) => !TOP_LEVEL_SLUGS.has(t.slug))
-          .map((t) => t.name);
+      : categoryTerms.reduce<string[]>((names, t) => {
+          if (!TOP_LEVEL_SLUGS.has(t.slug)) names.push(t.name);
+          return names;
+        }, []);
 
   const categorySlugs = categoryTerms.map((c) => c.slug);
   const category = mapCategory(categorySlugs);
@@ -546,22 +459,6 @@ export function transformPost(wpPost: WPPost): Post {
   };
 }
 
-export function transformAuthor(wpUser: WPUser): Author {
-  const avatarUrl =
-    wpUser.avatar_urls?.["96"] || wpUser.avatar_urls?.["48"] || null;
-  return {
-    id: wpUser.id,
-    uid: wpUser.slug,
-    data: {
-      name: wpUser.name,
-      title: "",
-      bio: wpUser.description,
-      email: "",
-      avatar: { url: avatarUrl, alt: wpUser.name },
-    },
-  };
-}
-
 // ─── API Fetch ────────────────────────────────────────────────────────────────
 
 // WP server can be slow — 15 s gives enough headroom without hanging the page.
@@ -662,7 +559,10 @@ async function resolveCategoryIds(slugs: string[]): Promise<number[]> {
     if (!res.ok) return [];
     const categories = (await res.json()) as Array<{ id: number; slug: string }>;
     const wanted = new Set(slugs);
-    return categories.filter((c) => wanted.has(c.slug)).map((c) => c.id);
+    return categories.reduce<number[]>((ids, c) => {
+      if (wanted.has(c.slug)) ids.push(c.id);
+      return ids;
+    }, []);
   } catch {
     return [];
   } finally {
@@ -721,6 +621,12 @@ const APP_SUBCATEGORY_WP_SLUGS: Record<string, string[]> = {
 
 export function getWPSlugsForCategory(appSlug: string): string[] {
   return APP_CATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
+}
+
+// App-level category slugs (news, sports, business, ...) — used to prebuild
+// /[catagory] at deploy time instead of relying on force-dynamic rendering.
+export function getAppCategorySlugs(): string[] {
+  return Object.keys(APP_CATEGORY_WP_SLUGS);
 }
 
 export function getWPSlugsForSubcategory(appSlug: string): string[] {
@@ -789,30 +695,6 @@ export async function getRelatedPosts(
     .slice(0, limit);
 }
 
-export async function getPostsByCategory(
-  categorySlug: string,
-  perPage = 20,
-  page = 1,
-): Promise<{ posts: Post[]; totalPages: number; total: number }> {
-  const categories = await wpFetch<WPCategory[]>("/categories", {
-    slug: categorySlug,
-  });
-  if (!categories[0]) return { posts: [], totalPages: 0, total: 0 };
-
-  const { data, totalPages, total } = await wpFetchPaginated<WPPost[]>(
-    "/posts",
-    {
-      categories: categories[0].id,
-      per_page: perPage,
-      page,
-      _embed: 1,
-      orderby: "date",
-      order: "desc",
-    },
-  );
-  return { posts: data.map(transformPost), totalPages, total };
-}
-
 // Fetch banner-news posts and group them by subcategory/category
 // Used to populate section heroes with banner news relevant to each section
 export async function getBannerNewsBySubcategory(
@@ -865,18 +747,6 @@ export async function getPostsByCategorySlugs(
   }
 }
 
-// Convert an author name to a URL-safe slug
-// e.g. "Atty. Eduardo T. Reyes III" → "atty-eduardo-t-reyes-iii"
-export function authorToSlug(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // strip diacritics
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "") // drop punctuation (dots, commas, etc.)
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
 // Normalize a name for loose comparison (remove dots, lowercase, collapse spaces)
 function normalizeName(name: string): string {
   return name.toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim();
@@ -909,9 +779,11 @@ export async function getOpinionPostsByAuthor(
   );
 
   const target = normalizeName(authorName);
-  const posts = data
-    .map(transformPost)
-    .filter((p) => normalizeName(p.data.author) === target);
+  const posts = data.reduce<Post[]>((acc, wpPost) => {
+    const p = transformPost(wpPost);
+    if (normalizeName(p.data.author) === target) acc.push(p);
+    return acc;
+  }, []);
 
   return { posts, totalPages, total };
 }
@@ -1351,16 +1223,19 @@ export async function getPaperEditions(limit = 30): Promise<PaperEdition[]> {
       order: "desc",
       _fields: "id,date,title,source_url",
     });
-    return items
-      .filter((m) =>
-        /^PDF-[A-Za-z]+-\d+-\d+$/.test(m.title.rendered.replace(/\.pdf$/i, "")),
-      )
-      .map((m) => ({
-        id: m.id,
-        date: m.date,
-        label: m.title.rendered.replace(/^PDF-/, "").replace(/-/g, " "),
-        pdfUrl: m.source_url,
-      }));
+    return items.reduce<PaperEdition[]>((editions, m) => {
+      if (
+        /^PDF-[A-Za-z]+-\d+-\d+$/.test(m.title.rendered.replace(/\.pdf$/i, ""))
+      ) {
+        editions.push({
+          id: m.id,
+          date: m.date,
+          label: m.title.rendered.replace(/^PDF-/, "").replace(/-/g, " "),
+          pdfUrl: m.source_url,
+        });
+      }
+      return editions;
+    }, []);
   } catch {
     return [];
   }
@@ -1388,18 +1263,6 @@ export async function getSupplementEditions(
   } catch {
     return [];
   }
-}
-
-export async function getAllAuthors(): Promise<Author[]> {
-  const wpUsers = await wpFetch<WPUser[]>("/users", {
-    per_page: 100,
-    who: "authors",
-  });
-  return wpUsers.map(transformAuthor);
-}
-
-export async function getAllCategories(): Promise<WPCategory[]> {
-  return wpFetch<WPCategory[]>("/categories", { per_page: 100 });
 }
 
 // ─── Comments ─────────────────────────────────────────────────────────────────

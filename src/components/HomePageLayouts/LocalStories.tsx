@@ -60,6 +60,7 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                       src={mainStory.data.featured_image.url}
                       alt={mainStory.data.featured_image.alt || "Story image"}
                       fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover"
                     />
                   </div>

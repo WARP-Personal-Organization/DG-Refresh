@@ -11,6 +11,15 @@ interface MainContentProps {
   localposts?: Post;
 }
 
+// Hide the "NEWS" default pill — only show a section label when WP gives us
+// something more specific than the generic news bucket.
+const labelFor = (p: Post): string | null => {
+  // Specific province (Negros, Capiz, …) beats the generic "local"/section.
+  const candidate = p.data.locality || p.data.subcategory || p.data.category;
+  if (!candidate || candidate.toLowerCase() === "news") return null;
+  return candidate;
+};
+
 const ArticleSeparator: React.FC = () => {
   return (
     <div className="flex items-center justify-center py-2 my-3">
@@ -37,14 +46,6 @@ const MainContent: React.FC<MainContentProps> = ({
     );
   }
 
-  // Hide the "NEWS" default pill — only show a section label when WP gives us
-  // something more specific than the generic news bucket.
-  const labelFor = (p: Post): string | null => {
-    // Specific province (Negros, Capiz, …) beats the generic "local"/section.
-    const candidate = p.data.locality || p.data.subcategory || p.data.category;
-    if (!candidate || candidate.toLowerCase() === "news") return null;
-    return candidate;
-  };
   const heroLabel = labelFor(heroPost);
   const featuredLabel = labelFor(featuredPost);
 

@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
 
 const navigationData = [
@@ -114,6 +114,15 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
       .slice(0, 4);
   };
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMobileMenu();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMobileMenuOpen]);
+
   const activeItem = navigationData.find((i) => i.name === activeDropdown);
   const previewPosts = activeItem ? getPostsForCategory(activeItem.categoryKeywords ?? []) : [];
 
@@ -180,6 +189,7 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
         <div className="md:hidden flex items-center justify-between py-3">
           <span className="text-[#fcee16] font-black text-sm tracking-widest uppercase">Menu</span>
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-[#fcee16] p-1"
             aria-label="Toggle menu"
@@ -275,7 +285,11 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
 
       {/* ── MOBILE OVERLAY ──────────────────────────────────── */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/60 z-40" onClick={closeMobileMenu} />
+        <div
+          className="md:hidden fixed inset-0 bg-black/60 z-40"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
       )}
 
       {/* ── MOBILE DRAWER ───────────────────────────────────── */}
@@ -286,7 +300,12 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 sticky top-0 bg-[#0d0d0d]">
           <span className="text-[#fcee16] font-black tracking-widest text-xs uppercase">Daily Guardian</span>
-          <button onClick={closeMobileMenu} className="text-white/50 hover:text-[#fcee16] transition-colors">
+          <button
+            type="button"
+            onClick={closeMobileMenu}
+            aria-label="Close menu"
+            className="text-white/50 hover:text-[#fcee16] transition-colors"
+          >
             <X size={20} />
           </button>
         </div>
@@ -310,7 +329,9 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                 )}
                 {item.dropdown && (
                   <button
+                    type="button"
                     onClick={() => toggleMobileDropdown(item.name)}
+                    aria-label={`Toggle ${item.name} submenu`}
                     className="px-4 py-4 text-white/40 hover:text-[#fcee16] transition-colors"
                   >
                     <ChevronRight

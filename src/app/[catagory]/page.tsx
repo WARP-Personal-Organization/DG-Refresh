@@ -1,40 +1,39 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 import { notFound, redirect } from "next/navigation";
 import {
+  getAppCategorySlugs,
   getPostsByCategorySlugs,
   getPostBySlug,
   getWPSlugsForCategory,
 } from "../../../lib/wordpress";
-import CategoryPageComponent from "../../components/CategoryPage";
-import Pagination from "../../components/Pagination";
+import PaginatedCategoryContent from "../../components/PaginatedCategoryContent";
 
 type Props = {
   params: Promise<{ catagory: string }>;
-  searchParams: Promise<{ page?: string }>;
 };
 
 const POSTS_PER_PAGE = 6;
 
-export default async function CategoryPage({ params, searchParams }: Props) {
+export default async function CategoryPage({ params }: Props) {
   const categorySlug = (await params).catagory;
-  const page = Math.max(1, parseInt((await searchParams).page ?? "1", 10) || 1);
 
+  // Server render always fetches page 1 — pagination beyond that is handled
+  // client-side (see PaginatedCategoryContent) so this page stays a plain
+  // ISR-cached static render instead of force-dynamic.
   let posts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   let totalPages = 1;
   let recommendedPosts: Awaited<ReturnType<typeof getPostsByCategorySlugs>>["posts"] = [];
   const safeCategory = categorySlug ?? "news";
   try {
     const wpSlugs = getWPSlugsForCategory(categorySlug);
-    const mainResult = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
+    const mainResult = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, 1);
     posts = mainResult.posts;
     totalPages = mainResult.totalPages;
 
-    // Fetch adjacent page for sidebar so recommended articles don't overlap main content
     const mainIds = new Set(posts.map((p) => p.id));
-    const sidebarPage = page < totalPages ? page + 1 : totalPages > 1 ? page - 1 : 0;
-    if (sidebarPage > 0) {
-      const sidebarResult = await getPostsByCategorySlugs(wpSlugs, 5, sidebarPage);
+    if (totalPages > 1) {
+      const sidebarResult = await getPostsByCategorySlugs(wpSlugs, 5, 2);
       recommendedPosts = sidebarResult.posts.filter((p) => !mainIds.has(p.id)).slice(0, 5);
     }
   } catch (err) {
@@ -56,23 +55,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <div className="font-open-sans">
-      <CategoryPageComponent
-        categoryName={
-          safeCategory.charAt(0).toUpperCase() + safeCategory.slice(1)
-        }
+      <PaginatedCategoryContent
         categorySlug={safeCategory}
-        featuredArticle={posts[0]}
-        newsArticles={posts.slice(1)}
-        opinionArticles={[]}
-        recommendedArticles={recommendedPosts}
+        categoryName={safeCategory.charAt(0).toUpperCase() + safeCategory.slice(1)}
+        basePath={`/${safeCategory}`}
+        initialFeaturedArticle={posts[0]}
+        initialNewsArticles={posts.slice(1)}
+        initialRecommendedArticles={recommendedPosts}
+        initialTotalPages={totalPages}
       />
-      <div className="max-w-7xl mx-auto px-4">
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          basePath={`/${safeCategory}`}
-        />
-      </div>
     </div>
   );
 }
@@ -107,5 +98,5 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  return [];
+  return getAppCategorySlugs().map((catagory) => ({ catagory }));
 }

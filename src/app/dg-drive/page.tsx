@@ -1,90 +1,91 @@
 import { Clock, User } from "lucide-react";
+import Image from "next/image";
 import DGDriveReels from "@/components/DGDriveReels";
 
-const DGDriveHomepage = () => {
-  const articles = [
-    {
-      id: 1,
-      title: "Mercedes EQS: Redefining Electric",
-      author: "James Mitchell",
-      readTime: "5 min read",
-      category: "LUXURY",
-      image:
-        "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&h=400&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 2,
-      title: "Classic Convertible: 1953 Chevrolet Corvette",
-      author: "Alex Turner",
-      readTime: "8 min read",
-      category: "PERFORMANCE",
-      image:
-        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 3,
-      title: "Volkswagen Revives the Iconic Beetle",
-      author: "Alex Turner",
-      readTime: "4 min read",
-      category: "VINTAGE",
-      image:
-        "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 4,
-      title: "Unleashing the Power of Muscle Cars",
-      author: "Emma Rodriguez",
-      readTime: "7 min read",
-      category: "MUSCLE",
-      image:
-        "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 5,
-      title: "McLaren's Masterpiece: The 570",
-      author: "Sarah Rodriguez",
-      readTime: "7 min read",
-      category: "PERFORMANCE",
-      image:
-        "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 6,
-      title: "The Future of Flying: Electric Supercars",
-      author: "James Mitchell",
-      readTime: "6 min read",
-      category: "FUTURE",
-      image:
-        "https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 7,
-      title: "Engineering the McLaren 22S",
-      author: "Sarah Rodriguez",
-      readTime: "9 min read",
-      category: "PERFORMANCE",
-      image:
-        "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-    {
-      id: 8,
-      title: "Making the City Electric: Mini Cooper SE",
-      author: "Emma Rodriguez",
-      readTime: "5 min read",
-      category: "URBAN",
-      image:
-        "https://images.unsplash.com/photo-1556800120-f80367ea0d72?w=400&h=300&fit=crop&crop=center",
-      categoryColor: "bg-yellow-400",
-    },
-  ];
+const articles = [
+  {
+    id: 1,
+    title: "Mercedes EQS: Redefining Electric",
+    author: "James Mitchell",
+    readTime: "5 min read",
+    category: "LUXURY",
+    image:
+      "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&h=400&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 2,
+    title: "Classic Convertible: 1953 Chevrolet Corvette",
+    author: "Alex Turner",
+    readTime: "8 min read",
+    category: "PERFORMANCE",
+    image:
+      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 3,
+    title: "Volkswagen Revives the Iconic Beetle",
+    author: "Alex Turner",
+    readTime: "4 min read",
+    category: "VINTAGE",
+    image:
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 4,
+    title: "Unleashing the Power of Muscle Cars",
+    author: "Emma Rodriguez",
+    readTime: "7 min read",
+    category: "MUSCLE",
+    image:
+      "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 5,
+    title: "McLaren's Masterpiece: The 570",
+    author: "Sarah Rodriguez",
+    readTime: "7 min read",
+    category: "PERFORMANCE",
+    image:
+      "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 6,
+    title: "The Future of Flying: Electric Supercars",
+    author: "James Mitchell",
+    readTime: "6 min read",
+    category: "FUTURE",
+    image:
+      "https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 7,
+    title: "Engineering the McLaren 22S",
+    author: "Sarah Rodriguez",
+    readTime: "9 min read",
+    category: "PERFORMANCE",
+    image:
+      "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+  {
+    id: 8,
+    title: "Making the City Electric: Mini Cooper SE",
+    author: "Emma Rodriguez",
+    readTime: "5 min read",
+    category: "URBAN",
+    image:
+      "https://images.unsplash.com/photo-1556800120-f80367ea0d72?w=400&h=300&fit=crop&crop=center",
+    categoryColor: "bg-yellow-400",
+  },
+];
 
+const DGDriveHomepage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
       {/* Navigation */}
@@ -158,11 +159,13 @@ const DGDriveHomepage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {/* Large Featured Article */}
           <div className="group relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-            <div className="aspect-video overflow-hidden">
-              <img
+            <div className="relative aspect-video overflow-hidden">
+              <Image
                 src={articles[0].image}
                 alt={articles[0].title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute top-6 left-6">
                 <span
@@ -191,11 +194,13 @@ const DGDriveHomepage = () => {
 
           {/* Second Featured Article */}
           <div className="group relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-            <div className="aspect-video overflow-hidden">
-              <img
+            <div className="relative aspect-video overflow-hidden">
+              <Image
                 src={articles[1].image}
                 alt={articles[1].title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute top-6 left-6">
                 <span
@@ -230,11 +235,13 @@ const DGDriveHomepage = () => {
               key={article.id}
               className="group relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
             >
-              <div className="aspect-video overflow-hidden">
-                <img
+              <div className="relative aspect-video overflow-hidden">
+                <Image
                   src={article.image}
                   alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute top-4 left-4">
                   <span
@@ -281,11 +288,13 @@ const DGDriveHomepage = () => {
             {/* Hero Article - Takes up 3 columns */}
             <div className="lg:col-span-3">
               <div className="group relative overflow-hidden rounded-3xl bg-white shadow-2xl hover:shadow-3xl transition-all duration-500">
-                <div className="aspect-[16/10] overflow-hidden">
-                  <img
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <Image
                     src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&h=500&fit=crop&crop=center"
                     alt="Mercedes EQS Future of Luxury"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute top-6 left-6">
                     <span className="bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg">
@@ -322,11 +331,13 @@ const DGDriveHomepage = () => {
               <div className="group relative overflow-hidden rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=300&h=300&fit=crop&crop=center"
                         alt="McLaren Engineering"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="128px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   </div>
@@ -351,11 +362,13 @@ const DGDriveHomepage = () => {
               <div className="group relative overflow-hidden rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=300&h=300&fit=crop&crop=center"
                         alt="Volkswagen Beetle"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="128px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   </div>
@@ -380,11 +393,13 @@ const DGDriveHomepage = () => {
               <div className="group relative overflow-hidden rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=300&h=300&fit=crop&crop=center"
                         alt="Muscle Cars"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="128px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   </div>
@@ -407,11 +422,13 @@ const DGDriveHomepage = () => {
               <div className="group relative overflow-hidden rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=300&h=300&fit=crop&crop=center"
                         alt="Muscle Cars"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="128px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   </div>
@@ -434,11 +451,13 @@ const DGDriveHomepage = () => {
               <div className="group relative overflow-hidden rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
                 <div className="flex">
                   <div className="w-32 flex-shrink-0">
-                    <div className="aspect-square overflow-hidden">
-                      <img
+                    <div className="relative aspect-square overflow-hidden">
+                      <Image
                         src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=300&h=300&fit=crop&crop=center"
                         alt="Muscle Cars"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="128px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   </div>
@@ -478,7 +497,10 @@ const DGDriveHomepage = () => {
                 placeholder="Enter your email"
                 className="flex-1 px-6 py-4 rounded-full text-gray-900 placeholder-gray-500 border-0 focus:outline-none focus:ring-4 focus:ring-white/50 shadow-lg"
               />
-              <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:bg-gray-800 transition-colors duration-300 shadow-lg hover:shadow-xl">
+              <button
+                type="button"
+                className="px-8 py-4 bg-black text-white rounded-full font-bold hover:bg-gray-800 transition-colors duration-300 shadow-lg hover:shadow-xl"
+              >
                 Subscribe
               </button>
             </div>

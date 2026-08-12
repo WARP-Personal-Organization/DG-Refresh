@@ -51,7 +51,7 @@ export default function CartoonCard({ cartoons }: { cartoons: Post[] }) {
           <span className="text-xs text-gray-500 font-open-sans mt-0.5 truncate">
             {c.data.published_date
               ? new Date(c.data.published_date).toLocaleDateString("en-US", {
-                  month: "short", day: "numeric", year: "numeric",
+                  month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Manila",
                 })
               : "Latest"}
           </span>
@@ -61,6 +61,7 @@ export default function CartoonCard({ cartoons }: { cartoons: Post[] }) {
         {cartoons.length > 1 && (
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={prev}
               className="w-7 h-7 rounded-full bg-gray-800 hover:bg-[#fcee16] hover:text-black text-white flex items-center justify-center transition-all"
               aria-label="Previous cartoon"
@@ -71,6 +72,7 @@ export default function CartoonCard({ cartoons }: { cartoons: Post[] }) {
               {idx + 1}/{cartoons.length}
             </span>
             <button
+              type="button"
               onClick={next}
               className="w-7 h-7 rounded-full bg-gray-800 hover:bg-[#fcee16] hover:text-black text-white flex items-center justify-center transition-all"
               aria-label="Next cartoon"

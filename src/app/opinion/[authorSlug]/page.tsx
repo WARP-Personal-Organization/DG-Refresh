@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import AuthorArticlesPage from "@/components/AuthorArticlesPage";
 import {
   findColumnistBySlug,
+  getOpinionColumnists,
   getOpinionPostsByAuthor,
   getOpinionPostsByColumnSlug,
 } from "../../../../lib/wordpress";
 
 type Props = {
   params: Promise<{ authorSlug: string }>;
-  searchParams: Promise<{ page?: string }>;
 };
 
 // Convert URL slug back to a search-friendly name
@@ -19,9 +19,22 @@ function slugToName(slug: string): string {
   return decodeURIComponent(slug).replace(/-/g, " ");
 }
 
-export default async function AuthorPage({ params, searchParams }: Props) {
+// A dynamic segment needs a generateStaticParams export — even one returning
+// [] — to be ISR-eligible at all. Without it Next.js falls back to full SSR
+// on every request regardless of `revalidate`. Curated columnist slugs are
+// prebuilt; other author-search URLs still render on-demand and get cached
+// after their first hit.
+export async function generateStaticParams(): Promise<{ authorSlug: string }[]> {
+  const columnists = await getOpinionColumnists().catch(() => []);
+  return columnists.map((c) => ({ authorSlug: c.slug }));
+}
+
+// Server render always fetches page 1 — pagination beyond that is handled
+// client-side inside AuthorArticlesPage so this page stays a plain ISR-cached
+// static render instead of opting into dynamic rendering via searchParams.
+export default async function AuthorPage({ params }: Props) {
   const { authorSlug } = await params;
-  const page = Math.max(1, parseInt((await searchParams).page ?? "1", 10) || 1);
+  const page = 1;
 
   // The Opinion directory links by column category slug (e.g. "prometheus"),
   // which is reliable even when a column's posts have no parseable byline.
@@ -40,7 +53,7 @@ export default async function AuthorPage({ params, searchParams }: Props) {
         total: 0,
       }));
 
-  if (posts.length === 0 && page === 1) notFound();
+  if (posts.length === 0) notFound();
 
   // Prefer the curated columnist name; else the post's resolved author field.
   const displayName =

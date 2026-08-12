@@ -47,7 +47,10 @@ const DGDriveFooter = () => {
                 placeholder="Enter your email address"
                 className="flex-1 px-6 py-4 rounded-full text-gray-900 placeholder-gray-500 border-0 focus:outline-none focus:ring-4 focus:ring-white/50 shadow-lg w-full sm:w-auto"
               />
-              <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2 group">
+              <button
+                type="button"
+                className="px-8 py-4 bg-black text-white rounded-full font-bold hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center space-x-2 group"
+              >
                 <span>Subscribe</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
@@ -73,30 +76,35 @@ const DGDriveFooter = () => {
               <div className="flex space-x-4">
                 <a
                   href="#"
+                  aria-label="Facebook"
                   className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all duration-300 group"
                 >
                   <Facebook className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 </a>
                 <a
                   href="#"
+                  aria-label="Twitter"
                   className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all duration-300 group"
                 >
                   <Twitter className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 </a>
                 <a
                   href="#"
+                  aria-label="Instagram"
                   className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all duration-300 group"
                 >
                   <Instagram className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 </a>
                 <a
                   href="#"
+                  aria-label="YouTube"
                   className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all duration-300 group"
                 >
                   <Youtube className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                 </a>
                 <a
                   href="#"
+                  aria-label="LinkedIn"
                   className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-black transition-all duration-300 group"
                 >
                   <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />

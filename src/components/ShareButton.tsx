@@ -77,6 +77,7 @@ const ShareButton = ({ title, url, text }: ShareButtonProps) => {
 
   return (
     <button
+      type="button"
       onClick={handleShare}
       disabled={isSharing}
       className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 disabled:opacity-50"

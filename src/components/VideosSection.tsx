@@ -2,6 +2,7 @@
 
 import type { YouTubeVideo } from "../../lib/youtube";
 import { Filter, Play } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 
 interface EnhancedVideoSectionProps {
@@ -14,6 +15,7 @@ const formatDate = (iso: string): string => {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "Asia/Manila",
   });
 };
 
@@ -62,12 +64,16 @@ const EnhancedVideoSection: React.FC<EnhancedVideoSectionProps> = ({
                     />
                   ) : (
                     <>
-                      <img
+                      <Image
                         src={`https://img.youtube.com/vi/${selectedVideo.videoId}/hqdefault.jpg`}
                         alt={selectedVideo.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 66vw"
+                        className="object-cover"
                       />
-                      <div
+                      <button
+                        type="button"
+                        aria-label={`Play video: ${selectedVideo.title}`}
                         className="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer group"
                         onClick={() => setIsPlaying(true)}
                       >
@@ -78,7 +84,7 @@ const EnhancedVideoSection: React.FC<EnhancedVideoSectionProps> = ({
                             fill="currentColor"
                           />
                         </div>
-                      </div>
+                      </button>
                     </>
                   )}
                 </div>
@@ -127,22 +133,27 @@ const EnhancedVideoSection: React.FC<EnhancedVideoSectionProps> = ({
               {videos.map((video, index) => (
                 <article
                   key={video.id}
-                  onClick={() => handleSelect(video)}
-                  className={`cursor-pointer pb-4 border-b border-default last:border-b-0 group transition-opacity duration-200 ${
+                  className={`pb-4 border-b border-default last:border-b-0 group transition-opacity duration-200 ${
                     selectedVideo?.videoId === video.videoId
                       ? "opacity-100"
                       : "opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(video)}
+                    className="flex gap-3 w-full text-left cursor-pointer"
+                  >
                     <div className="flex-shrink-0 w-6 h-6 bg-[#fcee16] text-[#1b1a1b] rounded-full flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </div>
                     <div className="relative flex-shrink-0 w-16 h-12 rounded overflow-hidden bg-gray-800">
-                      <img
+                      <Image
                         src={video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -153,7 +164,7 @@ const EnhancedVideoSection: React.FC<EnhancedVideoSectionProps> = ({
                         {formatDate(video.publishDate)}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 </article>
               ))}
             </div>

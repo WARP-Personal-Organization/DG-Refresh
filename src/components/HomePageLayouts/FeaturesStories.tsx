@@ -75,6 +75,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                             "Feature image"
                           }
                           fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
@@ -103,6 +104,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                             src={story.data.featured_image.url}
                             alt={story.data.featured_image.alt || story.data.title || "Article image"}
                             fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
@@ -135,6 +137,7 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                 height="376"
                 style={{ backgroundColor: "#ffffff", border: 0, width: "100%" }}
                 title="Rappler Communities"
+                sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
               />
             </div>
           </aside>

@@ -55,6 +55,7 @@ export const PublicationCard = ({
       <div className="relative bg-[#1b1a1b] rounded-xl overflow-hidden shadow-2xl border border-[#fcee16]/20 hover:border-[#fcee16]/40 transition-all duration-500">
         {/* Thumbnail */}
         <button
+          type="button"
           onClick={handleThumbnailClick}
           className="block w-full relative group overflow-hidden"
         >
@@ -99,6 +100,7 @@ export const PublicationCard = ({
           {editions.length > 0 ? (
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setDropdownOpen((v) => !v)}
                 className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors font-open-sans w-full text-left"
               >
@@ -113,6 +115,7 @@ export const PublicationCard = ({
                 <div className="absolute bottom-full left-0 right-0 mb-1 bg-[#111] border border-[#fcee16]/20 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
                   {/* Current/Latest option */}
                   <button
+                    type="button"
                     onClick={() => {
                       setSelectedEdition(null);
                       setDropdownOpen(false);
@@ -127,6 +130,7 @@ export const PublicationCard = ({
                   {editions.map((ed) => (
                     <button
                       key={ed.id}
+                      type="button"
                       onClick={() => {
                         setSelectedEdition(ed);
                         setDropdownOpen(false);

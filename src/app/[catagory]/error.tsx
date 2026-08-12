@@ -25,6 +25,7 @@ export default function CategoryError({
         </p>
         <div className="flex gap-3 justify-center">
           <button
+            type="button"
             onClick={reset}
             className="px-5 py-2 bg-accent text-black text-sm font-semibold rounded hover:bg-accent/80 transition-colors"
           >

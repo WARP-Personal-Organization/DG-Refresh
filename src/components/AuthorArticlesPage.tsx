@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
 import Pagination from "./Pagination";
 
@@ -69,11 +71,52 @@ const ArticleCard: React.FC<{ post: Post }> = ({ post }) => (
 
 const AuthorArticlesPage: React.FC<AuthorArticlesPageProps> = ({
   authorName,
-  posts,
-  currentPage,
-  totalPages,
+  posts: initialPosts,
+  currentPage: initialCurrentPage,
+  totalPages: initialTotalPages,
   authorSlug,
 }) => {
+  // Seeded from server-rendered props (always page 1) so hydration matches the
+  // static (ISR-cached) markup exactly. Pagination beyond page 1 is fetched
+  // client-side so the page itself stays statically rendered instead of
+  // opting into dynamic rendering via searchParams.
+  const [page, setPage] = useState(initialCurrentPage);
+  const [posts, setPosts] = useState(initialPosts);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [loading, setLoading] = useState(false);
+  const basePath = `/opinion/${authorSlug}`;
+
+  async function fetchPage(newPage: number) {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/author-posts?authorSlug=${encodeURIComponent(authorSlug)}&page=${newPage}`,
+      );
+      const data = await res.json();
+      setPosts(data.posts ?? []);
+      setTotalPages(data.totalPages ?? 1);
+      setPage(newPage);
+    } catch {
+      // keep previous content on failure
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlPage = Math.max(1, parseInt(params.get("page") ?? "1", 10) || 1);
+    if (urlPage !== 1) fetchPage(urlPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handlePageChange(newPage: number) {
+    fetchPage(newPage);
+    const url = newPage === 1 ? basePath : `${basePath}?page=${newPage}`;
+    window.history.pushState(null, "", url);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const avatarPhoto = posts[0]?.data.featured_image?.url ?? null;
   const initials = initialsOf(authorName);
 
@@ -123,7 +166,7 @@ const AuthorArticlesPage: React.FC<AuthorArticlesPageProps> = ({
       </section>
 
       {/* ── Articles list ─────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-12">
+      <div className={`max-w-7xl mx-auto px-6 md:px-10 py-12 ${loading ? "opacity-60 transition-opacity" : "transition-opacity"}`}>
         <div className="flex items-center gap-4 mb-10">
           <div className="w-1 h-8 bg-[#fcee16]" />
           <h2 className="font-roboto font-bold text-2xl tracking-wide uppercase text-white">
@@ -142,9 +185,10 @@ const AuthorArticlesPage: React.FC<AuthorArticlesPageProps> = ({
         )}
 
         <Pagination
-          currentPage={currentPage}
+          currentPage={page}
           totalPages={totalPages}
-          basePath={`/opinion/${authorSlug}`}
+          basePath={basePath}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>

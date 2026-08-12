@@ -19,6 +19,8 @@ const nextConfig = {
       { protocol: "https", hostname: "i2.wp.com" },
       { protocol: "https", hostname: "secure.gravatar.com" },
       { protocol: "https", hostname: "images.prismic.io" },
+      { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "http", hostname: "dailyguardian.com.ph" },
     ],
   },

@@ -5,9 +5,13 @@ interface PaginationProps {
   currentPage: number;
   totalPages: number;
   basePath: string; // e.g. "/news" or "/news/local"
+  // When provided, pagination renders as buttons calling this instead of
+  // navigating via <Link> — used by client components that fetch pages
+  // themselves so the parent server page can stay statically rendered (ISR).
+  onPageChange?: (page: number) => void;
 }
 
-export default function Pagination({ currentPage, totalPages, basePath }: PaginationProps) {
+export default function Pagination({ currentPage, totalPages, basePath, onPageChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const makeHref = (page: number) =>
@@ -23,18 +27,33 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
     }
   }
 
+  const control = (page: number, disabled: boolean, className: string, content: React.ReactNode) =>
+    onPageChange ? (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && onPageChange(page)}
+        className={className}
+      >
+        {content}
+      </button>
+    ) : (
+      <Link href={makeHref(page)} aria-disabled={disabled} className={className}>
+        {content}
+      </Link>
+    );
+
   return (
     <nav className="flex items-center justify-center gap-1 py-8" aria-label="Pagination">
-      <Link
-        href={makeHref(currentPage - 1)}
-        aria-disabled={currentPage === 1}
-        className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-colors font-open-sans
+      {control(
+        currentPage - 1,
+        currentPage === 1,
+        `flex items-center justify-center w-9 h-9 rounded-lg border transition-colors font-open-sans
           ${currentPage === 1
             ? "border-gray-700 text-gray-600 pointer-events-none"
-            : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`}
-      >
-        <ChevronLeft size={16} />
-      </Link>
+            : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`,
+        <ChevronLeft size={16} />,
+      )}
 
       {pages.map((p, i) =>
         p === "..." ? (
@@ -42,29 +61,29 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
             …
           </span>
         ) : (
-          <Link
-            key={p}
-            href={makeHref(p)}
-            className={`flex items-center justify-center w-9 h-9 rounded-lg border text-sm font-roboto font-medium transition-colors
-              ${p === currentPage
-                ? "border-[#fcee16] bg-[#fcee16] text-black"
-                : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`}
-          >
-            {p}
-          </Link>
+          <span key={p}>
+            {control(
+              p,
+              false,
+              `flex items-center justify-center w-9 h-9 rounded-lg border text-sm font-roboto font-medium transition-colors
+                ${p === currentPage
+                  ? "border-[#fcee16] bg-[#fcee16] text-black"
+                  : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`,
+              p,
+            )}
+          </span>
         )
       )}
 
-      <Link
-        href={makeHref(currentPage + 1)}
-        aria-disabled={currentPage === totalPages}
-        className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-colors font-open-sans
+      {control(
+        currentPage + 1,
+        currentPage === totalPages,
+        `flex items-center justify-center w-9 h-9 rounded-lg border transition-colors font-open-sans
           ${currentPage === totalPages
             ? "border-gray-700 text-gray-600 pointer-events-none"
-            : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`}
-      >
-        <ChevronRight size={16} />
-      </Link>
+            : "border-gray-600 text-gray-300 hover:border-[#fcee16] hover:text-[#fcee16]"}`,
+        <ChevronRight size={16} />,
+      )}
     </nav>
   );
 }

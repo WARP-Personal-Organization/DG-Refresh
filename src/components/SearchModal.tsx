@@ -3,7 +3,7 @@
 
 import { ArrowRight, Calendar, Clock, Search, Tag, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import type { Post } from "../../lib/wordpress";
 
 interface SearchModalProps {
@@ -17,15 +17,31 @@ interface SearchResult extends Post {
   matchedFields: string[];
 }
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  });
+};
+
 const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
+  const searchPostsRef = useRef<(searchQuery: string) => SearchResult[]>(() => []);
 
   useEffect(() => {
-    const saved = localStorage.getItem("recent_searches");
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("recent_searches:v1");
     if (saved) {
       setRecentSearches(JSON.parse(saved));
     }
@@ -40,7 +56,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -53,9 +69,9 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  const searchPosts = (searchQuery: string): SearchResult[] => {
+  const searchPosts = useCallback((searchQuery: string): SearchResult[] => {
     if (!searchQuery.trim()) return [];
 
     const normalizedQuery = searchQuery.toLowerCase().trim();
@@ -121,7 +137,11 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
       .filter((r) => r.relevanceScore > 0)
       .sort((a, b) => b.relevanceScore - a.relevanceScore)
       .slice(0, 10);
-  };
+  }, [posts]);
+
+  useEffect(() => {
+    searchPostsRef.current = searchPosts;
+  }, [searchPosts]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -129,15 +149,15 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
       return;
     }
 
-    setIsLoading(true);
     const timeoutId = setTimeout(() => {
-      const searchResults = searchPosts(query);
-      setResults(searchResults);
-      setIsLoading(false);
+      const searchResults = searchPostsRef.current(query);
+      startTransition(() => {
+        setResults(searchResults);
+      });
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [query, posts]);
+  }, [query]);
 
   const saveSearch = (searchQuery: string) => {
     if (!searchQuery.trim()) return;
@@ -146,7 +166,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
       ...recentSearches.filter((s) => s !== searchQuery),
     ].slice(0, 5);
     setRecentSearches(updated);
-    localStorage.setItem("recent_searches", JSON.stringify(updated));
+    localStorage.setItem("recent_searches:v1", JSON.stringify(updated));
   };
 
   const handleResultClick = () => {
@@ -160,16 +180,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
 
   const clearRecentSearches = () => {
     setRecentSearches([]);
-    localStorage.removeItem("recent_searches");
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    localStorage.removeItem("recent_searches:v1");
   };
 
   if (!isOpen) return null;
@@ -179,6 +190,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       <div className="relative flex items-start justify-center min-h-screen pt-16 px-4">
@@ -199,7 +211,9 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
               />
             </div>
             <button
+              type="button"
               onClick={onClose}
+              aria-label="Close search"
               className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
             >
               <X size={20} />
@@ -216,6 +230,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
                         Recent Searches
                       </h3>
                       <button
+                        type="button"
                         onClick={clearRecentSearches}
                         className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
                       >
@@ -223,9 +238,10 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
                       </button>
                     </div>
                     <div className="space-y-2">
-                      {recentSearches.map((search, index) => (
+                      {recentSearches.map((search) => (
                         <button
-                          key={index}
+                          type="button"
+                          key={search}
                           onClick={() => handleRecentSearchClick(search)}
                           className="flex items-center gap-3 w-full p-3 text-left rounded-lg hover:bg-gray-800 transition-colors group"
                         >
@@ -252,7 +268,7 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
                   </div>
                 )}
               </div>
-            ) : isLoading ? (
+            ) : isPending ? (
               <div className="p-6">
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#fcee16]"></div>
