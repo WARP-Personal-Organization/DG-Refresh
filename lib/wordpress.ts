@@ -625,8 +625,14 @@ export function getWPSlugsForCategory(appSlug: string): string[] {
 
 // App-level category slugs (news, sports, business, ...) — used to prebuild
 // /[catagory] at deploy time instead of relying on force-dynamic rendering.
+// Excludes "opinion": that path is owned by the dedicated app/opinion/page.tsx
+// route (columnist directory), not the generic category template. Including
+// it here made generateStaticParams prebuild /opinion a second time via
+// [catagory], colliding with the dedicated route's build output and
+// corrupting its ISR/RSC-prefetch manifest entry (its background
+// revalidation started failing with "Cannot find module .../app/opinion/page.js").
 export function getAppCategorySlugs(): string[] {
-  return Object.keys(APP_CATEGORY_WP_SLUGS);
+  return Object.keys(APP_CATEGORY_WP_SLUGS).filter((slug) => slug !== "opinion");
 }
 
 export function getWPSlugsForSubcategory(appSlug: string): string[] {
