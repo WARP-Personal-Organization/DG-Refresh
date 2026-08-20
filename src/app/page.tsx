@@ -22,7 +22,14 @@ import {
   getPaperEditions,
   getSupplementEditions,
 } from "../../lib/wordpress";
+import { withConcurrencyLimit } from "../../lib/concurrency";
 import "./globals.css";
+
+// Caps how many of the sections below hit the WordPress origin at once —
+// each getPostsByCategorySlugs call is 2 requests, so running all 16 entries
+// via Promise.all could burst 25-40+ simultaneous connections against
+// shared cPanel hosting.
+const WP_FETCH_CONCURRENCY = 5;
 
 export default async function Home() {
   try {
@@ -44,24 +51,31 @@ export default async function Home() {
       cartoonResult,
       paperEditions,
       supplementEditions,
-    ] = await Promise.all([
-      getAllPosts(20),
-      getBannerNewsBySubcategory(30), // banner news grouped by subcategory
-      getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),
-      getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
-      getPostsByCategorySlugs(["sports"], 8),
-      getPostsByCategorySlugs(["feature", "features", "entertainment", "lifestyle", "health", "technology"], 10),
-      getPostsByCategorySlugs(["initiatives"], 5),
-      getPostsByCategorySlugs(["national", "national-news"], 5),
-      getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
-      getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),
-      getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
-      getTodaysPaper().catch(() => null),
-      getSupplement().catch(() => null),
-      getPostsByCategorySlugs(["cartoon"], 5),
-      getPaperEditions(30).catch(() => []),
-      getSupplementEditions(10).catch(() => []),
-    ]);
+    ] = await withConcurrencyLimit(
+      [
+        () => getAllPosts(20),
+        () => getBannerNewsBySubcategory(30), // banner news grouped by subcategory
+        () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),
+        () => getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
+        () => getPostsByCategorySlugs(["sports"], 8),
+        () =>
+          getPostsByCategorySlugs(
+            ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
+            10,
+          ),
+        () => getPostsByCategorySlugs(["initiatives"], 5),
+        () => getPostsByCategorySlugs(["national", "national-news"], 5),
+        () => getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
+        () => getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),
+        () => getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
+        () => getTodaysPaper().catch(() => null),
+        () => getSupplement().catch(() => null),
+        () => getPostsByCategorySlugs(["cartoon"], 5),
+        () => getPaperEditions(30).catch(() => []),
+        () => getSupplementEditions(10).catch(() => []),
+      ],
+      WP_FETCH_CONCURRENCY,
+    );
 
     // Banner news per section — fall back to regular category posts if no banner news for that section
     const bannerPicks = [

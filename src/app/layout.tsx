@@ -12,11 +12,16 @@ import {
   getPostsByCategorySlugs,
   type Post,
 } from "../../lib/wordpress";
+import { withConcurrencyLimit } from "../../lib/concurrency";
 import "./globals.css";
 
 export const revalidate = 300;
 
 const EMPTY_CATEGORY_RESULT = { posts: [] as Post[], total: 0 };
+
+// Caps concurrent requests to the WordPress origin — this fetch set runs on
+// nearly every page render (root layout), same rationale as page.tsx.
+const WP_FETCH_CONCURRENCY = 4;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,18 +94,28 @@ export default async function RootLayout({
     businessNav,
     featuresNav,
     initiativesNav,
-  ] = await Promise.all([
-    getLayoutPosts().catch(() => [] as Post[]),
-    getAllPosts(20).catch(() => [] as Post[]),
-    getPostsByCategorySlugs(["sports"], 4).catch(() => EMPTY_CATEGORY_RESULT),
-    getPostsByCategorySlugs(["voices", "visons", "opinion"], 4).catch(() => EMPTY_CATEGORY_RESULT),
-    getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4).catch(() => EMPTY_CATEGORY_RESULT),
-    getPostsByCategorySlugs(
-      ["feature", "features", "entertainment", "lifestyle", "health"],
-      4,
-    ).catch(() => EMPTY_CATEGORY_RESULT),
-    getPostsByCategorySlugs(["initiatives"], 4).catch(() => EMPTY_CATEGORY_RESULT),
-  ]);
+  ] = await withConcurrencyLimit(
+    [
+      () => getLayoutPosts().catch(() => [] as Post[]),
+      () => getAllPosts(20).catch(() => [] as Post[]),
+      () => getPostsByCategorySlugs(["sports"], 4).catch(() => EMPTY_CATEGORY_RESULT),
+      () =>
+        getPostsByCategorySlugs(["voices", "visons", "opinion"], 4).catch(
+          () => EMPTY_CATEGORY_RESULT,
+        ),
+      () =>
+        getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4).catch(
+          () => EMPTY_CATEGORY_RESULT,
+        ),
+      () =>
+        getPostsByCategorySlugs(
+          ["feature", "features", "entertainment", "lifestyle", "health"],
+          4,
+        ).catch(() => EMPTY_CATEGORY_RESULT),
+      () => getPostsByCategorySlugs(["initiatives"], 4).catch(() => EMPTY_CATEGORY_RESULT),
+    ],
+    WP_FETCH_CONCURRENCY,
+  );
 
   // Merge all nav posts, deduplicated — each category is guaranteed representation
   const navPosts = [
