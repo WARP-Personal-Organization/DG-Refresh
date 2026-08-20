@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPostsByCategorySlugs, getWPSlugsForCategory } from "../../../../lib/wordpress";
+import {
+  getAppCategorySlugs,
+  getPostsByCategorySlugs,
+  getWPSlugsForCategory,
+} from "../../../../lib/wordpress";
 
 const POSTS_PER_PAGE = 6;
+const MAX_PAGE = 500;
 
 // Backs client-side pagination for /[catagory] so the page itself can stay
 // statically rendered (ISR) instead of force-dynamic. Mirrors the sidebar
@@ -9,7 +14,14 @@ const POSTS_PER_PAGE = 6;
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category") ?? "";
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const page = Math.min(
+    MAX_PAGE,
+    Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1),
+  );
+
+  if (!getAppCategorySlugs().includes(category)) {
+    return NextResponse.json({ error: "Unknown category" }, { status: 400 });
+  }
 
   const wpSlugs = getWPSlugsForCategory(category);
   const mainResult = await getPostsByCategorySlugs(wpSlugs, POSTS_PER_PAGE, page);
@@ -24,5 +36,8 @@ export async function GET(request: NextRequest) {
     recommendedPosts = sidebarResult.posts.filter((p) => !mainIds.has(p.id)).slice(0, 5);
   }
 
-  return NextResponse.json({ posts, totalPages, recommendedPosts, page });
+  return NextResponse.json(
+    { posts, totalPages, recommendedPosts, page },
+    { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
+  );
 }

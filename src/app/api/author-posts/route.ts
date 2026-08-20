@@ -5,6 +5,8 @@ import {
   getOpinionPostsByColumnSlug,
 } from "../../../../lib/wordpress";
 
+const MAX_PAGE = 500;
+
 // Convert URL slug back to a search-friendly name — mirrors the page's own helper.
 function slugToName(slug: string): string {
   return decodeURIComponent(slug).replace(/-/g, " ");
@@ -16,7 +18,14 @@ function slugToName(slug: string): string {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const authorSlug = searchParams.get("authorSlug") ?? "";
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const page = Math.min(
+    MAX_PAGE,
+    Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1),
+  );
+
+  if (!authorSlug) {
+    return NextResponse.json({ error: "Missing authorSlug" }, { status: 400 });
+  }
 
   const columnist = findColumnistBySlug(authorSlug);
   const searchName = slugToName(authorSlug);
@@ -32,5 +41,8 @@ export async function GET(request: NextRequest) {
         total: 0,
       }));
 
-  return NextResponse.json({ posts, totalPages, page });
+  return NextResponse.json(
+    { posts, totalPages, page },
+    { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } },
+  );
 }

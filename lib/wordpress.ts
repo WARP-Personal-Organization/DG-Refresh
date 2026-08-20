@@ -639,6 +639,10 @@ export function getWPSlugsForSubcategory(appSlug: string): string[] {
   return APP_SUBCATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
 }
 
+export function isKnownSubcategorySlug(appSlug: string): boolean {
+  return appSlug in APP_SUBCATEGORY_WP_SLUGS;
+}
+
 // ─── Public API Functions ─────────────────────────────────────────────────────
 
 // Lightweight fetch for layout/header — no _embed, fewer posts, essential fields only.
