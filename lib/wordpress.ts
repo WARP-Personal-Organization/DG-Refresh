@@ -647,14 +647,21 @@ export function isKnownSubcategorySlug(appSlug: string): boolean {
 
 // Lightweight fetch for layout/header — no _embed, fewer posts, essential fields only.
 // Much faster than getAllPosts; use this in the root layout to avoid timeouts.
-export async function getLayoutPosts(perPage = 10): Promise<Post[]> {
-  const wpPosts = await wpFetch<WPPost[]>("/posts", {
-    per_page: perPage,
-    status: "publish",
-    orderby: "date",
-    order: "desc",
-    _fields: "id,slug,title,excerpt,sticky",
-  }).catch(() => [] as WPPost[]);
+export async function getLayoutPosts(
+  perPage = 10,
+  revalidateSeconds = 300,
+): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>(
+    "/posts",
+    {
+      per_page: perPage,
+      status: "publish",
+      orderby: "date",
+      order: "desc",
+      _fields: "id,slug,title,excerpt,sticky",
+    },
+    revalidateSeconds,
+  ).catch(() => [] as WPPost[]);
   return wpPosts.map(transformPost);
 }
 
@@ -676,19 +683,33 @@ export async function getPostSlugsForSitemap(
   );
 }
 
-export async function getAllPosts(perPage = 40): Promise<Post[]> {
-  const wpPosts = await wpFetch<WPPost[]>("/posts", {
-    per_page: perPage,
-    _embed: 1,
-    status: "publish",
-    orderby: "date",
-    order: "desc",
-  });
+export async function getAllPosts(
+  perPage = 40,
+  revalidateSeconds = 300,
+): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>(
+    "/posts",
+    {
+      per_page: perPage,
+      _embed: 1,
+      status: "publish",
+      orderby: "date",
+      order: "desc",
+    },
+    revalidateSeconds,
+  );
   return wpPosts.map(transformPost);
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const wpPosts = await wpFetch<WPPost[]>("/posts", { slug, _embed: 1 });
+export async function getPostBySlug(
+  slug: string,
+  revalidateSeconds = 300,
+): Promise<Post | null> {
+  const wpPosts = await wpFetch<WPPost[]>(
+    "/posts",
+    { slug, _embed: 1 },
+    revalidateSeconds,
+  );
   if (!wpPosts[0]) return null;
   return transformPost(wpPosts[0]);
 }
@@ -697,9 +718,10 @@ export async function getRelatedPosts(
   currentSlug: string,
   category: string,
   limit = 3,
+  revalidateSeconds = 300,
 ): Promise<Post[]> {
   // Re-uses the same cached fetch as getAllPosts — no extra network call within the same revalidation window
-  const allPosts = await getAllPosts(30);
+  const allPosts = await getAllPosts(30, revalidateSeconds);
   return allPosts
     .filter((p) => p.uid !== currentSlug && p.data.category === category)
     .slice(0, limit);
@@ -731,6 +753,7 @@ export async function getPostsByCategorySlugs(
   slugs: string[],
   perPage = 20,
   page = 1,
+  revalidateSeconds = 300,
 ): Promise<{ posts: Post[]; totalPages: number; total: number }> {
   const ids = await resolveCategoryIds(slugs).catch(() => [] as number[]);
 
@@ -749,6 +772,7 @@ export async function getPostsByCategorySlugs(
         orderby: "date",
         order: "desc",
       },
+      revalidateSeconds,
     );
     return { posts: data.map(transformPost), totalPages, total };
   } catch (err) {
@@ -1289,14 +1313,19 @@ export interface WPComment {
 
 export async function getCommentsByPostId(
   postId: number,
+  revalidateSeconds = 300,
 ): Promise<WPComment[]> {
-  return wpFetch<WPComment[]>("/comments", {
-    post: postId,
-    per_page: 100,
-    status: "approve",
-    orderby: "date",
-    order: "asc",
-  }).catch(() => []);
+  return wpFetch<WPComment[]>(
+    "/comments",
+    {
+      post: postId,
+      per_page: 100,
+      status: "approve",
+      orderby: "date",
+      order: "asc",
+    },
+    revalidateSeconds,
+  ).catch(() => []);
 }
 
 export async function submitWPComment(
