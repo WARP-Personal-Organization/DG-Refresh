@@ -129,7 +129,7 @@ const formatDate = (dateString: string): string => {
 export default async function BlogPost({ params }: BlogPageProps) {
   const resolvedParams = await params;
 
-  const found = await getPostBySlug(resolvedParams.uid).catch((error) => {
+  const found = await getPostBySlug(resolvedParams.uid, 600).catch((error) => {
     unstable_rethrow(error);
     return null;
   });
@@ -140,8 +140,8 @@ export default async function BlogPost({ params }: BlogPageProps) {
   let initialComments: Awaited<ReturnType<typeof getCommentsByPostId>> = [];
   try {
     [relatedArticles, initialComments] = await Promise.all([
-      getRelatedPosts(resolvedParams.uid, post.data.category, 3),
-      getCommentsByPostId(post.id),
+      getRelatedPosts(resolvedParams.uid, post.data.category, 3, 600),
+      getCommentsByPostId(post.id, 600),
     ]);
   } catch (error) {
     unstable_rethrow(error);
@@ -450,7 +450,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
 export async function generateMetadata({ params }: BlogPageProps) {
   try {
     const resolvedParams = await params;
-    const post = await getPostBySlug(resolvedParams.uid);
+    const post = await getPostBySlug(resolvedParams.uid, 600);
     if (!post) return { title: "Article Not Found" };
 
     const url = `https://www.dailyguardian.com.ph/blog/${resolvedParams.uid}`;

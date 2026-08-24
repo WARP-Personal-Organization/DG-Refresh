@@ -15,7 +15,16 @@ import {
 import { withConcurrencyLimit } from "../../lib/concurrency";
 import "./globals.css";
 
-export const revalidate = 300;
+// Next.js takes the LOWEST revalidate across a route's whole layout+page tree,
+// and this layout wraps every route. Leaving this at 300 silently capped
+// blog/[uid] (meant to be 600s) and supplement/todays-paper (meant to be
+// 1800s) down to 300s too, tripling/sextupling their regeneration frequency
+// (and billed ISR writes) beyond what those pages intended. Raised to 1800 so
+// this layout stops overriding them — pages with their own lower explicit
+// revalidate (home/category/opinion, all 300) are unaffected either way,
+// since the lowest value in the tree still wins.
+export const revalidate = 1800;
+const NAV_REVALIDATE_SECONDS = 1800;
 
 const EMPTY_CATEGORY_RESULT = { posts: [] as Post[], total: 0 };
 
@@ -96,23 +105,37 @@ export default async function RootLayout({
     initiativesNav,
   ] = await withConcurrencyLimit(
     [
-      () => getLayoutPosts().catch(() => [] as Post[]),
-      () => getAllPosts(20).catch(() => [] as Post[]),
-      () => getPostsByCategorySlugs(["sports"], 4).catch(() => EMPTY_CATEGORY_RESULT),
+      () => getLayoutPosts(10, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
+      () => getAllPosts(20, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
       () =>
-        getPostsByCategorySlugs(["voices", "visons", "opinion"], 4).catch(
-          () => EMPTY_CATEGORY_RESULT,
-        ),
-      () =>
-        getPostsByCategorySlugs(["business", "motoring", "tech-talk"], 4).catch(
+        getPostsByCategorySlugs(["sports"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
           () => EMPTY_CATEGORY_RESULT,
         ),
       () =>
         getPostsByCategorySlugs(
+          ["voices", "visons", "opinion"],
+          4,
+          1,
+          NAV_REVALIDATE_SECONDS,
+        ).catch(() => EMPTY_CATEGORY_RESULT),
+      () =>
+        getPostsByCategorySlugs(
+          ["business", "motoring", "tech-talk"],
+          4,
+          1,
+          NAV_REVALIDATE_SECONDS,
+        ).catch(() => EMPTY_CATEGORY_RESULT),
+      () =>
+        getPostsByCategorySlugs(
           ["feature", "features", "entertainment", "lifestyle", "health"],
           4,
+          1,
+          NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
-      () => getPostsByCategorySlugs(["initiatives"], 4).catch(() => EMPTY_CATEGORY_RESULT),
+      () =>
+        getPostsByCategorySlugs(["initiatives"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
+          () => EMPTY_CATEGORY_RESULT,
+        ),
     ],
     WP_FETCH_CONCURRENCY,
   );
