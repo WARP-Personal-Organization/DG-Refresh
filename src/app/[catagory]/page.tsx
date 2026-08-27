@@ -18,6 +18,15 @@ const POSTS_PER_PAGE = 6;
 export default async function CategoryPage({ params }: Props) {
   const categorySlug = (await params).catagory;
 
+  // Real category/article slugs from WordPress never contain a literal ".".
+  // This single-segment catch-all otherwise absorbs every bot/scanner hit at
+  // the site root (anymind-sw.js, wp-login.php, .env, favicon.ico, ...),
+  // each one costing two wasted WordPress requests below before 404ing —
+  // reject those immediately without touching WordPress at all.
+  if (categorySlug.includes(".")) {
+    notFound();
+  }
+
   // Server render always fetches page 1 — pagination beyond that is handled
   // client-side (see PaginatedCategoryContent) so this page stays a plain
   // ISR-cached static render instead of force-dynamic.
