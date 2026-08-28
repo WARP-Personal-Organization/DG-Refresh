@@ -82,10 +82,16 @@ export function middleware(request: NextRequest) {
     if (!isStaticFile && !isKnownRoute) {
       const url = request.nextUrl.clone();
       url.pathname = `/blog/${slug}`;
-      // 308 rather than 307: these moved permanently when the site migrated
-      // off the flat permalink structure, and a permanent redirect lets search
-      // engines consolidate the old URLs onto /blog/*.
-      return NextResponse.redirect(url, 308);
+      // 307, deliberately, even though these URLs did move permanently and a
+      // 308 would let search engines consolidate them onto /blog/*.
+      //
+      // A 308 is cached hard and indefinitely by browsers: if any path turns
+      // out to be something other than an article — a vanity URL, a print
+      // campaign short link — correcting the allowlist would not help anyone
+      // whose browser already stored the redirect. 307 keeps this reversible.
+      // Promote to 308 once production traffic confirms nothing legitimate is
+      // being swallowed.
+      return NextResponse.redirect(url, 307);
     }
   }
 
