@@ -1,5 +1,18 @@
 export const revalidate = 300;
 
+// Only the slugs returned by generateStaticParams below are ever rendered.
+// This route is a single-segment catch-all, so without this it absorbed every
+// unmatched path at the site root — 10K unique paths and 26K ISR writes per
+// 12h, versus six real categories. Rejecting unknown params here returns a
+// genuine 404 without rendering the page, so no cache entry is written at all.
+//
+// The legacy flat article URLs that used to be resolved by this route
+// (/charity-delmo -> /blog/charity-delmo) are now redirected in
+// src/middleware.ts, before routing reaches this file. The redirect fallback
+// further down is consequently unreachable in production; it is left in place
+// as a safety net in case the middleware matcher ever stops covering a path.
+export const dynamicParams = false;
+
 import { notFound, redirect } from "next/navigation";
 import {
   getAppCategorySlugs,

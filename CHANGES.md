@@ -1,31 +1,138 @@
-# Daily Guardian (DG-refresh) — Working-Tree Change Summary
+# Daily Guardian (DG-refresh) — Change Summary
 
-Everything below is currently **uncommitted** on `main` (`git status` vs `HEAD` at commit `a362a94`). Nothing has been committed or pushed. Grouped by what changed and why, not by file — Section 1 is from this session; everything else predates it.
+Grouped by session/date, most recent first. Entries are committed and merged to `main` unless marked otherwise.
 
 ---
 
-## 1. ISR / Vercel caching fix (this session)
+## 2026-08-28 — Cut ISR writes at the source: edge redirects + on-demand article revalidation (branch `perf/isr-write-cost-phase2`, **not yet merged**)
 
-**Problem:** `/[catagory]` and `/[catagory]/[subcategory]` had `export const dynamic = "force-dynamic"` (added months ago, commit `40ee1b9`, to work around a Next.js 15 conflict between `searchParams`-based pagination and ISR `revalidate`). That made every category/subcategory pageview a live function invocation — never cached, and the primary driver behind the reported 78% cache-bypass rate. `/opinion/[authorSlug]` had `revalidate = 300` set but **no `generateStaticParams`**, which silently makes a dynamic-segment page fully SSR regardless of `revalidate` — a second, previously-unknown instance of the same class of bug.
+**Measured starting point.** Vercel billing, 17 days into the cycle: **$164.32** on-demand, of which **ISR Writes $114.38 (70%)** and **Fast Origin Transfer $38.33 (23%)** — the latter is largely a byproduct of the same regenerations, since every write ships its rendered HTML to the edge. Observability → ISR, last 12h, showed where they came from:
+
+| Route | Reads | Writes | Unique paths |
+|---|---|---|---|
+| `/blog/[uid]` | 21K | 28K | 9K |
+| `/[catagory]` | 13K | **26K** | **10K** |
+| `/[catagory]/[subcategory]` | 7.7K | 8.3K | 1.5K |
+| everything else | — | ~1.5K | 1 each |
+
+~63K writes/12h. Two findings changed the plan:
+
+1. **PR #12 did not reduce ISR writes.** `/anymind-sw.js` was still being written 143×/12h a day after it merged. The `.`-guard calls `notFound()`, and `notFound()` still renders and still writes a cache entry — it only skipped the WordPress calls. This is exactly the caveat the Aug 26 entry predicted; it is now confirmed empirically. Only rejection in middleware, before routing, avoids the write.
+2. **`/[catagory]`'s 10K unique paths are mostly legitimate.** The six real categories are prebuilt and bill separately, so that 26K was almost entirely *legacy flat article URLs* — the old WordPress permalink structure (`/charity-delmo`), which the route resolved via WordPress and redirected to `/blog/*`. Each of those thousands of URLs held its own ISR entry, re-written every 5 minutes on every crawl. `dynamicParams = false` alone would have 404'd years of indexed inbound links.
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `src/middleware.ts` | Legacy flat URLs now 308-redirect to `/blog/<slug>` at the edge — no render, no cache write. Issued without verifying the post exists, since `/blog/[uid]` already handles unknown slugs. Guarded by an allowlist of real app routes and category slugs; dotted paths fall through untouched so `/ads.txt`, `/robots.txt`, and `public/*` still serve. |
+| `src/app/[catagory]/page.tsx` | `dynamicParams = false` — only the six real category slugs render. Unknown params 404 without rendering, so junk creates no cache entry. The in-page redirect fallback is now unreachable, kept as a safety net. |
+| `src/app/blog/[uid]/page.tsx` | `revalidate` 600 → 86400, and the four fetch calls that were independently pinning the route to 600s now follow it. |
+| `src/app/api/revalidate-recent/route.ts` (new) | Cron poller. Asks WordPress `orderby=modified` which posts actually changed and invalidates only those, so article pages no longer need a short timer. `CRON_SECRET`-guarded; capped at 20 posts/run so a bulk edit can't stampede. |
+| `lib/wordpress.ts` | `getRecentlyModifiedPosts()` — uses `modified_gmt` rather than `modified`, which is in site-local time (Asia/Manila) and would skew the cutoff by 8h. |
+| `vercel.json` (new) | Cron schedule, every 10 minutes. |
+
+**Verified** via `next build` + `next start` (not dev): all six categories, all ten static pages, `/ads.txt`, `/robots.txt`, `/black_dg.png`, `/feed` → 200. `/charity-delmo`, `/a-bitter-harvest` → 308 to the correct article. `/anymind-sw.js`, `/manifest.json`, `/wp-login.php`, `/.env`, `/xmlrpc.php` → genuine 404 with no cache write (previously 200 + a write).
+
+**Honest limits — this is not a clean sweep:**
+
+- **The root layout caps the article win.** `/blog/[uid]` went 10m → **30m**, not 24h. `layout.tsx` sets `revalidate = 1800` and Next.js takes the lowest value across the tree, so the 86400 is floored. Getting the full reduction requires moving the nav fetches out of the root layout — not attempted here. Setting article `revalidate` to `false` is pointless until that lands, since it would still be capped at 1800.
+- **Non-dotted junk still costs one write.** `/random-junk-slug` now redirects to `/blog/random-junk-slug`, which returns 200 with a soft-404 page (same streaming-SSR quirk as above) and writes a cache entry. That junk moved from a 5-minute window to a 30-minute one rather than disappearing. Dotted junk *is* fully eliminated.
+- **`/[catagory]/[subcategory]` is untouched** (8.3K writes/12h). Its `generateStaticParams` returns `[]`, so `dynamicParams = false` would 404 every subcategory; it needs its own pass.
+
+**Separately discovered — pre-existing, not caused by this work:** `robots.ts` advertises `https://www.dailyguardian.com.ph/sitemap.xml`, but production serves that path as **HTTP 200 with `content-type: text/html`** — the "Section Not Found" page, cached in ISR. Google has been fetching an HTML error page as the sitemap. Real sitemaps are at `/sitemap/0.xml`…`/99.xml`; there is no index at `/sitemap.xml`. This change turns it into an honest 404 rather than a fake 200, but the underlying problem needs its own fix.
+
+**Also noted:** `x-vercel-id: sin1::iad1` — functions run in a **single** region (no ISR write multiplier), but that region is `iad1` (US East) for a Philippine audience with WordPress on PH-adjacent shared hosting. Latency question, not a cost one.
+
+**Requires before merge:** `CRON_SECRET` set in Vercel (done, Production, Secret type) and a deploy — the cron does not exist until `vercel.json` reaches production.
+
+---
+
+## 2026-08-26 — Block junk/bot paths before they reach ISR cache (PR #12, `fec5eba` — merged in `c39b3d3`)
+
+**Problem:** `/[catagory]` is a single-segment catch-all route, so it silently absorbed every bot/scanner hit at the site root (`anymind-sw.js`, `wp-login.php`, `.env`, etc.). Confirmed via Vercel Observability → ISR: **16K unique paths under this one route in 12h**, vs ~6-7 real categories — the single largest write count of any route on the site, and growing day over day. Each junk path cost two wasted WordPress requests (a failed category lookup, then a failed post-slug lookup) before finally 404ing, and still created its own ISR cache write.
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `src/app/[catagory]/page.tsx` | Reject any slug containing `"."` before either WordPress call — real category/article slugs never contain one. Verified via debug logging that the WordPress fetch code path is never reached for junk slugs after this change. |
+| `src/middleware.ts` (new) | Reject well-known bot/scanner probe paths (`wp-admin`, `wp-login`, `xmlrpc.php`, `.env`, `.git`, `phpmyadmin`, ...) at the edge, before Next.js routes to any page at all — the more complete fix, since a request blocked here never creates an ISR write in the first place, not just a cheaper one. |
+
+**Important honest caveat found during this fix:** blocked junk paths in `[catagory]/page.tsx` still return HTTP 200 instead of 404 — a Next.js streaming-SSR quirk where the status header commits before `notFound()` fires deep in the render. The visible content is correct (the site's "Section Not Found" page), just not the status code. Confirmed this doesn't affect the actual goal (WordPress calls are verifiably skipped), but it's a known limitation, not fully clean.
+
+**Also important:** this fix targets wasted WordPress requests and origin load, but ISR Writes are billed per write-event regardless of how much work that write did — so this alone likely won't dramatically move the dominant "ISR Writes" cost line. The bigger lever (proposed, not yet built) is webhook-based on-demand revalidation from WordPress, so pages only regenerate when content actually changes instead of on a timer.
+
+**Verified:** production build (`next build` + `next start`, not dev mode) — bot-scan patterns return a genuine 404 (`/wp-admin`, `/wp-login.php`, `/xmlrpc.php`, `/.env`, `/.git/config`), all real routes still 200 (`/news`, `/sports`, `/opinion`, `/ads.txt`, `/black_dg.png`, `/`, `/robots.txt`). Re-verified live on the Vercel preview deploy too.
+
+**Game plan:** check the Aug 26 finalized number on Aug 27. If it's still not meaningfully lower, merge this PR immediately without further delay.
+
+---
+
+## 2026-08-24 — ISR write cost reduction (PR #11, `f136132`)
+
+**Problem:** Vercel billing showed a flat ~$9-13/day in ISR Writes, independent of real traffic — the site's `revalidate` windows weren't actually taking effect the way the code implied.
+
+Two causes, found via the Vercel Usage dashboard + code audit:
+
+1. **`AutoRefresh.tsx`** called `router.refresh()` every 5 minutes on *every open browser tab*, with no check for whether the tab was even visible. A tab left open overnight kept pinging the server all night with zero real readers.
+2. **The root layout's `revalidate = 300` silently capped every route in the app.** Next.js takes the *lowest* `revalidate` value across a route's whole layout+page tree — since the root layout wraps every page, its 300s (5 min) setting was overriding `blog/[uid]`'s intended 600s (10 min) window, doubling article regeneration frequency site-wide.
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `src/components/AutoRefresh.tsx` | Skips the refresh call when `document.visibilityState !== "visible"` |
+| `lib/wordpress.ts` | Added optional `revalidateSeconds` param (default 300, unchanged for existing callers) to `getLayoutPosts`, `getAllPosts`, `getPostsByCategorySlugs`, `getPostBySlug`, `getRelatedPosts`, `getCommentsByPostId` |
+| `src/app/layout.tsx` | `revalidate` raised 300 → 1800; nav fetches now explicitly pass 1800s so they stop imposing a 300s floor on every other route |
+| `src/app/blog/[uid]/page.tsx` | Its own fetch calls now explicitly pass 600s, matching its already-declared `revalidate = 600` |
+
+**Verified:** production build confirmed `blog/[uid]` now shows a genuine `10m` revalidate window (was `5m`); home/category/opinion pages (which have their own lower explicit `revalidate = 300`) are unaffected. `supplement`/`todays-paper` (2 pages total, more tangled fetch internals) intentionally left uncapped-from-300s for now — not worth the risk for that small a slice of cost. Deployed via PR, previewed, then merged to `main` — no regressions on homepage/article/category/opinion pages.
+
+**Follow-up:** monitor Vercel Usage over the next few days to confirm ISR Writes actually trend down from the ~$9-13/day baseline.
+
+---
+
+## 2026-08-20 — WordPress origin connection-burst fix + API route hardening (`284861c`, `6f9d9af`)
+
+**Problem:** The WordPress backend (`old.dailyguardian.com.ph`, cPanel/Bluehost hosting) was reporting intermittent connection loss. Root cause: a single homepage or root-layout render fired ~25-40+ simultaneous requests to the WordPress origin via `Promise.all` (each `getPostsByCategorySlugs` call costs 2 requests under the hood). Bluehost support confirmed the server's concurrent-connection limit is 25-30 — a single page load could hit or exceed it alone.
+
+**Fix (`284861c`):**
+- Added `lib/concurrency.ts` — `withConcurrencyLimit()`, a small tuple-typed throttled runner (like `Promise.all` but capped).
+- `src/app/page.tsx`: homepage's 16 WordPress fetches now run at most 5 at a time.
+- `src/app/layout.tsx`: root layout's 7 fetches now run at most 4 at a time.
+- Same data, same fallbacks — only the concurrency changed. Verified homepage renders identically before/after.
+
+**Also fixed (`6f9d9af`):** the new pagination API routes (`/api/category-posts`, `/api/subcategory-posts`, `/api/author-posts`, added the same day) were unauthenticated and uncached — anyone could loop garbage input into wasted WordPress fetches.
+- Reject unknown category/subcategory slugs with a 400 instead of paying for a WP fetch.
+- Cap `page` at 500.
+- Added `Cache-Control` headers matching the pages they back, so repeat requests hit Vercel's edge cache instead of invoking the function every time.
+
+---
+
+## 2026-08-13 — ISR / Vercel caching fix (`ef262d3`) + same-day hotfixes
+
+**Problem:** `/[catagory]` and `/[catagory]/[subcategory]` had `export const dynamic = "force-dynamic"` (added months earlier to work around a Next.js 15 conflict between `searchParams`-based pagination and ISR `revalidate`). That made every category/subcategory pageview a live function invocation — never cached, and the primary driver behind a reported 78% cache-bypass rate. `/opinion/[authorSlug]` had `revalidate = 300` set but **no `generateStaticParams`**, which silently makes a dynamic-segment page fully SSR regardless of `revalidate` — a second, previously-unknown instance of the same class of bug.
 
 **Fix:** pages now always statically render page 1 (ISR, `revalidate = 300`); pagination beyond page 1 is fetched client-side against new JSON API routes, so the page itself never opts into dynamic rendering.
 
 | File | Change |
 |---|---|
 | `lib/wordpress.ts` | Added `getAppCategorySlugs()` export for `generateStaticParams` |
-| `src/app/api/category-posts/route.ts` *(new)* | JSON endpoint backing `/[catagory]` pagination |
-| `src/app/api/subcategory-posts/route.ts` *(new)* | JSON endpoint backing `/[catagory]/[subcategory]` pagination |
-| `src/app/api/author-posts/route.ts` *(new)* | JSON endpoint backing `/opinion/[authorSlug]` pagination |
+| `src/app/api/category-posts/route.ts` | JSON endpoint backing `/[catagory]` pagination |
+| `src/app/api/subcategory-posts/route.ts` | JSON endpoint backing `/[catagory]/[subcategory]` pagination |
+| `src/app/api/author-posts/route.ts` | JSON endpoint backing `/opinion/[authorSlug]` pagination |
 | `src/components/Pagination.tsx` | Added optional `onPageChange` prop — renders `<button>`s calling it instead of `<Link>`s when provided |
-| `src/components/PaginatedCategoryContent.tsx` *(new)* | Client component owning `/[catagory]`'s paginated list + sidebar "recommended" |
-| `src/components/PaginatedSubcategoryContent.tsx` *(new)* | Client component owning `/[catagory]/[subcategory]`'s paginated list + banner/breaking/featured sections |
+| `src/components/PaginatedCategoryContent.tsx` | Client component owning `/[catagory]`'s paginated list + sidebar "recommended" |
+| `src/components/PaginatedSubcategoryContent.tsx` | Client component owning `/[catagory]/[subcategory]`'s paginated list + banner/breaking/featured sections |
 | `src/components/AuthorArticlesPage.tsx` | Converted to a client component managing its own pagination state |
 | `src/app/[catagory]/page.tsx` | Dropped `force-dynamic`; restored `revalidate = 300`; `generateStaticParams` now returns the 7 real app category slugs (was `[]`) |
 | `src/app/[catagory]/[subcategory]/page.tsx` | Dropped `force-dynamic`; restored `revalidate = 300` |
 | `src/app/opinion/[authorSlug]/page.tsx` | Removed `searchParams` prop; added `generateStaticParams` prebuilding the 35 curated columnists |
 | `src/app/blog/[uid]/page.tsx` | Added `generateStaticParams` prebuilding the 100 most recent articles (previously none — every article cold-rendered on first visit) |
 
-**Verified:** production build (`next build`) shows all four routes as `● SSG` (3 of them were `ƒ Dynamic` before); `next start` shows `/news/local` going `MISS → HIT` on its second request; pagination exercised live in Chrome (button clicks, deep-link to `?page=3`, no console errors introduced).
+**Same-day hotfixes:** this deploy introduced two production regressions, fixed within the hour — `d1aa6b7` (`ERR_REQUIRE_ESM` crash on article pages) and `4d143aa` (replaced `isomorphic-dompurify` with `sanitize-html` to fix article 500s). A third bug from the same batch — `/opinion` colliding with `/[catagory]`'s `generateStaticParams` output and corrupting its ISR manifest — wasn't caught until `a1eb29c`, ~13 hours later.
+
+**Verified:** production build showed all four routes as `● SSG` (3 of them were `ƒ Dynamic` before); pagination exercised live in Chrome.
 
 ---
 
@@ -85,8 +192,8 @@ Across `Header.tsx`, `Navigation.tsx`, `ArticleGallery.tsx`, `CartoonCard.tsx`, 
 
 ## 8. Dependencies (`package.json` / `package-lock.json`)
 
-- **Added:** `@next/third-parties` (used for the `GoogleAnalytics` component in `layout.tsx`), `isomorphic-dompurify` (sanitizes article HTML in `blog/[uid]/page.tsx`), `react-doctor` (dev tool)
-- **Removed:** `@google-cloud/text-to-speech` (TTS feature removed), `framer-motion` (only used by the removed `LoadingScreen.tsx`)
+- **Added:** `@next/third-parties` (used for the `GoogleAnalytics` component in `layout.tsx`), `sanitize-html` (sanitizes article HTML in `blog/[uid]/page.tsx`, replacing `isomorphic-dompurify` after the Aug 13 ESM crash), `react-doctor` (dev tool)
+- **Removed:** `@google-cloud/text-to-speech` (TTS feature removed), `framer-motion` (only used by the removed `LoadingScreen.tsx`), `isomorphic-dompurify` (replaced by `sanitize-html`)
 - **Bumped:** `next` 15.5.14 → 15.5.18, `eslint-config-next` to match
 
 ## 9. Config
