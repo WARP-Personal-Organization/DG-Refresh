@@ -683,6 +683,31 @@ export async function getPostSlugsForSitemap(
   );
 }
 
+// Most-recently-edited posts, newest first. Backs the /api/revalidate-recent
+// cron: instead of every article page expiring on a timer and rebuilding on
+// the next crawler hit, we ask WordPress once per run which posts actually
+// changed, and invalidate only those.
+//
+// Ordering by `modified` rather than `date` is the point — an edit to a 2019
+// story has to surface here, and ordering by publish date would bury it.
+// `modified_gmt` is requested rather than `modified` because the latter is in
+// site local time (Asia/Manila) while the cron's cutoff is computed in UTC.
+export async function getRecentlyModifiedPosts(
+  perPage = 20,
+): Promise<Array<{ slug: string; modified_gmt: string }>> {
+  return wpFetch<Array<{ slug: string; modified_gmt: string }>>(
+    "/posts",
+    {
+      per_page: perPage,
+      status: "publish",
+      orderby: "modified",
+      order: "desc",
+      _fields: "slug,modified_gmt",
+    },
+    0, // never cached — the entire job is detecting what just changed
+  );
+}
+
 export async function getAllPosts(
   perPage = 40,
   revalidateSeconds = 300,

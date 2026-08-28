@@ -4,7 +4,50 @@ Grouped by session/date, most recent first. Entries are committed and merged to 
 
 ---
 
-## 2026-08-26 — Block junk/bot paths before they reach ISR cache (PR #12, `fec5eba` — **open, not yet merged, pending Aug 27 review**)
+## 2026-08-28 — Cut ISR writes at the source: edge redirects + on-demand article revalidation (branch `perf/isr-write-cost-phase2`, **not yet merged**)
+
+**Measured starting point.** Vercel billing, 17 days into the cycle: **$164.32** on-demand, of which **ISR Writes $114.38 (70%)** and **Fast Origin Transfer $38.33 (23%)** — the latter is largely a byproduct of the same regenerations, since every write ships its rendered HTML to the edge. Observability → ISR, last 12h, showed where they came from:
+
+| Route | Reads | Writes | Unique paths |
+|---|---|---|---|
+| `/blog/[uid]` | 21K | 28K | 9K |
+| `/[catagory]` | 13K | **26K** | **10K** |
+| `/[catagory]/[subcategory]` | 7.7K | 8.3K | 1.5K |
+| everything else | — | ~1.5K | 1 each |
+
+~63K writes/12h. Two findings changed the plan:
+
+1. **PR #12 did not reduce ISR writes.** `/anymind-sw.js` was still being written 143×/12h a day after it merged. The `.`-guard calls `notFound()`, and `notFound()` still renders and still writes a cache entry — it only skipped the WordPress calls. This is exactly the caveat the Aug 26 entry predicted; it is now confirmed empirically. Only rejection in middleware, before routing, avoids the write.
+2. **`/[catagory]`'s 10K unique paths are mostly legitimate.** The six real categories are prebuilt and bill separately, so that 26K was almost entirely *legacy flat article URLs* — the old WordPress permalink structure (`/charity-delmo`), which the route resolved via WordPress and redirected to `/blog/*`. Each of those thousands of URLs held its own ISR entry, re-written every 5 minutes on every crawl. `dynamicParams = false` alone would have 404'd years of indexed inbound links.
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `src/middleware.ts` | Legacy flat URLs now 308-redirect to `/blog/<slug>` at the edge — no render, no cache write. Issued without verifying the post exists, since `/blog/[uid]` already handles unknown slugs. Guarded by an allowlist of real app routes and category slugs; dotted paths fall through untouched so `/ads.txt`, `/robots.txt`, and `public/*` still serve. |
+| `src/app/[catagory]/page.tsx` | `dynamicParams = false` — only the six real category slugs render. Unknown params 404 without rendering, so junk creates no cache entry. The in-page redirect fallback is now unreachable, kept as a safety net. |
+| `src/app/blog/[uid]/page.tsx` | `revalidate` 600 → 86400, and the four fetch calls that were independently pinning the route to 600s now follow it. |
+| `src/app/api/revalidate-recent/route.ts` (new) | Cron poller. Asks WordPress `orderby=modified` which posts actually changed and invalidates only those, so article pages no longer need a short timer. `CRON_SECRET`-guarded; capped at 20 posts/run so a bulk edit can't stampede. |
+| `lib/wordpress.ts` | `getRecentlyModifiedPosts()` — uses `modified_gmt` rather than `modified`, which is in site-local time (Asia/Manila) and would skew the cutoff by 8h. |
+| `vercel.json` (new) | Cron schedule, every 10 minutes. |
+
+**Verified** via `next build` + `next start` (not dev): all six categories, all ten static pages, `/ads.txt`, `/robots.txt`, `/black_dg.png`, `/feed` → 200. `/charity-delmo`, `/a-bitter-harvest` → 308 to the correct article. `/anymind-sw.js`, `/manifest.json`, `/wp-login.php`, `/.env`, `/xmlrpc.php` → genuine 404 with no cache write (previously 200 + a write).
+
+**Honest limits — this is not a clean sweep:**
+
+- **The root layout caps the article win.** `/blog/[uid]` went 10m → **30m**, not 24h. `layout.tsx` sets `revalidate = 1800` and Next.js takes the lowest value across the tree, so the 86400 is floored. Getting the full reduction requires moving the nav fetches out of the root layout — not attempted here. Setting article `revalidate` to `false` is pointless until that lands, since it would still be capped at 1800.
+- **Non-dotted junk still costs one write.** `/random-junk-slug` now redirects to `/blog/random-junk-slug`, which returns 200 with a soft-404 page (same streaming-SSR quirk as above) and writes a cache entry. That junk moved from a 5-minute window to a 30-minute one rather than disappearing. Dotted junk *is* fully eliminated.
+- **`/[catagory]/[subcategory]` is untouched** (8.3K writes/12h). Its `generateStaticParams` returns `[]`, so `dynamicParams = false` would 404 every subcategory; it needs its own pass.
+
+**Separately discovered — pre-existing, not caused by this work:** `robots.ts` advertises `https://www.dailyguardian.com.ph/sitemap.xml`, but production serves that path as **HTTP 200 with `content-type: text/html`** — the "Section Not Found" page, cached in ISR. Google has been fetching an HTML error page as the sitemap. Real sitemaps are at `/sitemap/0.xml`…`/99.xml`; there is no index at `/sitemap.xml`. This change turns it into an honest 404 rather than a fake 200, but the underlying problem needs its own fix.
+
+**Also noted:** `x-vercel-id: sin1::iad1` — functions run in a **single** region (no ISR write multiplier), but that region is `iad1` (US East) for a Philippine audience with WordPress on PH-adjacent shared hosting. Latency question, not a cost one.
+
+**Requires before merge:** `CRON_SECRET` set in Vercel (done, Production, Secret type) and a deploy — the cron does not exist until `vercel.json` reaches production.
+
+---
+
+## 2026-08-26 — Block junk/bot paths before they reach ISR cache (PR #12, `fec5eba` — merged in `c39b3d3`)
 
 **Problem:** `/[catagory]` is a single-segment catch-all route, so it silently absorbed every bot/scanner hit at the site root (`anymind-sw.js`, `wp-login.php`, `.env`, etc.). Confirmed via Vercel Observability → ISR: **16K unique paths under this one route in 12h**, vs ~6-7 real categories — the single largest write count of any route on the site, and growing day over day. Each junk path cost two wasted WordPress requests (a failed category lookup, then a failed post-slug lookup) before finally 404ing, and still created its own ISR cache write.
 

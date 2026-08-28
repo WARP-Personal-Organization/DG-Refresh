@@ -1,5 +1,16 @@
 // app/blog/[uid]/page.tsx
-export const revalidate = 600;
+//
+// 24h, not 10 minutes. There are ~75,000 published articles; at 600s every
+// crawler hit on a stale one rebuilt it, which made this route the largest
+// single source of billed ISR writes — overwhelmingly for articles that had
+// not changed since publication. Freshness now comes from invalidation
+// instead of expiry: /api/revalidate-recent (cron) and /api/revalidate
+// (WordPress webhook) invalidate the specific articles that were edited.
+//
+// This 24h value is the backstop for when both of those fail, which is why it
+// isn't `false`. Do not lower it to buy freshness — add coverage to the
+// invalidation routes instead.
+export const revalidate = 86_400;
 
 import CommentSection from "@/components/CommentSection";
 import ShareButton from "@/components/ShareButton";
@@ -129,7 +140,7 @@ const formatDate = (dateString: string): string => {
 export default async function BlogPost({ params }: BlogPageProps) {
   const resolvedParams = await params;
 
-  const found = await getPostBySlug(resolvedParams.uid, 600).catch((error) => {
+  const found = await getPostBySlug(resolvedParams.uid, revalidate).catch((error) => {
     unstable_rethrow(error);
     return null;
   });
@@ -140,8 +151,8 @@ export default async function BlogPost({ params }: BlogPageProps) {
   let initialComments: Awaited<ReturnType<typeof getCommentsByPostId>> = [];
   try {
     [relatedArticles, initialComments] = await Promise.all([
-      getRelatedPosts(resolvedParams.uid, post.data.category, 3, 600),
-      getCommentsByPostId(post.id, 600),
+      getRelatedPosts(resolvedParams.uid, post.data.category, 3, revalidate),
+      getCommentsByPostId(post.id, revalidate),
     ]);
   } catch (error) {
     unstable_rethrow(error);
@@ -450,7 +461,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
 export async function generateMetadata({ params }: BlogPageProps) {
   try {
     const resolvedParams = await params;
-    const post = await getPostBySlug(resolvedParams.uid, 600);
+    const post = await getPostBySlug(resolvedParams.uid, revalidate);
     if (!post) return { title: "Article Not Found" };
 
     const url = `https://www.dailyguardian.com.ph/blog/${resolvedParams.uid}`;
