@@ -1,36 +1,27 @@
 import AutoRefresh from "@/components/AutoRefresh";
 import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import NavigationBar from "@/components/Navigation";
+import SiteChrome from "@/components/SiteChrome";
 import type { Metadata } from "next";
 import { Geist, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import {
-  getAllPosts,
-  getLayoutPosts,
-  getPostsByCategorySlugs,
-  type Post,
-} from "../../lib/wordpress";
-import { withConcurrencyLimit } from "../../lib/concurrency";
 import "./globals.css";
 
+// This layout deliberately declares no `revalidate` and fetches nothing.
+//
 // Next.js takes the LOWEST revalidate across a route's whole layout+page tree,
-// and this layout wraps every route. Leaving this at 300 silently capped
-// blog/[uid] (meant to be 600s) and supplement/todays-paper (meant to be
-// 1800s) down to 300s too, tripling/sextupling their regeneration frequency
-// (and billed ISR writes) beyond what those pages intended. Raised to 1800 so
-// this layout stops overriding them — pages with their own lower explicit
-// revalidate (home/category/opinion, all 300) are unaffected either way,
-// since the lowest value in the tree still wins.
-export const revalidate = 1800;
-const NAV_REVALIDATE_SECONDS = 1800;
-
-const EMPTY_CATEGORY_RESULT = { posts: [] as Post[], total: 0 };
-
-// Caps concurrent requests to the WordPress origin — this fetch set runs on
-// nearly every page render (root layout), same rationale as page.tsx.
-const WP_FETCH_CONCURRENCY = 4;
+// and this layout wraps every route — so any value here becomes a ceiling on
+// every page in the app. At 1800 it silently held /blog/[uid] to 30 minutes
+// despite that route asking for 24h, which across ~75,000 articles was the
+// dominant remaining source of billed ISR writes. Raising the number would
+// only have moved the ceiling; removing the fetches removes it altogether.
+//
+// The header/nav data those fetches produced now comes from /api/nav-data,
+// requested client-side by SiteChrome and cached at the edge, so it is shared
+// across readers instead of forcing a page regeneration per article.
+//
+// Do not add `export const revalidate` or a server-side fetch to this file.
+// Either one silently re-caps every route in the app.
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -90,73 +81,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [
-    posts,
-    recentNav,
-    sportsNav,
-    voicesNav,
-    businessNav,
-    featuresNav,
-    initiativesNav,
-  ] = await withConcurrencyLimit(
-    [
-      () => getLayoutPosts(10, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
-      () => getAllPosts(20, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
-      () =>
-        getPostsByCategorySlugs(["sports"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
-          () => EMPTY_CATEGORY_RESULT,
-        ),
-      () =>
-        getPostsByCategorySlugs(
-          ["voices", "visons", "opinion"],
-          4,
-          1,
-          NAV_REVALIDATE_SECONDS,
-        ).catch(() => EMPTY_CATEGORY_RESULT),
-      () =>
-        getPostsByCategorySlugs(
-          ["business", "motoring", "tech-talk"],
-          4,
-          1,
-          NAV_REVALIDATE_SECONDS,
-        ).catch(() => EMPTY_CATEGORY_RESULT),
-      () =>
-        getPostsByCategorySlugs(
-          ["feature", "features", "entertainment", "lifestyle", "health"],
-          4,
-          1,
-          NAV_REVALIDATE_SECONDS,
-        ).catch(() => EMPTY_CATEGORY_RESULT),
-      () =>
-        getPostsByCategorySlugs(["initiatives"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
-          () => EMPTY_CATEGORY_RESULT,
-        ),
-    ],
-    WP_FETCH_CONCURRENCY,
-  );
-
-  // Merge all nav posts, deduplicated — each category is guaranteed representation
-  const navPosts = [
-    ...recentNav,
-    ...sportsNav.posts,
-    ...voicesNav.posts,
-    ...businessNav.posts,
-    ...featuresNav.posts,
-    ...initiativesNav.posts,
-  ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
-
-  // Latest local+featured post for breaking news, fallback to any featured
-  const breakingPost =
-    posts.find((p) => p.data.subcategory === "local" && p.data.is_featured) ||
-    posts.find((p) => p.data.is_featured) ||
-    posts[0] ||
-    null;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -177,8 +106,7 @@ export default async function RootLayout({
         />
         <GoogleAnalytics gaId="G-SQ61FCPRV9" />
         <AutoRefresh intervalMs={300_000} />
-        <Header posts={posts} breakingPost={breakingPost} />
-        <NavigationBar navPosts={navPosts} />
+        <SiteChrome />
         <main>{children}</main>
         <Footer />
       </body>
