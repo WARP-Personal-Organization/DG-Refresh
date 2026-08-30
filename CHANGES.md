@@ -4,7 +4,50 @@ Grouped by session/date, most recent first. Entries are committed and merged to 
 
 ---
 
-## 2026-08-28 — Cut ISR writes at the source: edge redirects + on-demand article revalidation (branch `perf/isr-write-cost-phase2`, **not yet merged**)
+## 2026-08-30 — Remove the root layout's revalidate ceiling (branch `perf/layout-revalidate-ceiling`, **not yet merged**)
+
+**Measured outcome of the Aug 28 work first**, since it motivates this change. Comparing two adjacent full days, Aug 27 (pre-fix) against Aug 29 (post-fix):
+
+| Line item | Aug 27 | Aug 29 | Change |
+|---|---|---|---|
+| ISR Writes | $7.22 | $4.92 | −32% |
+| Fast Origin Transfer | $2.31 | $1.71 | −26% |
+| **Edge Requests** | $0.60 | **$1.45** | **+142%** |
+| Fluid Active CPU | $0.69 | $0.57 | −17% |
+| ISR Reads | $0.58 | $0.47 | −19% |
+| **Total/day** | **$11.94** | **$9.58** | **−20%** |
+
+Two things to record honestly:
+
+- **`/[catagory]` was a complete success**: 26K writes / 10K unique paths → **0 writes / 5 paths**.
+- **`/blog/[uid]` went up**: 28K → 36K writes, 9K → 15K unique paths. The traffic did not vanish, it *moved* — those ~6K extra paths are the legacy flat URLs that used to be cached on `/[catagory]`. That consolidation is correct, but it only pays off if the article route can actually hold its cache, and the root layout was capping it at 30 minutes.
+- **Edge Requests more than doubled** — the redirect hop is two edge requests where there was one. That was an unaccounted cost in the Aug 28 design and it ate roughly a quarter of the gain.
+
+Note: the Observability route table (~44K writes/12h) and billing (1.23M writes/day) disagree by more than an order of magnitude, so the free-tier route counts appear to be sampled. **Billing is the number to trust.**
+
+**Problem:** `src/app/layout.tsx` declared `revalidate = 1800` *and* ran seven WordPress fetches. Next.js takes the lowest revalidate across a route's whole layout+page tree, and the root layout wraps every route — so that 1800 was a hard 30-minute ceiling on every page in the app. `/blog/[uid]` declared 86400 and silently got 1800. Raising the number would only have moved the ceiling; the fetches themselves are what forced one to exist.
+
+**Fix:**
+
+| File | Change |
+|---|---|
+| `src/app/api/nav-data/route.ts` (new) | The seven header/nav fetches, moved out of the layout, behind `Cache-Control: s-maxage=1800, stale-while-revalidate=3600`. One CDN-cached JSON response shared by every reader, instead of a page regeneration per article. Keeps the same `withConcurrencyLimit(…, 4)` cap on the WordPress origin. |
+| `src/components/SiteChrome.tsx` (new) | Client component that fetches `/api/nav-data` once on mount and renders `Header` + `NavigationBar`. Both were already client components with safe empty defaults, so the pre-fetch render is the same one they already produced whenever a WordPress call failed. |
+| `src/app/layout.tsx` | No `revalidate`, no fetches, no longer `async`. Carries a comment warning that adding either one silently re-caps every route in the app. |
+
+**Verified** via `next build` + `next start`: `/blog/[uid]` now reports **`1d`** (was `30m`). `/` and `/[catagory]` unchanged at `5m`, `/opinion` at `5m` — pages with their own lower value are unaffected, as intended. Static pages (`/about-us`, `/contact-us`, `/dg-blog`, `/dg-drive`) dropped their inherited 30m window entirely and are now fully static. `/api/nav-data` returns the identical payload the layout produced (10 posts, 36 navPosts, correct breakingPost) with the right cache header. Full route sweep still 200; legacy redirects, junk 404s, and `/e-paper` all unchanged. Confirmed in-browser that the breaking-news ticker and the nav dropdown previews populate client-side.
+
+**Tradeoffs:**
+
+- **Header/nav post data is no longer in the server HTML.** The nav's category links are static and still server-rendered; what moved client-side is the breaking-news headline and the article previews inside the nav dropdowns. Those are enhancement content, but it is a real change for crawlers.
+- **Brief empty state** for the breaking-news line on first paint, until `/api/nav-data` resolves.
+- Search still only covers the 10 posts from `getLayoutPosts` — a pre-existing limitation, now fed from the same client fetch.
+
+**Still outstanding:** `/[catagory]/[subcategory]` (6.7K writes/12h, untouched — `generateStaticParams` returns `[]`); the `robots.ts` → `/sitemap.xml` 404; `supplement`/`todays-paper` declare `revalidate = 1800` but build as `5m`, so something in their own fetches still caps them.
+
+---
+
+## 2026-08-28 — Cut ISR writes at the source: edge redirects + on-demand article revalidation (PR #13, `6b0f2bb` — merged)
 
 **Measured starting point.** Vercel billing, 17 days into the cycle: **$164.32** on-demand, of which **ISR Writes $114.38 (70%)** and **Fast Origin Transfer $38.33 (23%)** — the latter is largely a byproduct of the same regenerations, since every write ships its rendered HTML to the edge. Observability → ISR, last 12h, showed where they came from:
 
