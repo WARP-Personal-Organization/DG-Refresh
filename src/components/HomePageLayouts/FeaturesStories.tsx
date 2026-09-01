@@ -4,6 +4,12 @@ import React from "react";
 import type { Post } from "../../../lib/wordpress";
 import AnimatedHeadline from "../AnimatedHeadline";
 import FacebookPagePlugin from "../FacebookPagePlugin";
+import SectionPager from "../SectionPager";
+import { chunk } from "../../../lib/chunk";
+
+// One page of the Features grid — 3 columns × 2 rows, which is what the
+// section showed before paging was added.
+const FEATURES_PER_PAGE = 6;
 
 interface FeaturesStoriesProps {
   stories: Post[];
@@ -26,7 +32,9 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
   const mainStory = stories[0];
   const heroImageStory = stories.length > 1 ? stories[1] : null;
-  const bottomStories = stories.length > 2 ? stories.slice(2, 8) : [];
+  // Everything after the two lead stories, not just the next six — the pager
+  // turns the remainder into pages instead of dropping it.
+  const bottomStories = stories.length > 2 ? stories.slice(2) : [];
 
   return (
     <section className="bg-background py-16">
@@ -93,36 +101,54 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
 
             {/* === BOTTOM ROW: Grid of smaller stories === */}
             {bottomStories.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10 border-t border-accent pt-8">
-                {bottomStories.map((story) => (
-                  <article key={story.id} className="group border-t border-gray-700 pt-4">
-                    <Link href={`/blog/${story.uid}`} className="block">
-                      {/* Thumbnail — shows image when available, fallback placeholder otherwise */}
-                      <div className="relative w-full aspect-[16/10] overflow-hidden rounded-md mb-3">
-                        {story.data.featured_image?.url ? (
-                          <Image
-                            src={story.data.featured_image.url}
-                            alt={story.data.featured_image.alt || story.data.title || "Article image"}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                            <span className="text-gray-500 text-xs font-sans uppercase tracking-widest select-none">
-                              Daily Guardian
-                            </span>
-                          </div>
-                        )}
-                      </div>
+              <div className="border-t border-accent pt-8">
+                <SectionPager label="feature stories">
+                  {chunk(bottomStories, FEATURES_PER_PAGE).map((group, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-10"
+                    >
+                      {group.map((story) => (
+                        <article
+                          key={story.id}
+                          className="group border-t border-gray-700 pt-4"
+                        >
+                          <Link href={`/blog/${story.uid}`} className="block">
+                            {/* Thumbnail — shows image when available, fallback placeholder otherwise */}
+                            <div className="relative w-full aspect-[16/10] overflow-hidden rounded-md mb-3">
+                              {story.data.featured_image?.url ? (
+                                <Image
+                                  src={story.data.featured_image.url}
+                                  alt={
+                                    story.data.featured_image.alt ||
+                                    story.data.title ||
+                                    "Article image"
+                                  }
+                                  fill
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                                  <span className="text-gray-500 text-xs font-sans uppercase tracking-widest select-none">
+                                    Daily Guardian
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-                      <h4 className="text-lg font-playfair font-bold text-foreground transition-colors duration-200 group-hover:text-accent leading-snug">
-                        {story.data.title}
-                      </h4>
-                      {story.data.author && <AuthorByline story={story} />}
-                    </Link>
-                  </article>
-                ))}
+                            <h4 className="text-lg font-playfair font-bold text-foreground transition-colors duration-200 group-hover:text-accent leading-snug">
+                              {story.data.title}
+                            </h4>
+                            {story.data.author && (
+                              <AuthorByline story={story} />
+                            )}
+                          </Link>
+                        </article>
+                      ))}
+                    </div>
+                  ))}
+                </SectionPager>
               </div>
             )}
           </div>

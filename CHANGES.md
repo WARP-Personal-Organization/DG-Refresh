@@ -26,9 +26,22 @@ Then, after reading the annotated screenshots (which pin down what the comments 
 
 **Verified** against `next build` + `next start`, parsing the rendered homepage: Top Stories returns 4 stories all labelled `local` (previously mixed categories), LOCAL returns 4 different stories, NEGROS 4, with **zero overlap** between Top Stories and LOCAL. An editorial article's breadcrumb now reads `Home > opinion` (was `Home > news`). Homepage contains **zero occurrences of "Staff"** — NEGROS has 2 of 4 stories with no author and they render blank. On the exact article Editorial screenshotted, the in-article photo now renders at its natural ~432px inside a ~750px column, matching the old site's proportion in their side-by-side.
 
-**Still open from the same document:**
+Then the pagination Editorial asked for:
 
-- **Pagination** requested in four places: main article list, Latest Opinion, Features, and replacing the "VIEW ALL OPINION" button with in-place paging. The screenshot shows this is **not** numbered pagination — it is a compact `<` `>` prev/next pair that swaps a section row's contents in place. The existing `Pagination` component does page *numbers* for category listings and is a different control.
+| File | Change |
+|---|---|
+| `src/components/SectionPager.tsx` (new) | Compact `<` `>` pager for homepage section rows. Deliberately not the existing `Pagination` component, which renders page *numbers* for the category listing routes — the screenshot shows Editorial wants the old site's control: arrows that swap a row's contents in place without navigating away. Every page is rendered into the DOM and inactive ones hidden with CSS rather than unmounted, so all headlines stay in the server HTML and paging costs no request. |
+| `lib/chunk.ts` (new) | `chunk()` helper. Lives here, not next to `SectionPager`, because that is a `"use client"` module: a server component may render its exports but may not *call* an exported function from one — doing so fails the build with "Attempted to call chunk() from the server". |
+| `src/components/HomePageLayouts/EditorialCartoonOpinion.tsx` | Opinion rail pages through the columns in place; **"View All Opinion →" removed**. The featured column stays fixed above the pager. |
+| `src/components/HomePageLayouts/FeaturesStories.tsx` | Features grid pages 6 at a time (3 × 2, what it showed before). |
+| `src/app/page.tsx` | Opinion fetch 9 → 21, features 10 → 20, so the pagers have depth to page through instead of truncating. |
+| `src/components/MainContent.tsx` | `<main>` → `<div>` (2 places). It was nested inside the root layout's `<main>`, which is invalid HTML and an a11y problem. Found while investigating something else; unrelated to the pagers. |
+
+**Verified** by real mouse clicks (see the note below on why scripted clicks were not trustworthy): the Opinion pager steps correctly through three pages of distinct columns — page 1 "As the floods recede…" / "Do not shortchange SUCs", page 2 "The devil is powerless against God" / "Marcos-Pinks uniteam redux", page 3 "Sabayang pagsigaw" / "More pesos, less value" — with the featured column correctly fixed.
+
+**A wrong turn worth recording.** Mid-investigation I concluded that client components inside page content never hydrate anywhere on the site, including in production, and that category pagination and the CartoonCard pager had never worked. **That was wrong.** The cause was a bad probe: `document.querySelectorAll('button')` was matching a duplicate button inside React's hidden Suspense staging container (`div#S:1`, `display:none`), which is inert leftover markup — not the real, visible, hydrated control. Scripted `.click()` on it did nothing and its DOM node carries no React keys, which looked exactly like a hydration failure. A real mouse click on the visible control works fine: production `/news` pagination advances to `?page=2` and swaps the articles. **Verify interactivity with real clicks on visible elements, not `querySelector` plus `.click()`.**
+
+**Still open from the same document:**
 - **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
 - **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.
 - **Publish dates on homepage story cards**, as on the old site.

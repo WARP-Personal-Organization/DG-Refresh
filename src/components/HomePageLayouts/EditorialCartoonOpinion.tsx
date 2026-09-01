@@ -3,6 +3,12 @@ import Link from "next/link";
 import React from "react";
 import type { Post } from "../../../lib/wordpress";
 import CartoonCard from "../CartoonCard";
+import SectionPager from "../SectionPager";
+import { chunk } from "../../../lib/chunk";
+
+// Columns shown per page in the Opinion rail — matches what the old
+// "View All Opinion →" link used to sit beneath.
+const OPINION_PER_PAGE = 4;
 
 interface Props {
   editorialPosts: Post[];
@@ -34,9 +40,12 @@ export default function EditorialCartoonOpinion({
 }: Props) {
   const banner = editorialPosts[0];
   const opinionFeatured = opinionPosts[0];
-  const opinionRest = opinionPosts.slice(1, 5);
+  // Everything after the featured column, not just the next four — the pager
+  // below turns the remainder into pages rather than truncating it.
+  const opinionRest = opinionPosts.slice(1);
 
-  if (!banner && cartoons.length === 0 && opinionPosts.length === 0) return null;
+  if (!banner && cartoons.length === 0 && opinionPosts.length === 0)
+    return null;
 
   return (
     <section className="bg-background py-12 border-t border-default">
@@ -71,7 +80,9 @@ export default function EditorialCartoonOpinion({
                 )}
               </Link>
             ) : (
-              <div className="text-gray-500 text-sm">No editorial available.</div>
+              <div className="text-gray-500 text-sm">
+                No editorial available.
+              </div>
             )}
           </div>
 
@@ -118,30 +129,31 @@ export default function EditorialCartoonOpinion({
                   )}
                 </Link>
               )}
-              {opinionRest.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/blog/${p.uid}`}
-                  className="block group pt-3 border-t border-default"
-                >
-                  <h4 className="text-sm font-playfair font-bold text-white leading-snug group-hover:text-accent transition-colors">
-                    {p.data.title}
-                  </h4>
-                  {p.data.author && (
-                    <p className="text-xs text-gray-500 mt-1 font-open-sans">
-                      {p.data.author}
-                    </p>
-                  )}
-                </Link>
-              ))}
-              {opinionPosts.length > 0 && (
-                <Link
-                  href="/opinion"
-                  className="block pt-3 border-t border-default text-xs uppercase tracking-widest text-[#fcee16] hover:text-[#fcee16]/70 transition-colors font-roboto"
-                >
-                  View All Opinion →
-                </Link>
-              )}
+              {/* Editorial asked for paging here instead of "View All Opinion →",
+                  so the latest columns can be stepped through in place rather
+                  than sending the reader to /opinion. */}
+              <SectionPager label="opinion columns">
+                {chunk(opinionRest, OPINION_PER_PAGE).map((group, i) => (
+                  <div key={i} className="space-y-3">
+                    {group.map((p) => (
+                      <Link
+                        key={p.id}
+                        href={`/blog/${p.uid}`}
+                        className="block group pt-3 border-t border-default"
+                      >
+                        <h4 className="text-sm font-playfair font-bold text-white leading-snug group-hover:text-accent transition-colors">
+                          {p.data.title}
+                        </h4>
+                        {p.data.author && (
+                          <p className="text-xs text-gray-500 mt-1 font-open-sans">
+                            {p.data.author}
+                          </p>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </SectionPager>
             </div>
           </div>
         </div>

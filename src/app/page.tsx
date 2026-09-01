@@ -60,15 +60,20 @@ export default async function Home() {
         () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 16),
         () => getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
         () => getPostsByCategorySlugs(["sports"], 8),
+        // 20, not 10: the Features grid pages through the tail of this pool
+        // now rather than truncating it at six.
         () =>
           getPostsByCategorySlugs(
             ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
-            10,
+            20,
           ),
         () => getPostsByCategorySlugs(["initiatives"], 5),
         () => getPostsByCategorySlugs(["national", "national-news"], 5),
         () => getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
-        () => getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),
+        // 21, not 9: the Opinion rail now pages through these in place rather
+        // than truncating at four and linking to /opinion, so a deeper pool
+        // gives the pager something to page through.
+        () => getPostsByCategorySlugs(["voices", "visons", "opinion"], 21),
         () => getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
         () => getTodaysPaper().catch(() => null),
         () => getSupplement().catch(() => null),

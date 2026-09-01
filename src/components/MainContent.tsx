@@ -40,9 +40,9 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   if (!heroPost || !featuredPost) {
     return (
-      <main className="lg:col-span-3 w-full bg-background">
+      <div className="lg:col-span-3 w-full bg-background">
         <div className="text-center py-12 text-gray-400">Loading...</div>
-      </main>
+      </div>
     );
   }
 
@@ -50,7 +50,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const featuredLabel = labelFor(featuredPost);
 
   return (
-    <main className="lg:col-span-3 w-full p-0 m-0">
+    <div className="lg:col-span-3 w-full p-0 m-0">
       {/* === MAIN GRID (40/60 split) === */}
       <div className="grid lg:grid-cols-5 gap-4 lg:gap-6 mt-8">
         {/* === LEFT COLUMN (MAIN HERO STORY - 2/5 width) === */}
@@ -168,7 +168,7 @@ const MainContent: React.FC<MainContentProps> = ({
           </article>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 
