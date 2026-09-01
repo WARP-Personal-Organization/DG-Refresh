@@ -54,11 +54,19 @@ And two more from the same document:
 
 **Method note.** Several wrong conclusions today came from probing the DOM with JavaScript. In this tab context layout is not computed — `offsetParent` is `null` and `getBoundingClientRect()` returns `0×0` for *every* element, including plainly visible ones — so anything inferred from geometry is meaningless here. `querySelectorAll` also matches inert duplicates inside React's hidden Suspense staging containers. **Verify interactivity by clicking the real control and looking at the result, and verify server-rendered output with `curl` plus a parser.**
 
+And the nav-dropdown pagination:
+
+| File | Change |
+|---|---|
+| `src/components/Navigation.tsx` | **Prev/next arrows under the mega-dropdown's preview cards.** Editorial clarified this one with a screenshot of the old site: hovering a nav item there gives you `<` `>` beneath the four article cards, so you can step through that section's articles without leaving the menu. `getPostsForCategory` no longer truncates to four; the dropdown holds a page index that resets whenever a different nav item opens. |
+| `src/app/api/nav-data/route.ts` | Per-category fetch 4 → 12, so there is something to page through. Each category is its own fetch, so this stays far below the 2 MB per-fetch data-cache limit, and costs no extra WordPress requests — `getPostsByCategorySlugs` makes two either way. |
+
+**Verified** with a real click: the NEWS dropdown pages from "Free HIV testing…" / "ARCHITECT, NOT JUST FINANCIER…" to "More Filipinos say Sara Duterte guilty…" / "Ex-convict, alleged runner nabbed…", with the prev arrow correctly enabling on page 2. This is comment 1, which earlier notes had misread as a page section — image3 in the document is the old site's BUSINESS *dropdown*, not a row on the page.
+
 **Still open from the same document:**
 - **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
 - **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.
-- **Publish dates on homepage story cards**, as on the old site.
-- **Category labels in the Features section** (entertainment, society, environment, health, …).
+- **"Latest Opinions" pagination on `/opinion`** (comment 5) — built twice and reverted twice. `SectionPager` renders correctly there but could not be verified as working, while the identical component works on the homepage and in the nav. Unresolved; see the method note above.
 
 Note: the comments are in Hiligaynon and the readings above are a translation — worth a native check before acting on the remaining items.
 
