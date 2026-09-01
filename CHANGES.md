@@ -15,13 +15,22 @@ Acting on `for website.docx` — 12 annotated screenshots with review comments f
 | `src/app/page.tsx` | **Editorials no longer duplicate into the Opinion list.** They are filed under both the `editorial` and `opinion` WordPress categories, so both fetches returned them and they rendered twice in the same block. The Editorial column owns them. |
 | `lib/wordpress.ts` | **`editorial` now maps to `opinion`, not `news`.** This one line put a `NEWS` label on every editorial, and — via the `category === "news"` branch in `transformPost` — also gave editorials a locality tag they should never have had. |
 
-**Verified** against `next build` + `next start`, parsing the rendered homepage: Top Stories returns 4 stories all labelled `local` (previously mixed categories), LOCAL returns 4 different stories, NEGROS 4, with **zero overlap** between Top Stories and LOCAL. An editorial article's breadcrumb now reads `Home > opinion` (was `Home > news`).
+Then, after reading the annotated screenshots (which pin down what the comments only gestured at):
 
-**Still open from the same document** — feature/design work, not yet started:
+| File | Change |
+|---|---|
+| `src/components/HomePageLayouts/LocalStories.tsx` | **Dropped the `"Staff"` byline placeholder** (2 places). A story with no author now shows nothing at all — the wrapping `<div>` and its divider go too, rather than leaving an empty rule. This is the one the red arrow in the NEGROS screenshot pointed at. |
+| `src/components/CategoryPage.tsx` | Same, 2 places. The `•` separator is dropped along with the author so the date isn't left dangling after a bullet. |
+| `src/components/PaginatedSubcategoryContent.tsx` | Same, 2 places (`"Staff Reporter"`), icon included. |
+| `src/app/globals.css` | **In-article images no longer stretched to full column width.** The rule set `width: 100% !important` next to `max-width: 100%`, which *upscaled* every image regardless of natural size — a 400px photo became ~750px and, with `height: auto`, proportionally taller, so one image could fill the desktop viewport and push the article text below the fold. `width: auto` restores the old site's sizing; `max-width` still caps anything wider than the column. The `.td-gallery` rules below deliberately re-assert `width: 100%` for grid tiles and are unaffected. |
 
-- **Pagination** requested in four places: main article list, Latest Opinion, Features, and replacing the "VIEW ALL OPINION" button with in-place paging (they want the old site's red-arrow control).
-- **Embedded article images render too large on desktop** — you have to scroll past a single image. Mobile is fine. They want the old site's dimensions.
-- **Byline cleanup**: drop the `STAFF` fallback when a story has no byline; remove a duplicate byline at the top of article pages; remove the `UPDATED` timestamp.
+**Verified** against `next build` + `next start`, parsing the rendered homepage: Top Stories returns 4 stories all labelled `local` (previously mixed categories), LOCAL returns 4 different stories, NEGROS 4, with **zero overlap** between Top Stories and LOCAL. An editorial article's breadcrumb now reads `Home > opinion` (was `Home > news`). Homepage contains **zero occurrences of "Staff"** — NEGROS has 2 of 4 stories with no author and they render blank. On the exact article Editorial screenshotted, the in-article photo now renders at its natural ~432px inside a ~750px column, matching the old site's proportion in their side-by-side.
+
+**Still open from the same document:**
+
+- **Pagination** requested in four places: main article list, Latest Opinion, Features, and replacing the "VIEW ALL OPINION" button with in-place paging. The screenshot shows this is **not** numbered pagination — it is a compact `<` `>` prev/next pair that swaps a section row's contents in place. The existing `Pagination` component does page *numbers* for category listings and is a different control.
+- **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
+- **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.
 - **Publish dates on homepage story cards**, as on the old site.
 - **Category labels in the Features section** (entertainment, society, environment, health, …).
 

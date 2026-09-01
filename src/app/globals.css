@@ -64,12 +64,26 @@ body {
   height: auto !important;
 }
 
-/* Responsive images in article body — override any WP inline style="width:Xpx" */
+/* Images in the article body.
+ *
+ * `width: 100%` used to be set here alongside max-width, which upscaled every
+ * image to the full column regardless of its natural size. A 400px-wide photo
+ * from WordPress was being stretched to ~800px and, with height:auto, got
+ * proportionally taller — on desktop a single image could fill the viewport and
+ * push the article text below the fold. Editorial flagged it against the old
+ * site, where the same photo renders at roughly half the column width.
+ *
+ * `width: auto` restores that: images render at their natural size, and
+ * max-width still caps anything wider than the column (which is what the
+ * original comment about WP's inline style="width:Xpx" was guarding against).
+ *
+ * The .td-gallery rules below deliberately re-assert width:100% for gallery
+ * tiles — those are grid cells and should fill their column. */
 .prose figure,
 .prose figure img,
 .prose img {
   max-width: 100% !important;
-  width: 100% !important;
+  width: auto !important;
   height: auto !important;
 }
 

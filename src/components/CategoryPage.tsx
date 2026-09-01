@@ -63,8 +63,14 @@ const ArticleCard: React.FC<{ article: Post }> = ({ article }) => (
         </p>
 
         <div className="flex items-center gap-3 text-xs text-gray-500 pt-2 font-open-sans">
-          <span>{renderText(article.data.author) || "Staff"}</span>
-          <span>•</span>
+          {/* No "Staff" placeholder when a story has no byline — the separator
+              drops with it so the date isn't left dangling after a bullet. */}
+          {renderText(article.data.author) && (
+            <>
+              <span>{renderText(article.data.author)}</span>
+              <span>•</span>
+            </>
+          )}
           <span>{formatDate(article.data.published_date)}</span>
         </div>
       </div>
@@ -119,10 +125,12 @@ const CategoryPageComponent: React.FC<CategoryPageComponentProps> = ({
                       </p>
 
                       <div className="flex items-center gap-3 text-sm text-gray-500 pt-2 font-open-sans">
-                        <span>
-                          {renderText(featuredArticle.data.author) || "Staff"}
-                        </span>
-                        <span>•</span>
+                        {renderText(featuredArticle.data.author) && (
+                          <>
+                            <span>{renderText(featuredArticle.data.author)}</span>
+                            <span>•</span>
+                          </>
+                        )}
                         <span>
                           {formatDate(featuredArticle.data.published_date)}
                         </span>

@@ -65,10 +65,14 @@ const ArticleCard: React.FC<{ article: Post }> = ({ article }) => (
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <User size={12} className="text-[#fcee16]" />
-              {article.data.author || "Staff Reporter"}
-            </span>
+            {/* No "Staff Reporter" placeholder — a story without a byline
+                shows no author line at all, icon included. */}
+            {article.data.author && (
+              <span className="flex items-center gap-1">
+                <User size={12} className="text-[#fcee16]" />
+                {article.data.author}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Calendar size={12} className="text-[#fcee16]" />
               {formatDate(article.data.published_date)}
@@ -123,10 +127,12 @@ const FeaturedArticle: React.FC<{ article: Post }> = ({ article }) => (
           </p>
 
           <div className="flex items-center gap-6 text-sm text-gray-400">
-            <span className="flex items-center gap-2">
-              <User size={16} className="text-[#fcee16]" />
-              {article.data.author || "Staff Reporter"}
-            </span>
+            {article.data.author && (
+              <span className="flex items-center gap-2">
+                <User size={16} className="text-[#fcee16]" />
+                {article.data.author}
+              </span>
+            )}
             <span className="flex items-center gap-2">
               <Calendar size={16} className="text-[#fcee16]" />
               {formatDate(article.data.published_date)}

@@ -46,11 +46,15 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                       </p>
                     )}
                   </div>
-                  <div className="mt-4 pt-2 border-t border-default">
-                    <span className="text-xs font-medium text-gray-400 font-sans">
-                      {mainStory.data.author || "Staff"}
-                    </span>
-                  </div>
+                  {/* No "Staff" placeholder — editorial asked that a story with
+                      no byline simply show nothing. The divider goes with it. */}
+                  {mainStory.data.author && (
+                    <div className="mt-4 pt-2 border-t border-default">
+                      <span className="text-xs font-medium text-gray-400 font-sans">
+                        {mainStory.data.author}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Image */}
@@ -79,11 +83,13 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                   <h4 className="text-base font-playfair font-bold text-foreground uppercase transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h4>
-                  <div className="mt-2 pt-2 border-t border-default">
-                    <span className="text-xs font-medium text-gray-400 font-sans">
-                      By {story.data.author || "Staff"}
-                    </span>
-                  </div>
+                  {story.data.author && (
+                    <div className="mt-2 pt-2 border-t border-default">
+                      <span className="text-xs font-medium text-gray-400 font-sans">
+                        By {story.data.author}
+                      </span>
+                    </div>
+                  )}
                 </Link>
               </article>
             ))}
