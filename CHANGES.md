@@ -41,6 +41,19 @@ Then the pagination Editorial asked for:
 
 **A wrong turn worth recording.** Mid-investigation I concluded that client components inside page content never hydrate anywhere on the site, including in production, and that category pagination and the CartoonCard pager had never worked. **That was wrong.** The cause was a bad probe: `document.querySelectorAll('button')` was matching a duplicate button inside React's hidden Suspense staging container (`div#S:1`, `display:none`), which is inert leftover markup — not the real, visible, hydrated control. Scripted `.click()` on it did nothing and its DOM node carries no React keys, which looked exactly like a hydration failure. A real mouse click on the visible control works fine: production `/news` pagination advances to `?page=2` and swaps the articles. **Verify interactivity with real clicks on visible elements, not `querySelector` plus `.click()`.**
 
+And two more from the same document:
+
+| File | Change |
+|---|---|
+| `src/components/HomePageLayouts/FeaturesStories.tsx` | **Category label on each Features card** — entertainment, society, environment, health, and so on. The generic `"feature"` value is suppressed, since it labels every card identically and tells the reader nothing. |
+| `TopStories.tsx`, `LocalStories.tsx`, `FeaturesStories.tsx` | **Publish date on homepage story cards**, as on the old site. Pinned to `Asia/Manila` — the functions run in `iad1`, so an unpinned date renders a day off for a PH newsroom. In `LocalStories` the date stands on its own when a story has no byline, and the `•` separator only appears when both are present. |
+
+**Verified** against the server-rendered homepage: dates render in Top Stories (4), LOCAL (4), NEGROS (4) and FEATURES (18); Features labels come through as `ENVIRONMENT`, `EDUCATION`, `SOCIETY`, `ARTS AND CULTURE`.
+
+**Attempted and reverted:** pagination for "Latest Opinions" on `/opinion` (comment 5). `SectionPager` renders there correctly — four page groups, one visible — but the control does not hydrate on that route: no React keys after six seconds, and clicking does nothing, while the header on the same page is interactive and the identical component works on the homepage. Rather than ship a visible arrow that does nothing, `VoicesPage` was reverted to its previous six-post slice. Why that route differs is unresolved.
+
+**Method note.** Several wrong conclusions today came from probing the DOM with JavaScript. In this tab context layout is not computed — `offsetParent` is `null` and `getBoundingClientRect()` returns `0×0` for *every* element, including plainly visible ones — so anything inferred from geometry is meaningless here. `querySelectorAll` also matches inert duplicates inside React's hidden Suspense staging containers. **Verify interactivity by clicking the real control and looking at the result, and verify server-rendered output with `curl` plus a parser.**
+
 **Still open from the same document:**
 - **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
 - **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.

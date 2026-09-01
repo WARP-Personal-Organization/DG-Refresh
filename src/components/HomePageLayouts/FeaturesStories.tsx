@@ -16,6 +16,28 @@ interface FeaturesStoriesProps {
   title: string;
 }
 
+// Which bucket a feature belongs to. `subcategory` carries the specific one
+// (entertainment, health, environment, …); `category` is the generic
+// "feature" fallback, which is dropped since it labels every card identically
+// and tells the reader nothing.
+const sectionLabel = (story: Post) => {
+  const label = story.data.subcategory || story.data.category || "";
+  return label.toLowerCase() === "feature" ? "" : label;
+};
+
+// Publish date on homepage cards, as on the old site. Pinned to Asia/Manila so
+// it doesn't render a day off for a PH newsroom when the server is elsewhere —
+// the functions run in iad1.
+const formatDate = (s: string) =>
+  s
+    ? new Date(s).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Manila",
+      })
+    : "";
+
 const AuthorByline = ({ story }: { story: Post }) => (
   <div className="text-accent text-sm font-medium uppercase tracking-wide mt-2 font-sans">
     {story.data.author}
@@ -137,11 +159,25 @@ const FeaturesStories: React.FC<FeaturesStoriesProps> = ({
                               )}
                             </div>
 
+                            {/* Editorial asked for a label here so readers can
+                                tell which kind of feature a story is —
+                                entertainment, health, environment, and so on —
+                                since the section mixes them all together. */}
+                            {sectionLabel(story) && (
+                              <p className="text-xs font-semibold text-accent uppercase tracking-wide font-sans mb-1">
+                                {sectionLabel(story)}
+                              </p>
+                            )}
                             <h4 className="text-lg font-playfair font-bold text-foreground transition-colors duration-200 group-hover:text-accent leading-snug">
                               {story.data.title}
                             </h4>
                             {story.data.author && (
                               <AuthorByline story={story} />
+                            )}
+                            {formatDate(story.data.published_date) && (
+                              <p className="text-xs text-gray-400 font-open-sans mt-1">
+                                {formatDate(story.data.published_date)}
+                              </p>
                             )}
                           </Link>
                         </article>
