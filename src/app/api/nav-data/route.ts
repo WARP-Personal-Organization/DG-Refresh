@@ -59,21 +59,21 @@ export async function GET() {
       () =>
         getPostsByCategorySlugs(
           ["voices", "visons", "opinion"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
         getPostsByCategorySlugs(
           ["business", "motoring", "tech-talk"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
         getPostsByCategorySlugs(
           ["feature", "features", "entertainment", "lifestyle", "health"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
