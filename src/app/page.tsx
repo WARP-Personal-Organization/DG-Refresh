@@ -55,7 +55,9 @@ export default async function Home() {
       [
         () => getAllPosts(20),
         () => getBannerNewsBySubcategory(30), // banner news grouped by subcategory
-        () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),
+        // 16, not 6: this pool now feeds three places — one post in MainContent,
+        // four in Top Stories, and four in the LOCAL section below.
+        () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 16),
         () => getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
         () => getPostsByCategorySlugs(["sports"], 8),
         () =>
@@ -103,7 +105,13 @@ export default async function Home() {
       ...nationalResult.posts,
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
     const editorialPicks = editorialResult.posts;
-    const voicesPicks = voicesResult.posts;
+
+    // Editorials are filed under the WordPress "opinion" category as well as
+    // "editorial", so they came back in both fetches and rendered twice in the
+    // same block — once in the Editorial column, again in the Opinion list.
+    // The Editorial column owns them; drop them from Opinion.
+    const editorialIds = new Set(editorialPicks.map((p) => p.id));
+    const voicesPicks = voicesResult.posts.filter((p) => !editorialIds.has(p.id));
 
     // Featured/sticky posts come from the recent posts pool
     const featuredPicks = recentPosts.filter((p) => p.data.is_featured);
@@ -134,16 +142,22 @@ export default async function Home() {
     const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (localPost) usedIds.add(localPost.id);
 
-    // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([heroPost.id, featuredPost.id]);
+    // Top Stories carries LOCAL news only.
+    //
+    // It used to draw from `recentPosts` (getAllPosts — the 20 newest posts in
+    // any category), so publishing anything anywhere put it on the homepage's
+    // Top Stories rail: an opinion column, a sports result, a business item.
+    // Editorial reported this as the single biggest problem with the new site —
+    // posts should stay in their own section. Sourcing from localPicks keeps
+    // Top Stories to what it claims to be.
+    const topStoriesPool = localPicks.filter((p) => !usedIds.has(p.id));
 
-    // TopStories shows the freshest posts only (no stickies-pinned older items).
-    const topStoriesPool = recentPosts.filter(
-      (p) => !shownInMainContent.has(p.id),
+    // The LOCAL section takes what Top Stories didn't, so the two rails don't
+    // show the same four stories. TopStories renders 4.
+    const topStoriesIds = new Set(topStoriesPool.slice(0, 4).map((p) => p.id));
+    const localStoriesData = localPicks.filter(
+      (p) => !usedIds.has(p.id) && !topStoriesIds.has(p.id),
     );
-
-    // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
-    const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
 
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">

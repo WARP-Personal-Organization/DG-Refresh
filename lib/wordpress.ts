@@ -244,7 +244,10 @@ const CATEGORY_MAP: Record<string, string> = {
   opinion: "opinion",
   voices: "voices",
   visons: "voices",
-  editorial: "news",
+  // Editorial is opinion, not news. Mapping it to "news" put an OPINION label
+  // of "NEWS" on every editorial, and (via the `category === "news"` branch in
+  // transformPost) also gave editorials a locality tag they should never have.
+  editorial: "opinion",
   entertainment: "feature",
   lifestyle: "feature",
   health: "feature",

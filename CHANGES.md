@@ -4,7 +4,44 @@ Grouped by session/date, most recent first. Entries are committed and merged to 
 
 ---
 
-## 2026-08-30 — Remove the root layout's revalidate ceiling (branch `perf/layout-revalidate-ceiling`, **not yet merged**)
+## 2026-09-01 — Editorial feedback: category leakage and editorial mis-tagging (branch `fix/editorial-category-leakage`, **not yet merged**)
+
+Acting on `for website.docx` — 12 annotated screenshots with review comments from DG-Editorial-Rex, written in Hiligaynon. Three of the items are real bugs; the rest are design/feature requests, listed at the bottom as still open.
+
+| File | Change |
+|---|---|
+| `src/app/page.tsx` | **Top Stories now carries local news only.** It drew from `getAllPosts(20)` — the 20 newest posts in *any* category — so publishing an opinion column, a sports result, or a business item put it straight onto the homepage's Top Stories rail. Editorial reported this twice, as their biggest problem with the new site. Now sourced from `localPicks`, with the LOCAL section taking what Top Stories didn't so the two rails never show the same story. |
+| `src/app/page.tsx` | Local fetch raised 6 → 16, since that pool now feeds three places (MainContent, Top Stories, LOCAL). |
+| `src/app/page.tsx` | **Editorials no longer duplicate into the Opinion list.** They are filed under both the `editorial` and `opinion` WordPress categories, so both fetches returned them and they rendered twice in the same block. The Editorial column owns them. |
+| `lib/wordpress.ts` | **`editorial` now maps to `opinion`, not `news`.** This one line put a `NEWS` label on every editorial, and — via the `category === "news"` branch in `transformPost` — also gave editorials a locality tag they should never have had. |
+
+**Verified** against `next build` + `next start`, parsing the rendered homepage: Top Stories returns 4 stories all labelled `local` (previously mixed categories), LOCAL returns 4 different stories, NEGROS 4, with **zero overlap** between Top Stories and LOCAL. An editorial article's breadcrumb now reads `Home > opinion` (was `Home > news`).
+
+**Still open from the same document** — feature/design work, not yet started:
+
+- **Pagination** requested in four places: main article list, Latest Opinion, Features, and replacing the "VIEW ALL OPINION" button with in-place paging (they want the old site's red-arrow control).
+- **Embedded article images render too large on desktop** — you have to scroll past a single image. Mobile is fine. They want the old site's dimensions.
+- **Byline cleanup**: drop the `STAFF` fallback when a story has no byline; remove a duplicate byline at the top of article pages; remove the `UPDATED` timestamp.
+- **Publish dates on homepage story cards**, as on the old site.
+- **Category labels in the Features section** (entertainment, society, environment, health, …).
+
+Note: the comments are in Hiligaynon and the readings above are a translation — worth a native check before acting on the remaining items.
+
+---
+
+## 2026-08-30 — Remove the root layout's revalidate ceiling (PR #14, `4ba1132` — merged)
+
+**Measured outcome.** Aug 31, the first full day on the new layout, against Aug 27 (before any of this work):
+
+| Line item | Aug 27 | Aug 29 (after PR #13) | **Aug 31 (after PR #14)** |
+|---|---|---|---|
+| ISR Writes | $7.22 | $4.92 | **$0.67** (−91%) |
+| Fast Origin Transfer | $2.31 | $1.71 | $0.61 (−74%) |
+| Edge Requests | $0.60 | $1.45 | $1.22 |
+| Fluid Active CPU | $0.69 | $0.57 | $0.31 |
+| **Total/day** | **$11.94** | **$9.58** | **$3.47** |
+
+**$11.94 → $3.47/day, a 71% reduction** — roughly $358/month down to $104/month. The layout ceiling was indeed the blocker: `/blog/[uid]` writes-per-path halved (2.4 → 1.33) once the route could actually hold a 24h cache, and `/[catagory]` has dropped off the top-10 routes entirely. **Edge Requests is now the largest single line item** ($1.22 of $3.47), partly the redirect hop introduced in PR #13 — that is where the next increment of savings would come from, at roughly a fifth the stakes.
 
 **Measured outcome of the Aug 28 work first**, since it motivates this change. Comparing two adjacent full days, Aug 27 (pre-fix) against Aug 29 (post-fix):
 
