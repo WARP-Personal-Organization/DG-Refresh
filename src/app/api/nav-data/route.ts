@@ -78,7 +78,10 @@ export async function GET() {
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
-        getPostsByCategorySlugs(["initiatives"], NAV_POSTS_PER_CATEGORY, 1, NAV_REVALIDATE_SECONDS).catch(
+        // "initiative", not "initiatives" — see the note in src/app/page.tsx.
+        // The plural matched no WordPress category, so the INITIATIVE dropdown
+        // rendered its empty-state skeletons.
+        getPostsByCategorySlugs(["initiative"], NAV_POSTS_PER_CATEGORY, 1, NAV_REVALIDATE_SECONDS).catch(
           () => EMPTY_CATEGORY_RESULT,
         ),
     ],

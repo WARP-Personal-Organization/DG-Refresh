@@ -240,6 +240,13 @@ const CATEGORY_MAP: Record<string, string> = {
   business: "business",
   features: "feature",
   feature: "feature",
+  // Both spellings: WordPress's category slug is the singular "initiative"
+  // (id 175), while this app's route and section are "initiatives". Without the
+  // singular key, mapCategory fell through to its "news" default and every
+  // initiative post was labelled NEWS — the same failure the editorial mapping
+  // above had. The substring fallback can't save it either, since "initiative"
+  // does not contain "initiatives".
+  initiative: "initiatives",
   initiatives: "initiatives",
   opinion: "opinion",
   voices: "voices",

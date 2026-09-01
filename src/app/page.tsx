@@ -67,7 +67,10 @@ export default async function Home() {
             ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
             20,
           ),
-        () => getPostsByCategorySlugs(["initiatives"], 5),
+        // "initiative", not "initiatives": that is the WordPress category slug
+        // (id 175, 165 posts). The plural is this app's route name and matches
+        // nothing in WordPress, so this section came back empty.
+        () => getPostsByCategorySlugs(["initiative"], 5),
         () => getPostsByCategorySlugs(["national", "national-news"], 5),
         () => getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
         // 21, not 9: the Opinion rail now pages through these in place rather

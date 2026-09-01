@@ -63,6 +63,17 @@ And the nav-dropdown pagination:
 
 **Verified** with a real click: the NEWS dropdown pages from "Free HIV testing…" / "ARCHITECT, NOT JUST FINANCIER…" to "More Filipinos say Sara Duterte guilty…" / "Ex-convict, alleged runner nabbed…", with the prev arrow correctly enabling on page 2. This is comment 1, which earlier notes had misread as a page section — image3 in the document is the old site's BUSINESS *dropdown*, not a row on the page.
 
+**Separately: the INITIATIVE section was empty everywhere.** Spotted while checking the new dropdown — it rendered only placeholder skeletons. Two independent bugs, both a singular/plural mismatch:
+
+| File | Change |
+|---|---|
+| `src/app/page.tsx`, `src/app/api/nav-data/route.ts` | Both queried WordPress for the category slug `"initiatives"`. The real slug is **`"initiative"`** (id 175, 165 posts) — confirmed against `/wp-json/wp/v2/categories`. The plural is this app's route name and matches nothing in WordPress, so both the homepage INITIATIVES section and the nav dropdown came back with zero posts. |
+| `lib/wordpress.ts` | `CATEGORY_MAP` was keyed only on the plural, so `mapCategory(["initiative"])` missed the exact lookup, missed the substring fallback (`"initiative"` does not contain `"initiatives"`), and fell through to the `"news"` default — labelling every initiative post **NEWS**. Same failure as the editorial mapping fixed above. Added the singular key. |
+
+**Verified:** nav data went from 44 to 55 posts, 12 of them initiative-tagged and now carrying `category: "initiatives"` rather than `"news"`. Both the dropdown and the homepage INITIATIVES section render real articles ("Bangon Iloilo Project…", "The New Normal Fashion", "Hablon Facemasks").
+
+One gotcha worth remembering: after changing `/api/nav-data`, the browser serves a cached copy of it (the response sets `s-maxage` but no `max-age`, so browsers cache heuristically). A normal reload still showed the old empty dropdown; a hard reload was needed to see the fix.
+
 **Still open from the same document:**
 - **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
 - **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.
