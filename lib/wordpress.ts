@@ -139,6 +139,65 @@ export function addTargetBlankToExternalLinks(html: string): string {
   });
 }
 
+// Drop a "By <author>" line from the top of the article body when it just
+// repeats the post's own byline.
+//
+// Many stories are typed with the byline as the first line of the body, so the
+// article page rendered it twice: once in the styled header block built from
+// the WordPress author field, then again in plain text at the start of the
+// text. Editorial flagged the duplication, and also noted it appears on some
+// stories and not others — which is exactly right, since it depends on whether
+// that particular story happens to carry the line in its body.
+//
+// Only the first block is examined, and only removed when its text matches this
+// post's author, so a story that opens by quoting someone else is untouched.
+export function stripLeadingByline(html: string, author: string): string {
+  if (!html || !author) return html;
+
+  const normalise = (s: string) =>
+    s
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/[.,]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  const target = normalise(author);
+  if (!target) return html;
+
+  // The byline is not always the very first block: stories usually open with a
+  // paragraph wrapping the lead image, with the byline in the one after it. So
+  // walk the leading blocks, stepping over any that carry no text of their own
+  // (image-only wrappers), and stop at the first that does.
+  const BLOCK = /^\s*<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>\s*/i;
+  const MAX_BLOCKS_TO_SCAN = 4;
+
+  let offset = 0;
+  for (let i = 0; i < MAX_BLOCKS_TO_SCAN; i++) {
+    const rest = html.slice(offset);
+    const match = BLOCK.exec(rest);
+    if (!match) return html;
+
+    const text = normalise(match[2]);
+    if (!text) {
+      // Image-only (or otherwise empty) block — keep it and look at the next.
+      offset += match[0].length;
+      continue;
+    }
+
+    const withoutPrefix = text.replace(/^by\s+/, "");
+    // Require a "By " prefix, and that what follows names this post's author —
+    // so a story that opens by quoting somebody else is left alone.
+    if (text !== withoutPrefix && withoutPrefix === target) {
+      return html.slice(0, offset) + rest.slice(match[0].length);
+    }
+    // First block with real text isn't the byline; nothing to strip.
+    return html;
+  }
+  return html;
+}
+
 // Remove the inline <style> block injected by the td-gallery plugin into content.rendered.
 // That block sets thumbnail CSS keyed on #tdi_N IDs — useless without the slider JS.
 export function stripGalleryStyles(html: string): string {
