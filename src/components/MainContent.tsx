@@ -7,7 +7,8 @@ import AnimatedHeadline from "./AnimatedHeadline";
 interface MainContentProps {
   heroPost?: Post;
   featuredPost?: Post;
-  editorialPost?: Post;
+  /** Second story in the left column, under the hero. */
+  secondaryPost?: Post;
   localposts?: Post;
 }
 
@@ -35,7 +36,7 @@ const ArticleSeparator: React.FC = () => {
 const MainContent: React.FC<MainContentProps> = ({
   heroPost,
   featuredPost,
-  editorialPost,
+  secondaryPost,
   localposts,
 }) => {
   if (!heroPost || !featuredPost) {
@@ -69,27 +70,30 @@ const MainContent: React.FC<MainContentProps> = ({
                 {heroPost.data.title}
               </AnimatedHeadline>
             </Link>
-            <p className="text-base text-gray-300 mt-2 leading-snug font-sans">
+            {/* Clamped so the column's height stays predictable. The story
+                beside it is a fixed-aspect image, and an unusually long
+                summary used to push this column past it. */}
+            <p className="text-base text-gray-300 mt-2 leading-snug font-sans line-clamp-[8]">
               {heroPost.data.summary}
             </p>
           </article>
 
           {/* Bottom articles */}
           <div>
-            {editorialPost && (
+            {secondaryPost && (
               <>
                 <ArticleSeparator />
                 <article className="pt-4">
-                  <Link href={`/blog/${editorialPost.uid}`} className="block group">
+                  <Link href={`/blog/${secondaryPost.uid}`} className="block group">
                     <div className="flex-1">
                       <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
-                        {editorialPost.data.locality || editorialPost.data.subcategory || editorialPost.data.category || "Editorial"}
+                        {secondaryPost.data.locality || secondaryPost.data.subcategory || secondaryPost.data.category || "News"}
                       </p>
-                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
-                        {editorialPost.data.title}
+                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug line-clamp-3">
+                        {secondaryPost.data.title}
                       </p>
-                      {editorialPost.data.author && (
-                        <p className="text-xs text-gray-500 mt-0.5">{editorialPost.data.author}</p>
+                      {secondaryPost.data.author && (
+                        <p className="text-xs text-gray-500 mt-0.5">{secondaryPost.data.author}</p>
                       )}
                     </div>
                   </Link>
@@ -106,7 +110,7 @@ const MainContent: React.FC<MainContentProps> = ({
                       <p className="text-accent text-xs font-bold uppercase tracking-wider mb-1">
                         {localposts.data.locality || localposts.data.subcategory || localposts.data.category || "Local"}
                       </p>
-                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug">
+                      <p className="font-bold text-foreground text-base group-hover:text-accent transition-colors font-playfair leading-snug line-clamp-3">
                         {localposts.data.title}
                       </p>
                       {localposts.data.author && (

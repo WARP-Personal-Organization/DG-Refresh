@@ -150,6 +150,17 @@ export default async function Home() {
     const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (localPost) usedIds.add(localPost.id);
 
+    // A second story for MainContent's left column. That column lays its two
+    // bottom slots out with `justify-between`, so with only one filled the lone
+    // item was pushed to the bottom and left a large gap under the hero summary
+    // — the column read as empty. Prefer another banner story, since the hero
+    // and featured are both banner news and this sits alongside them; fall back
+    // to local if banner news is exhausted.
+    const secondaryPost =
+      bannerPicks.find((p) => !usedIds.has(p.id)) ??
+      localPicks.find((p) => !usedIds.has(p.id));
+    if (secondaryPost) usedIds.add(secondaryPost.id);
+
     // Top Stories carries LOCAL news only.
     //
     // It used to draw from `recentPosts` (getAllPosts — the 20 newest posts in
@@ -174,6 +185,7 @@ export default async function Home() {
             <MainContent
               heroPost={heroPost}
               featuredPost={featuredPost}
+              secondaryPost={secondaryPost}
               localposts={localPost}
             />
             <div className="flex flex-col gap-6 self-start lg:sticky lg:top-4">
