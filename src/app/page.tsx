@@ -21,6 +21,7 @@ import {
   getSupplement,
   getPaperEditions,
   getSupplementEditions,
+  type Post,
 } from "../../lib/wordpress";
 import { withConcurrencyLimit } from "../../lib/concurrency";
 import "./globals.css";
@@ -30,6 +31,20 @@ import "./globals.css";
 // via Promise.all could burst 25-40+ simultaneous connections against
 // shared cPanel hosting.
 const WP_FETCH_CONCURRENCY = 5;
+
+// Merge a section's pinned banner news with its date-ordered category posts,
+// de-duplicate, and return newest first. Banner news does not reorder itself by
+// date, so concatenating it ahead of the category posts left every section rail
+// led by older pinned items — Editorial reported the homepage showing Sept 14-15
+// stories while /news/local already had Sept 16.
+const newestFirst = (...groups: Post[][]): Post[] =>
+  groups
+    .flat()
+    .filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i)
+    .sort(
+      (a, b) =>
+        Date.parse(b.data.published_date) - Date.parse(a.data.published_date),
+    );
 
 export default async function Home() {
   try {
@@ -92,26 +107,33 @@ export default async function Home() {
       ...Object.values(bannerBySubcategory).flat(),
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
 
-    const localPicks = [
-      ...(bannerBySubcategory["local"] ?? []),
-      ...localResult.posts,
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+    // Newest first. Banner news is editorially pinned and does not reorder
+    // itself by date, so merging it ahead of the date-ordered local posts meant
+    // Top Stories and the LOCAL rail led with older pinned items — the homepage
+    // was showing Sept 14-15 stories while /news/local already had Sept 16.
+    // Editorial reported exactly that. Banner news still leads the hero and
+    // featured slots, which are chosen from bannerPicks separately; these two
+    // rails are "latest local", so they sort by date.
+    const localPicks = newestFirst(
+      bannerBySubcategory["local"] ?? [],
+      localResult.posts,
+    );
 
-    const negrosPicks = [
-      ...(bannerBySubcategory["negros"] ?? []),
-      ...negrosResult.posts,
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+    const negrosPicks = newestFirst(
+      bannerBySubcategory["negros"] ?? [],
+      negrosResult.posts,
+    );
 
-    const sportsPicks = [
-      ...(bannerBySubcategory["sports"] ?? []),
-      ...sportsResult.posts,
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+    const sportsPicks = newestFirst(
+      bannerBySubcategory["sports"] ?? [],
+      sportsResult.posts,
+    );
     const featuredPicksAsCategory = featuresResult.posts;
     const initiativesPicks = initiativesResult.posts;
-    const nationalPicks = [
-      ...(bannerBySubcategory["national-news"] ?? []),
-      ...nationalResult.posts,
-    ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
+    const nationalPicks = newestFirst(
+      bannerBySubcategory["national-news"] ?? [],
+      nationalResult.posts,
+    );
     const editorialPicks = editorialResult.posts;
 
     // Editorials are filed under the WordPress "opinion" category as well as
