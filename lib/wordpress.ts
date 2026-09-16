@@ -166,11 +166,23 @@ export function stripLeadingByline(html: string, author: string): string {
   const target = normalise(author);
   if (!target) return html;
 
-  // The byline is not always the very first block: stories usually open with a
-  // paragraph wrapping the lead image, with the byline in the one after it. So
-  // walk the leading blocks, stepping over any that carry no text of their own
-  // (image-only wrappers), and stop at the first that does.
-  const BLOCK = /^\s*<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>\s*/i;
+  // The byline is rarely the very first block: stories open with the lead
+  // image, and the byline follows it. So walk the leading blocks, stepping over
+  // media, and stop at the first that carries real prose.
+  //
+  // `figure` matters as much as `p` here. A plain image is wrapped in <p>, but
+  // a *captioned* one becomes <figure class="wp-caption">, and matching only
+  // <p> meant the scan hit the figure, failed, and gave up before ever seeing
+  // the byline — so the duplicate survived on exactly those stories. Editorial
+  // spotted the pattern from the outside: it duplicated whenever a story had an
+  // embedded photo.
+  //
+  // Media blocks are skipped on the strength of containing an image, not on
+  // being textless — a <figure> carries its <figcaption>, so the old
+  // "no text means skip" test would have treated the caption as the first real
+  // block and stopped there.
+  const BLOCK = /^\s*<(p|h[1-6]|figure)\b[^>]*>([\s\S]*?)<\/\1>\s*/i;
+  const MEDIA = /<(img|figure|iframe|video|picture)\b/i;
   const MAX_BLOCKS_TO_SCAN = 4;
 
   let offset = 0;
@@ -180,8 +192,8 @@ export function stripLeadingByline(html: string, author: string): string {
     if (!match) return html;
 
     const text = normalise(match[2]);
-    if (!text) {
-      // Image-only (or otherwise empty) block — keep it and look at the next.
+    if (MEDIA.test(match[0]) || !text) {
+      // Lead image, captioned or not — keep it and look at the next block.
       offset += match[0].length;
       continue;
     }
