@@ -75,6 +75,9 @@ const navigationData = [
   },
   {
     name: "Others",
+    // Sentinel, not a destination: the render below checks for this exact
+    // value and draws "Others" as a plain label rather than a link, since
+    // there is no /other-pages route. Do not "fix" it to a real path.
     href: "/other-pages",
     categoryKeywords: [],
     megaMenu: false,

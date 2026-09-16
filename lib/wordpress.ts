@@ -708,6 +708,45 @@ export function getWPSlugsForSubcategory(appSlug: string): string[] {
   return APP_SUBCATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
 }
 
+// The section each subcategory belongs under, so /[catagory]/[subcategory] can
+// prebuild its real URLs and reject everything else.
+//
+// The route previously returned [] from generateStaticParams, which meant every
+// two-segment path rendered on demand and got its own cache entry — including
+// the footer's /subcategory/* links, which pointed at a literal "subcategory"
+// segment and so cached a second copy of every section page.
+const SUBCATEGORY_PARENT: Record<string, string> = {
+  local: "news",
+  nation: "news",
+  negros: "news",
+  capiz: "news",
+  "facts-first-ph": "news",
+  "national-news": "news",
+  health: "feature",
+  travel: "feature",
+  entertainment: "feature",
+  lifestyle: "feature",
+  "arts-and-culture": "feature",
+  education: "feature",
+  environment: "feature",
+  community: "feature",
+  motoring: "business",
+  "tech-talk": "business",
+  "fashion-fridays": "initiatives",
+  empower: "initiatives",
+  "global-shapers-iloilo": "initiatives",
+  "zero-day": "initiatives",
+  editorial: "opinion",
+};
+
+// Every real /[catagory]/[subcategory] URL on the site.
+export function getSubcategoryRoutes(): { catagory: string; subcategory: string }[] {
+  return Object.entries(SUBCATEGORY_PARENT).map(([subcategory, catagory]) => ({
+    catagory,
+    subcategory,
+  }));
+}
+
 export function isKnownSubcategorySlug(appSlug: string): boolean {
   return appSlug in APP_SUBCATEGORY_WP_SLUGS;
 }

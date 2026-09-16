@@ -1,5 +1,12 @@
 export const revalidate = 300;
 
+// Only the real section URLs render. This route used to return [] from
+// generateStaticParams, so any two-segment path was generated on demand and
+// cached — 1.1K unique paths and 6.6K ISR writes per 12h against ~21 real
+// ones. Rejecting unknown params here returns a genuine 404 without rendering,
+// so nothing is written. Same fix as /[catagory].
+export const dynamicParams = false;
+
 import {
   formatSubcategoryName,
   slugToSubcategory,
@@ -11,6 +18,7 @@ import { notFound } from "next/navigation";
 import {
   getBannerNewsBySubcategory,
   getPostsByCategorySlugs,
+  getSubcategoryRoutes,
   getWPSlugsForSubcategory,
 } from "../../../../lib/wordpress";
 import PaginatedSubcategoryContent from "../../../components/PaginatedSubcategoryContent";
@@ -27,9 +35,12 @@ interface SubCategoryPageProps {
 // categories, so subcategory pages fall back to on-demand ISR generation
 // (still cached after the first hit — unlike the previous force-dynamic).
 export async function generateStaticParams(): Promise<
-  { subcategory: string }[]
+  { catagory: string; subcategory: string }[]
 > {
-  return [];
+  // Note both params: a nested dynamic route needs the parent segment too. The
+  // previous signature omitted `catagory`, which is part of why this returned
+  // nothing useful.
+  return getSubcategoryRoutes();
 }
 
 export async function generateMetadata({
