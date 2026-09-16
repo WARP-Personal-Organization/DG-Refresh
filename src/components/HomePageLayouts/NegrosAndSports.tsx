@@ -6,6 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import type { PaperEdition, Post, Publication } from "../../../lib/wordpress";
 
+// Publish date on homepage cards, as on the old site. Pinned to Asia/Manila so
+// it doesn't render a day off for a PH newsroom when the server is elsewhere —
+// the functions run in iad1.
+const formatDate = (s: string) =>
+  s
+    ? new Date(s).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Manila",
+      })
+    : "";
+
 interface RegionalStoriesProps {
   sportsStories: Post[];
   sportsTitle: string;
@@ -63,6 +76,28 @@ export default function NegrosAndSportsStories({
                         <h4 className="text-lg font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                           {story.data.title || "Untitled Article"}
                         </h4>
+                        {/* Byline and date were missing here while every other
+                            homepage section had them — Editorial flagged it.
+                            The separator shows only between two values. */}
+                        {(story.data.author ||
+                          formatDate(story.data.published_date)) && (
+                          <div className="flex items-center gap-2 mt-1">
+                            {story.data.author && (
+                              <span className="text-xs font-medium text-gray-400 font-sans">
+                                {story.data.author}
+                              </span>
+                            )}
+                            {story.data.author &&
+                              formatDate(story.data.published_date) && (
+                                <span className="text-xs text-gray-600">•</span>
+                              )}
+                            {formatDate(story.data.published_date) && (
+                              <span className="text-xs text-gray-400 font-open-sans">
+                                {formatDate(story.data.published_date)}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </Link>
                     </article>
                   ))}
