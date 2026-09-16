@@ -8,6 +8,19 @@ interface TopStoriesProps {
   title: string;
 }
 
+// Publish date on homepage cards, as on the old site. Pinned to Asia/Manila so
+// it doesn't render a day off for a PH newsroom when the server is elsewhere —
+// the functions run in iad1.
+const formatDate = (s: string) =>
+  s
+    ? new Date(s).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Manila",
+      })
+    : "";
+
 const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
   const topStories = stories.slice(0, 4);
 
@@ -42,11 +55,19 @@ const TopStories: React.FC<TopStoriesProps> = ({ stories, title }) => {
 
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-accent uppercase font-sans">
-                    {story.data.locality || story.data.subcategory || story.data.category || "News"}
+                    {story.data.locality ||
+                      story.data.subcategory ||
+                      story.data.category ||
+                      "News"}
                   </p>
                   <h3 className="text-xl font-playfair font-bold text-foreground leading-tight transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h3>
+                  {formatDate(story.data.published_date) && (
+                    <p className="text-xs text-gray-400 font-open-sans">
+                      {formatDate(story.data.published_date)}
+                    </p>
+                  )}
                 </div>
               </Link>
             </article>

@@ -38,6 +38,7 @@ import {
   getPostSlugsForSitemap,
   getRelatedPosts,
   stripGalleryStyles,
+  stripLeadingByline,
 } from "../../../../lib/wordpress";
 import type { Post } from "../../../../lib/wordpress";
 
@@ -167,8 +168,25 @@ export default async function BlogPost({ params }: BlogPageProps) {
 
   const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
   const articleContent = sanitizeArticleHtml(
-    addTargetBlankToExternalLinks(stripGalleryStyles(contentWithoutGallery)),
+    addTargetBlankToExternalLinks(
+      stripGalleryStyles(stripLeadingByline(contentWithoutGallery, post.data.author)),
+    ),
   );
+
+  // WordPress sets post_modified to the last save. For a scheduled story that
+  // is *earlier* than the publish time — the newsroom writes in the evening and
+  // schedules for just after midnight — so articles were showing "Updated
+  // August 30" above a September 1 publish date. Editorial asked for the field
+  // to go; suppressing it when it is not genuinely later keeps real corrections
+  // visible while removing the nonsense. The tolerance stops a tidy-up minutes
+  // after publishing from counting as an update.
+  const UPDATE_TOLERANCE_MS = 5 * 60 * 1000;
+  const publishedAt = Date.parse(post.data.published_date);
+  const updatedAt = Date.parse(post.data.updated_date);
+  const wasUpdatedAfterPublishing =
+    Number.isFinite(publishedAt) &&
+    Number.isFinite(updatedAt) &&
+    updatedAt - publishedAt > UPDATE_TOLERANCE_MS;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -305,7 +323,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
                 <Calendar size={11} />
                 <time>{publishDate}</time>
               </div>
-              {updateDate && updateDate !== publishDate && (
+              {wasUpdatedAfterPublishing && updateDate !== publishDate && (
                 <div className="flex items-center gap-1 font-open-sans">
                   <Clock size={11} />
                   <span>Updated {updateDate}</span>

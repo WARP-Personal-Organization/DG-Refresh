@@ -8,65 +8,65 @@ const CATEGORIES = [
     name: "News",
     href: "/news",
     dropdown: [
-      { name: "LOCAL", href: "/subcategory/local" },
-      { name: "FACTS FIRST PH", href: "/subcategory/fact-first-ph" },
-      { name: "CAPIZ", href: "/subcategory/capiz" },
-      { name: "NEGROS", href: "/subcategory/negros" },
+      { name: "LOCAL", href: "/news/local" },
+      { name: "FACTS FIRST PH", href: "/news/facts-first-ph" },
+      { name: "CAPIZ", href: "/news/capiz" },
+      { name: "NEGROS", href: "/news/negros" },
     ],
   },
   {
     name: "Feature",
     href: "/feature",
     dropdown: [
-      { name: "HEALTH", href: "/subcategory/health" },
-      { name: "TRAVEL", href: "/subcategory/travel" },
-      { name: "ENTERTAINMENT", href: "/subcategory/entertainment" },
-      { name: "LIFESTYLE", href: "/subcategory/lifestyle" },
-      { name: "ARTS AND CULTURE", href: "/subcategory/arts-and-culture" },
-      { name: "EDUCATION", href: "/subcategory/education" },
-      { name: "ENVIRONMENT", href: "/subcategory/environment" },
+      { name: "HEALTH", href: "/feature/health" },
+      { name: "TRAVEL", href: "/feature/travel" },
+      { name: "ENTERTAINMENT", href: "/feature/entertainment" },
+      { name: "LIFESTYLE", href: "/feature/lifestyle" },
+      { name: "ARTS AND CULTURE", href: "/feature/arts-and-culture" },
+      { name: "EDUCATION", href: "/feature/education" },
+      { name: "ENVIRONMENT", href: "/feature/environment" },
     ],
   },
   {
     name: "Opinion",
     href: "/opinion",
-    dropdown: [{ name: "EDITORIAL", href: "/subcategory/editorial" }],
+    dropdown: [{ name: "EDITORIAL", href: "/opinion/editorial" }],
   },
   {
     name: "Initiatives",
     href: "/initiatives",
     dropdown: [
-      { name: "FASHION FRIDAYS", href: "/subcategory/fashion-fridays" },
-      { name: "EMPOWER", href: "/subcategory/empower" },
+      { name: "FASHION FRIDAYS", href: "/initiatives/fashion-fridays" },
+      { name: "EMPOWER", href: "/initiatives/empower" },
       {
         name: "GLOBAL SHAPERS ILOILO",
-        href: "/subcategory/global-shapers-iloilo",
+        href: "/initiatives/global-shapers-iloilo",
       },
-      { name: "ZERO DAY", href: "/subcategory/zero-day" },
+      { name: "ZERO DAY", href: "/initiatives/zero-day" },
     ],
   },
   {
     name: "Sports",
     href: "/sports",
-    dropdown: [
-      { name: "LOCAL NEWS", href: "/subcategory/local-news" },
-      { name: "NATIONAL NEWS", href: "/subcategory/national-news" },
-    ],
+    // No sub-links: the two that were here ("local-news", "national-news")
+    // resolved to general news listings, not sport. The nav has no Sports
+    // dropdown either. Restore with real slugs if sports subcategories exist.
+    dropdown: [],
   },
   {
     name: "Business",
     href: "/business",
     dropdown: [
-      { name: "MONITORING", href: "/subcategory/monitoring" },
-      { name: "TECH TALK", href: "/subcategory/tech-talk" },
+      { name: "MOTORING", href: "/business/motoring" },
+      { name: "TECH TALK", href: "/business/tech-talk" },
     ],
   },
   {
     name: "Others",
-    href: "/other-pages",
+    href: "/about-us",
     dropdown: [
-      { name: "ABOUT US", href: "/subcategory/about-us" },
-      { name: "CONTACT US", href: "/subcategory/contact-us" },
+      { name: "ABOUT US", href: "/about-us" },
+      { name: "CONTACT US", href: "/contact-us" },
     ],
   },
 ];
@@ -179,8 +179,11 @@ const Footer: React.FC = () => {
               </p>
             </div>
             <div className="flex items-center gap-6 text-sm">
+              {/* /privacy is not a route on this site — the page is /Policies.
+                  As a single unknown segment it was being taken for a legacy
+                  article URL and redirected into /blog/privacy, which 404s. */}
               <Link
-                href="/privacy"
+                href="/Policies"
                 className="text-gray-500 hover:text-accent transition-colors duration-200"
               >
                 Privacy Policy

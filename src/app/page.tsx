@@ -55,18 +55,28 @@ export default async function Home() {
       [
         () => getAllPosts(20),
         () => getBannerNewsBySubcategory(30), // banner news grouped by subcategory
-        () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 6),
+        // 16, not 6: this pool now feeds three places — one post in MainContent,
+        // four in Top Stories, and four in the LOCAL section below.
+        () => getPostsByCategorySlugs(["local", "local-news", "iloilo", "western-visayas"], 16),
         () => getPostsByCategorySlugs(["negros", "negros-news", "bacolod"], 5),
         () => getPostsByCategorySlugs(["sports"], 8),
+        // 20, not 10: the Features grid pages through the tail of this pool
+        // now rather than truncating it at six.
         () =>
           getPostsByCategorySlugs(
             ["feature", "features", "entertainment", "lifestyle", "health", "technology"],
-            10,
+            20,
           ),
-        () => getPostsByCategorySlugs(["initiatives"], 5),
+        // "initiative", not "initiatives": that is the WordPress category slug
+        // (id 175, 165 posts). The plural is this app's route name and matches
+        // nothing in WordPress, so this section came back empty.
+        () => getPostsByCategorySlugs(["initiative"], 5),
         () => getPostsByCategorySlugs(["national", "national-news"], 5),
         () => getPostsByCategorySlugs(["editorial", "the-dg-view"], 8),
-        () => getPostsByCategorySlugs(["voices", "visons", "opinion"], 9),
+        // 21, not 9: the Opinion rail now pages through these in place rather
+        // than truncating at four and linking to /opinion, so a deeper pool
+        // gives the pager something to page through.
+        () => getPostsByCategorySlugs(["voices", "visons", "opinion"], 21),
         () => getChannelVideos("@dailyguardian782").catch(() => FALLBACK_VIDEOS),
         () => getTodaysPaper().catch(() => null),
         () => getSupplement().catch(() => null),
@@ -103,7 +113,13 @@ export default async function Home() {
       ...nationalResult.posts,
     ].filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i);
     const editorialPicks = editorialResult.posts;
-    const voicesPicks = voicesResult.posts;
+
+    // Editorials are filed under the WordPress "opinion" category as well as
+    // "editorial", so they came back in both fetches and rendered twice in the
+    // same block — once in the Editorial column, again in the Opinion list.
+    // The Editorial column owns them; drop them from Opinion.
+    const editorialIds = new Set(editorialPicks.map((p) => p.id));
+    const voicesPicks = voicesResult.posts.filter((p) => !editorialIds.has(p.id));
 
     // Featured/sticky posts come from the recent posts pool
     const featuredPicks = recentPosts.filter((p) => p.data.is_featured);
@@ -134,16 +150,33 @@ export default async function Home() {
     const localPost = localPicks.find((p) => !usedIds.has(p.id)) ?? undefined;
     if (localPost) usedIds.add(localPost.id);
 
-    // Posts already shown prominently in MainContent — exclude from downstream sections
-    const shownInMainContent = new Set([heroPost.id, featuredPost.id]);
+    // A second story for MainContent's left column. That column lays its two
+    // bottom slots out with `justify-between`, so with only one filled the lone
+    // item was pushed to the bottom and left a large gap under the hero summary
+    // — the column read as empty. Prefer another banner story, since the hero
+    // and featured are both banner news and this sits alongside them; fall back
+    // to local if banner news is exhausted.
+    const secondaryPost =
+      bannerPicks.find((p) => !usedIds.has(p.id)) ??
+      localPicks.find((p) => !usedIds.has(p.id));
+    if (secondaryPost) usedIds.add(secondaryPost.id);
 
-    // TopStories shows the freshest posts only (no stickies-pinned older items).
-    const topStoriesPool = recentPosts.filter(
-      (p) => !shownInMainContent.has(p.id),
+    // Top Stories carries LOCAL news only.
+    //
+    // It used to draw from `recentPosts` (getAllPosts — the 20 newest posts in
+    // any category), so publishing anything anywhere put it on the homepage's
+    // Top Stories rail: an opinion column, a sports result, a business item.
+    // Editorial reported this as the single biggest problem with the new site —
+    // posts should stay in their own section. Sourcing from localPicks keeps
+    // Top Stories to what it claims to be.
+    const topStoriesPool = localPicks.filter((p) => !usedIds.has(p.id));
+
+    // The LOCAL section takes what Top Stories didn't, so the two rails don't
+    // show the same four stories. TopStories renders 4.
+    const topStoriesIds = new Set(topStoriesPool.slice(0, 4).map((p) => p.id));
+    const localStoriesData = localPicks.filter(
+      (p) => !usedIds.has(p.id) && !topStoriesIds.has(p.id),
     );
-
-    // LocalStories: skip localPicks[0] which is already shown in MainContent as localposts
-    const localStoriesData = localPicks.filter((p) => !usedIds.has(p.id));
 
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">
@@ -152,6 +185,7 @@ export default async function Home() {
             <MainContent
               heroPost={heroPost}
               featuredPost={featuredPost}
+              secondaryPost={secondaryPost}
               localposts={localPost}
             />
             <div className="flex flex-col gap-6 self-start lg:sticky lg:top-4">
@@ -198,7 +232,7 @@ export default async function Home() {
     console.error("Error fetching posts from WordPress API:", err);
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">
-        <Header posts={[]} />
+        <Header />
         <NavigationBar />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-red-400">

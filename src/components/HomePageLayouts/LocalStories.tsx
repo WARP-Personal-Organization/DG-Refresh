@@ -9,6 +9,19 @@ interface LocalStoriesProps {
   title: string;
 }
 
+// Publish date on homepage cards, as on the old site. Pinned to Asia/Manila so
+// it doesn't render a day off for a PH newsroom when the server is elsewhere —
+// the functions run in iad1.
+const formatDate = (s: string) =>
+  s
+    ? new Date(s).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Manila",
+      })
+    : "";
+
 const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
   if (!stories || stories.length === 0) {
     return null;
@@ -46,11 +59,28 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                       </p>
                     )}
                   </div>
-                  <div className="mt-4 pt-2 border-t border-default">
-                    <span className="text-xs font-medium text-gray-400 font-sans">
-                      {mainStory.data.author || "Staff"}
-                    </span>
-                  </div>
+                  {/* No "Staff" placeholder — editorial asked that a story with
+                      no byline simply show nothing. The divider goes with it,
+                      but the publish date stands on its own. */}
+                  {(mainStory.data.author ||
+                    formatDate(mainStory.data.published_date)) && (
+                    <div className="mt-4 pt-2 border-t border-default flex items-center gap-2">
+                      {mainStory.data.author && (
+                        <span className="text-xs font-medium text-gray-400 font-sans">
+                          {mainStory.data.author}
+                        </span>
+                      )}
+                      {mainStory.data.author &&
+                        formatDate(mainStory.data.published_date) && (
+                          <span className="text-xs text-gray-600">•</span>
+                        )}
+                      {formatDate(mainStory.data.published_date) && (
+                        <span className="text-xs text-gray-400 font-open-sans">
+                          {formatDate(mainStory.data.published_date)}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Image */}
@@ -79,11 +109,25 @@ const LocalStories: React.FC<LocalStoriesProps> = ({ stories, title }) => {
                   <h4 className="text-base font-playfair font-bold text-foreground uppercase transition-colors duration-200 group-hover:text-accent">
                     {story.data.title || "Untitled Article"}
                   </h4>
-                  <div className="mt-2 pt-2 border-t border-default">
-                    <span className="text-xs font-medium text-gray-400 font-sans">
-                      By {story.data.author || "Staff"}
-                    </span>
-                  </div>
+                  {(story.data.author ||
+                    formatDate(story.data.published_date)) && (
+                    <div className="mt-2 pt-2 border-t border-default flex items-center gap-2">
+                      {story.data.author && (
+                        <span className="text-xs font-medium text-gray-400 font-sans">
+                          By {story.data.author}
+                        </span>
+                      )}
+                      {story.data.author &&
+                        formatDate(story.data.published_date) && (
+                          <span className="text-xs text-gray-600">•</span>
+                        )}
+                      {formatDate(story.data.published_date) && (
+                        <span className="text-xs text-gray-400 font-open-sans">
+                          {formatDate(story.data.published_date)}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </Link>
               </article>
             ))}

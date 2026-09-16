@@ -21,12 +21,11 @@ import type { Post } from "../../lib/wordpress";
 // category links are static and render immediately.
 
 type NavData = {
-  posts: Post[];
   navPosts: Post[];
   breakingPost: Post | null;
 };
 
-const EMPTY: NavData = { posts: [], navPosts: [], breakingPost: null };
+const EMPTY: NavData = { navPosts: [], breakingPost: null };
 
 export default function SiteChrome() {
   const [data, setData] = useState<NavData>(EMPTY);
@@ -48,7 +47,7 @@ export default function SiteChrome() {
 
   return (
     <>
-      <Header posts={data.posts} breakingPost={data.breakingPost} />
+      <Header breakingPost={data.breakingPost} />
       <NavigationBar navPosts={data.navPosts} />
     </>
   );

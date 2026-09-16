@@ -21,6 +21,13 @@ import { withConcurrencyLimit } from "../../../../lib/concurrency";
 // The freshness window is unchanged at 1800s; only who pays for it changed.
 const NAV_REVALIDATE_SECONDS = 1800;
 
+// 12 rather than 4: the nav dropdown pages through these now instead of showing
+// a single row of four. Each category is its own fetch, so this stays well below
+// the 2 MB per-fetch data-cache limit that a 100-post `_embed` query once
+// exceeded (see the note in src/app/opinion/page.tsx). It also costs no extra
+// requests to WordPress — getPostsByCategorySlugs makes two either way.
+const NAV_POSTS_PER_CATEGORY = 12;
+
 const EMPTY_CATEGORY_RESULT = { posts: [] as Post[], total: 0 };
 
 // Same cap as the old layout — this fetch set hits the WordPress origin, which
@@ -46,32 +53,35 @@ export async function GET() {
       () => getLayoutPosts(10, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
       () => getAllPosts(20, NAV_REVALIDATE_SECONDS).catch(() => [] as Post[]),
       () =>
-        getPostsByCategorySlugs(["sports"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
+        getPostsByCategorySlugs(["sports"], NAV_POSTS_PER_CATEGORY, 1, NAV_REVALIDATE_SECONDS).catch(
           () => EMPTY_CATEGORY_RESULT,
         ),
       () =>
         getPostsByCategorySlugs(
           ["voices", "visons", "opinion"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
         getPostsByCategorySlugs(
           ["business", "motoring", "tech-talk"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
         getPostsByCategorySlugs(
           ["feature", "features", "entertainment", "lifestyle", "health"],
-          4,
+          NAV_POSTS_PER_CATEGORY,
           1,
           NAV_REVALIDATE_SECONDS,
         ).catch(() => EMPTY_CATEGORY_RESULT),
       () =>
-        getPostsByCategorySlugs(["initiatives"], 4, 1, NAV_REVALIDATE_SECONDS).catch(
+        // "initiative", not "initiatives" — see the note in src/app/page.tsx.
+        // The plural matched no WordPress category, so the INITIATIVE dropdown
+        // rendered its empty-state skeletons.
+        getPostsByCategorySlugs(["initiative"], NAV_POSTS_PER_CATEGORY, 1, NAV_REVALIDATE_SECONDS).catch(
           () => EMPTY_CATEGORY_RESULT,
         ),
     ],

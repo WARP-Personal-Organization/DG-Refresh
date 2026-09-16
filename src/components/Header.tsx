@@ -15,7 +15,6 @@ interface WeatherData {
 }
 
 interface HeaderProps {
-  posts?: Post[];
   breakingPost?: Post | null;
 }
 
@@ -97,7 +96,7 @@ const useWeather = () => {
   return weather;
 };
 
-const Header: React.FC<HeaderProps> = ({ posts = EMPTY_POSTS, breakingPost }) => {
+const Header: React.FC<HeaderProps> = ({ breakingPost }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const weather = useWeather();
@@ -354,7 +353,6 @@ const Header: React.FC<HeaderProps> = ({ posts = EMPTY_POSTS, breakingPost }) =>
       <SearchModal
         isOpen={isSearchModalOpen}
         onClose={closeSearchModal}
-        posts={posts}
       />
     </>
   );

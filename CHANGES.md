@@ -4,7 +4,102 @@ Grouped by session/date, most recent first. Entries are committed and merged to 
 
 ---
 
-## 2026-08-30 — Remove the root layout's revalidate ceiling (branch `perf/layout-revalidate-ceiling`, **not yet merged**)
+## 2026-09-01 — Editorial feedback: category leakage and editorial mis-tagging (branch `fix/editorial-category-leakage`, **not yet merged**)
+
+Acting on `for website.docx` — 12 annotated screenshots with review comments from DG-Editorial-Rex, written in Hiligaynon. Three of the items are real bugs; the rest are design/feature requests, listed at the bottom as still open.
+
+| File | Change |
+|---|---|
+| `src/app/page.tsx` | **Top Stories now carries local news only.** It drew from `getAllPosts(20)` — the 20 newest posts in *any* category — so publishing an opinion column, a sports result, or a business item put it straight onto the homepage's Top Stories rail. Editorial reported this twice, as their biggest problem with the new site. Now sourced from `localPicks`, with the LOCAL section taking what Top Stories didn't so the two rails never show the same story. |
+| `src/app/page.tsx` | Local fetch raised 6 → 16, since that pool now feeds three places (MainContent, Top Stories, LOCAL). |
+| `src/app/page.tsx` | **Editorials no longer duplicate into the Opinion list.** They are filed under both the `editorial` and `opinion` WordPress categories, so both fetches returned them and they rendered twice in the same block. The Editorial column owns them. |
+| `lib/wordpress.ts` | **`editorial` now maps to `opinion`, not `news`.** This one line put a `NEWS` label on every editorial, and — via the `category === "news"` branch in `transformPost` — also gave editorials a locality tag they should never have had. |
+
+Then, after reading the annotated screenshots (which pin down what the comments only gestured at):
+
+| File | Change |
+|---|---|
+| `src/components/HomePageLayouts/LocalStories.tsx` | **Dropped the `"Staff"` byline placeholder** (2 places). A story with no author now shows nothing at all — the wrapping `<div>` and its divider go too, rather than leaving an empty rule. This is the one the red arrow in the NEGROS screenshot pointed at. |
+| `src/components/CategoryPage.tsx` | Same, 2 places. The `•` separator is dropped along with the author so the date isn't left dangling after a bullet. |
+| `src/components/PaginatedSubcategoryContent.tsx` | Same, 2 places (`"Staff Reporter"`), icon included. |
+| `src/app/globals.css` | **In-article images no longer stretched to full column width.** The rule set `width: 100% !important` next to `max-width: 100%`, which *upscaled* every image regardless of natural size — a 400px photo became ~750px and, with `height: auto`, proportionally taller, so one image could fill the desktop viewport and push the article text below the fold. `width: auto` restores the old site's sizing; `max-width` still caps anything wider than the column. The `.td-gallery` rules below deliberately re-assert `width: 100%` for grid tiles and are unaffected. |
+
+**Verified** against `next build` + `next start`, parsing the rendered homepage: Top Stories returns 4 stories all labelled `local` (previously mixed categories), LOCAL returns 4 different stories, NEGROS 4, with **zero overlap** between Top Stories and LOCAL. An editorial article's breadcrumb now reads `Home > opinion` (was `Home > news`). Homepage contains **zero occurrences of "Staff"** — NEGROS has 2 of 4 stories with no author and they render blank. On the exact article Editorial screenshotted, the in-article photo now renders at its natural ~432px inside a ~750px column, matching the old site's proportion in their side-by-side.
+
+Then the pagination Editorial asked for:
+
+| File | Change |
+|---|---|
+| `src/components/SectionPager.tsx` (new) | Compact `<` `>` pager for homepage section rows. Deliberately not the existing `Pagination` component, which renders page *numbers* for the category listing routes — the screenshot shows Editorial wants the old site's control: arrows that swap a row's contents in place without navigating away. Every page is rendered into the DOM and inactive ones hidden with CSS rather than unmounted, so all headlines stay in the server HTML and paging costs no request. |
+| `lib/chunk.ts` (new) | `chunk()` helper. Lives here, not next to `SectionPager`, because that is a `"use client"` module: a server component may render its exports but may not *call* an exported function from one — doing so fails the build with "Attempted to call chunk() from the server". |
+| `src/components/HomePageLayouts/EditorialCartoonOpinion.tsx` | Opinion rail pages through the columns in place; **"View All Opinion →" removed**. The featured column stays fixed above the pager. |
+| `src/components/HomePageLayouts/FeaturesStories.tsx` | Features grid pages 6 at a time (3 × 2, what it showed before). |
+| `src/app/page.tsx` | Opinion fetch 9 → 21, features 10 → 20, so the pagers have depth to page through instead of truncating. |
+| `src/components/MainContent.tsx` | `<main>` → `<div>` (2 places). It was nested inside the root layout's `<main>`, which is invalid HTML and an a11y problem. Found while investigating something else; unrelated to the pagers. |
+
+**Verified** by real mouse clicks (see the note below on why scripted clicks were not trustworthy): the Opinion pager steps correctly through three pages of distinct columns — page 1 "As the floods recede…" / "Do not shortchange SUCs", page 2 "The devil is powerless against God" / "Marcos-Pinks uniteam redux", page 3 "Sabayang pagsigaw" / "More pesos, less value" — with the featured column correctly fixed.
+
+**A wrong turn worth recording.** Mid-investigation I concluded that client components inside page content never hydrate anywhere on the site, including in production, and that category pagination and the CartoonCard pager had never worked. **That was wrong.** The cause was a bad probe: `document.querySelectorAll('button')` was matching a duplicate button inside React's hidden Suspense staging container (`div#S:1`, `display:none`), which is inert leftover markup — not the real, visible, hydrated control. Scripted `.click()` on it did nothing and its DOM node carries no React keys, which looked exactly like a hydration failure. A real mouse click on the visible control works fine: production `/news` pagination advances to `?page=2` and swaps the articles. **Verify interactivity with real clicks on visible elements, not `querySelector` plus `.click()`.**
+
+And two more from the same document:
+
+| File | Change |
+|---|---|
+| `src/components/HomePageLayouts/FeaturesStories.tsx` | **Category label on each Features card** — entertainment, society, environment, health, and so on. The generic `"feature"` value is suppressed, since it labels every card identically and tells the reader nothing. |
+| `TopStories.tsx`, `LocalStories.tsx`, `FeaturesStories.tsx` | **Publish date on homepage story cards**, as on the old site. Pinned to `Asia/Manila` — the functions run in `iad1`, so an unpinned date renders a day off for a PH newsroom. In `LocalStories` the date stands on its own when a story has no byline, and the `•` separator only appears when both are present. |
+
+**Verified** against the server-rendered homepage: dates render in Top Stories (4), LOCAL (4), NEGROS (4) and FEATURES (18); Features labels come through as `ENVIRONMENT`, `EDUCATION`, `SOCIETY`, `ARTS AND CULTURE`.
+
+**Attempted and reverted:** pagination for "Latest Opinions" on `/opinion` (comment 5). `SectionPager` renders there correctly — four page groups, one visible — but the control does not hydrate on that route: no React keys after six seconds, and clicking does nothing, while the header on the same page is interactive and the identical component works on the homepage. Rather than ship a visible arrow that does nothing, `VoicesPage` was reverted to its previous six-post slice. Why that route differs is unresolved.
+
+**Method note.** Several wrong conclusions today came from probing the DOM with JavaScript. In this tab context layout is not computed — `offsetParent` is `null` and `getBoundingClientRect()` returns `0×0` for *every* element, including plainly visible ones — so anything inferred from geometry is meaningless here. `querySelectorAll` also matches inert duplicates inside React's hidden Suspense staging containers. **Verify interactivity by clicking the real control and looking at the result, and verify server-rendered output with `curl` plus a parser.**
+
+And the nav-dropdown pagination:
+
+| File | Change |
+|---|---|
+| `src/components/Navigation.tsx` | **Prev/next arrows under the mega-dropdown's preview cards.** Editorial clarified this one with a screenshot of the old site: hovering a nav item there gives you `<` `>` beneath the four article cards, so you can step through that section's articles without leaving the menu. `getPostsForCategory` no longer truncates to four; the dropdown holds a page index that resets whenever a different nav item opens. |
+| `src/app/api/nav-data/route.ts` | Per-category fetch 4 → 12, so there is something to page through. Each category is its own fetch, so this stays far below the 2 MB per-fetch data-cache limit, and costs no extra WordPress requests — `getPostsByCategorySlugs` makes two either way. |
+
+**A follow-up bug in that same change:** only NEWS, SPORTS and INITIATIVE got arrows at first. The 4 → 12 bump had been applied with a find-and-replace that only matched the single-line `getPostsByCategorySlugs(...)` calls; the three written across multiple lines (Opinion, Business, Features) kept their hardcoded `4`, which is exactly one page, so their arrows never rendered. All six now use `NAV_POSTS_PER_CATEGORY`, and nav data goes from 55 to 79 posts with every section at 3+ pages.
+
+**Verified** with a real click: the NEWS dropdown pages from "Free HIV testing…" / "ARCHITECT, NOT JUST FINANCIER…" to "More Filipinos say Sara Duterte guilty…" / "Ex-convict, alleged runner nabbed…", with the prev arrow correctly enabling on page 2. This is comment 1, which earlier notes had misread as a page section — image3 in the document is the old site's BUSINESS *dropdown*, not a row on the page.
+
+**Separately: the INITIATIVE section was empty everywhere.** Spotted while checking the new dropdown — it rendered only placeholder skeletons. Two independent bugs, both a singular/plural mismatch:
+
+| File | Change |
+|---|---|
+| `src/app/page.tsx`, `src/app/api/nav-data/route.ts` | Both queried WordPress for the category slug `"initiatives"`. The real slug is **`"initiative"`** (id 175, 165 posts) — confirmed against `/wp-json/wp/v2/categories`. The plural is this app's route name and matches nothing in WordPress, so both the homepage INITIATIVES section and the nav dropdown came back with zero posts. |
+| `lib/wordpress.ts` | `CATEGORY_MAP` was keyed only on the plural, so `mapCategory(["initiative"])` missed the exact lookup, missed the substring fallback (`"initiative"` does not contain `"initiatives"`), and fell through to the `"news"` default — labelling every initiative post **NEWS**. Same failure as the editorial mapping fixed above. Added the singular key. |
+
+**Verified:** nav data went from 44 to 55 posts, 12 of them initiative-tagged and now carrying `category: "initiatives"` rather than `"news"`. Both the dropdown and the homepage INITIATIVES section render real articles ("Bangon Iloilo Project…", "The New Normal Fashion", "Hablon Facemasks").
+
+One gotcha worth remembering: after changing `/api/nav-data`, the browser serves a cached copy of it (the response sets `s-maxage` but no `max-age`, so browsers cache heuristically). A normal reload still showed the old empty dropdown; a hard reload was needed to see the fix.
+
+**Still open from the same document:**
+- **Duplicate byline on article pages.** The byline renders twice: once in the header meta block, once as the first line of the article body. The second comes from the WordPress content itself, which is why it appears on some stories and not others — so the fix is stripping a leading `By …` from WP content when it matches the post author, not removing our header byline. Needs a decision on which copy wins.
+- **The `UPDATED` timestamp.** Editorial asked for its removal, but the screenshots show something worse: an article published **August 31** displaying "Updated August 30" — the updated date is *earlier* than the publish date. Worth understanding that inversion before simply hiding the field.
+- **"Latest Opinions" pagination on `/opinion`** (comment 5) — the one item not delivered. Built and reverted three times. `SectionPager` renders there correctly (four page groups, one visible, arrows present and correctly enabled/disabled) but clicking does nothing, confirmed on the final attempt by both a scoped `textContent` read *and* a screenshot agreeing that the grid never changes. The identical component works on the homepage sections and in the nav dropdown, so it is specific to this route.
+
+  What has been ruled out: the route itself (a lone client probe on a stripped `/opinion` hydrates and increments normally), the data (`VoicesPage` with empty arrays still fails), bundling (`SectionPager` is present in `app/opinion/page-*.js`), route collision, missing framework bootstrap, and a broken RSC payload — 66 chunks, 204 client refs, healthy. No console error is logged. Confusingly, the exact same header markup that fails inside `/opinion` hydrates fine when served from a scratch `/hydtest/*` route, which argues against a pure markup explanation. Whoever picks this up should start from that contradiction rather than re-running the bisect.
+
+Note: the comments are in Hiligaynon and the readings above are a translation — worth a native check before acting on the remaining items.
+
+---
+
+## 2026-08-30 — Remove the root layout's revalidate ceiling (PR #14, `4ba1132` — merged)
+
+**Measured outcome.** Aug 31, the first full day on the new layout, against Aug 27 (before any of this work):
+
+| Line item | Aug 27 | Aug 29 (after PR #13) | **Aug 31 (after PR #14)** |
+|---|---|---|---|
+| ISR Writes | $7.22 | $4.92 | **$0.67** (−91%) |
+| Fast Origin Transfer | $2.31 | $1.71 | $0.61 (−74%) |
+| Edge Requests | $0.60 | $1.45 | $1.22 |
+| Fluid Active CPU | $0.69 | $0.57 | $0.31 |
+| **Total/day** | **$11.94** | **$9.58** | **$3.47** |
+
+**$11.94 → $3.47/day, a 71% reduction** — roughly $358/month down to $104/month. The layout ceiling was indeed the blocker: `/blog/[uid]` writes-per-path halved (2.4 → 1.33) once the route could actually hold a 24h cache, and `/[catagory]` has dropped off the top-10 routes entirely. **Edge Requests is now the largest single line item** ($1.22 of $3.47), partly the redirect hop introduced in PR #13 — that is where the next increment of savings would come from, at roughly a fifth the stakes.
 
 **Measured outcome of the Aug 28 work first**, since it motivates this change. Comparing two adjacent full days, Aug 27 (pre-fix) against Aug 29 (post-fix):
 

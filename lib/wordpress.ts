@@ -139,6 +139,65 @@ export function addTargetBlankToExternalLinks(html: string): string {
   });
 }
 
+// Drop a "By <author>" line from the top of the article body when it just
+// repeats the post's own byline.
+//
+// Many stories are typed with the byline as the first line of the body, so the
+// article page rendered it twice: once in the styled header block built from
+// the WordPress author field, then again in plain text at the start of the
+// text. Editorial flagged the duplication, and also noted it appears on some
+// stories and not others — which is exactly right, since it depends on whether
+// that particular story happens to carry the line in its body.
+//
+// Only the first block is examined, and only removed when its text matches this
+// post's author, so a story that opens by quoting someone else is untouched.
+export function stripLeadingByline(html: string, author: string): string {
+  if (!html || !author) return html;
+
+  const normalise = (s: string) =>
+    s
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/[.,]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  const target = normalise(author);
+  if (!target) return html;
+
+  // The byline is not always the very first block: stories usually open with a
+  // paragraph wrapping the lead image, with the byline in the one after it. So
+  // walk the leading blocks, stepping over any that carry no text of their own
+  // (image-only wrappers), and stop at the first that does.
+  const BLOCK = /^\s*<(p|h[1-6])\b[^>]*>([\s\S]*?)<\/\1>\s*/i;
+  const MAX_BLOCKS_TO_SCAN = 4;
+
+  let offset = 0;
+  for (let i = 0; i < MAX_BLOCKS_TO_SCAN; i++) {
+    const rest = html.slice(offset);
+    const match = BLOCK.exec(rest);
+    if (!match) return html;
+
+    const text = normalise(match[2]);
+    if (!text) {
+      // Image-only (or otherwise empty) block — keep it and look at the next.
+      offset += match[0].length;
+      continue;
+    }
+
+    const withoutPrefix = text.replace(/^by\s+/, "");
+    // Require a "By " prefix, and that what follows names this post's author —
+    // so a story that opens by quoting somebody else is left alone.
+    if (text !== withoutPrefix && withoutPrefix === target) {
+      return html.slice(0, offset) + rest.slice(match[0].length);
+    }
+    // First block with real text isn't the byline; nothing to strip.
+    return html;
+  }
+  return html;
+}
+
 // Remove the inline <style> block injected by the td-gallery plugin into content.rendered.
 // That block sets thumbnail CSS keyed on #tdi_N IDs — useless without the slider JS.
 export function stripGalleryStyles(html: string): string {
@@ -240,11 +299,21 @@ const CATEGORY_MAP: Record<string, string> = {
   business: "business",
   features: "feature",
   feature: "feature",
+  // Both spellings: WordPress's category slug is the singular "initiative"
+  // (id 175), while this app's route and section are "initiatives". Without the
+  // singular key, mapCategory fell through to its "news" default and every
+  // initiative post was labelled NEWS — the same failure the editorial mapping
+  // above had. The substring fallback can't save it either, since "initiative"
+  // does not contain "initiatives".
+  initiative: "initiatives",
   initiatives: "initiatives",
   opinion: "opinion",
   voices: "voices",
   visons: "voices",
-  editorial: "news",
+  // Editorial is opinion, not news. Mapping it to "news" put an OPINION label
+  // of "NEWS" on every editorial, and (via the `category === "news"` branch in
+  // transformPost) also gave editorials a locality tag they should never have.
+  editorial: "opinion",
   entertainment: "feature",
   lifestyle: "feature",
   health: "feature",
@@ -639,6 +708,45 @@ export function getWPSlugsForSubcategory(appSlug: string): string[] {
   return APP_SUBCATEGORY_WP_SLUGS[appSlug] ?? [appSlug];
 }
 
+// The section each subcategory belongs under, so /[catagory]/[subcategory] can
+// prebuild its real URLs and reject everything else.
+//
+// The route previously returned [] from generateStaticParams, which meant every
+// two-segment path rendered on demand and got its own cache entry — including
+// the footer's /subcategory/* links, which pointed at a literal "subcategory"
+// segment and so cached a second copy of every section page.
+const SUBCATEGORY_PARENT: Record<string, string> = {
+  local: "news",
+  nation: "news",
+  negros: "news",
+  capiz: "news",
+  "facts-first-ph": "news",
+  "national-news": "news",
+  health: "feature",
+  travel: "feature",
+  entertainment: "feature",
+  lifestyle: "feature",
+  "arts-and-culture": "feature",
+  education: "feature",
+  environment: "feature",
+  community: "feature",
+  motoring: "business",
+  "tech-talk": "business",
+  "fashion-fridays": "initiatives",
+  empower: "initiatives",
+  "global-shapers-iloilo": "initiatives",
+  "zero-day": "initiatives",
+  editorial: "opinion",
+};
+
+// Every real /[catagory]/[subcategory] URL on the site.
+export function getSubcategoryRoutes(): { catagory: string; subcategory: string }[] {
+  return Object.entries(SUBCATEGORY_PARENT).map(([subcategory, catagory]) => ({
+    catagory,
+    subcategory,
+  }));
+}
+
 export function isKnownSubcategorySlug(appSlug: string): boolean {
   return appSlug in APP_SUBCATEGORY_WP_SLUGS;
 }
@@ -681,6 +789,31 @@ export async function getPostSlugsForSitemap(
     },
     86_400, // 24 h — sitemap data doesn't need to be fresh every 5 min
   );
+}
+
+// Full-archive search, backing /api/search.
+//
+// The header search used to score an in-memory array of whatever posts the
+// layout happened to have — ten of them — so a reader searching a 75,000-post
+// archive got "No Results Found" for almost anything, including columns
+// published the same day. WordPress already indexes the whole archive
+// (`?search=` reports 903 matches for "Boracay" alone); this just asks it.
+export async function searchPosts(
+  query: string,
+  perPage = 10,
+): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>(
+    "/posts",
+    {
+      search: query,
+      per_page: perPage,
+      status: "publish",
+      orderby: "relevance",
+      _embed: 1,
+    },
+    300,
+  ).catch(() => [] as WPPost[]);
+  return wpPosts.map(transformPost);
 }
 
 // Most-recently-edited posts, newest first. Backs the /api/revalidate-recent

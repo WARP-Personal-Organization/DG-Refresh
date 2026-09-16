@@ -3,13 +3,12 @@
 
 import { ArrowRight, Calendar, Clock, Search, Tag, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { Post } from "../../lib/wordpress";
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  posts: Post[];
 }
 
 interface SearchResult extends Post {
@@ -27,14 +26,28 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
+// Which fields contain the query — used only for the "Matched: …" label under
+// each result. WordPress decides what matches and in what order; this just
+// explains the hit to the reader.
+const matchedFieldsFor = (post: Post, query: string): string[] => {
+  const q = query.toLowerCase();
+  const has = (v?: string) => !!v && v.toLowerCase().includes(q);
+  const fields: string[] = [];
+  if (has(post.data.title)) fields.push("title");
+  if (has(post.data.summary)) fields.push("summary");
+  if (has(post.data.author)) fields.push("author");
+  if (has(post.data.category) || has(post.data.subcategory)) fields.push("category");
+  if (post.data.tags?.some((t) => t.toLowerCase().includes(q))) fields.push("tags");
+  return fields;
+};
+
+const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isPending, startTransition] = useTransition();
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
-  const searchPostsRef = useRef<(searchQuery: string) => SearchResult[]>(() => []);
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -71,92 +84,50 @@ const SearchModal = ({ isOpen, onClose, posts }: SearchModalProps) => {
     };
   }, [isOpen]);
 
-  const searchPosts = useCallback((searchQuery: string): SearchResult[] => {
-    if (!searchQuery.trim()) return [];
 
-    const normalizedQuery = searchQuery.toLowerCase().trim();
-    const queryWords = normalizedQuery.split(/\s+/);
-
-    const scoredResults = posts.map((post): SearchResult => {
-      let score = 0;
-      const matchedFields: string[] = [];
-
-      const title = post.data.title?.toLowerCase() || "";
-      if (title.includes(normalizedQuery)) {
-        score += 10;
-        matchedFields.push("title");
-      } else {
-        queryWords.forEach((word) => {
-          if (title.includes(word)) {
-            score += 5;
-            if (!matchedFields.includes("title")) matchedFields.push("title");
-          }
-        });
-      }
-
-      const summary = post.data.summary.toLowerCase();
-      if (summary.includes(normalizedQuery)) {
-        score += 7;
-        matchedFields.push("summary");
-      } else {
-        queryWords.forEach((word) => {
-          if (summary.includes(word)) {
-            score += 3;
-            if (!matchedFields.includes("summary"))
-              matchedFields.push("summary");
-          }
-        });
-      }
-
-      const author = post.data.author.toLowerCase();
-      if (author.includes(normalizedQuery)) {
-        score += 4;
-        matchedFields.push("author");
-      }
-
-      const category = post.data.category?.toLowerCase() || "";
-      if (category.includes(normalizedQuery)) {
-        score += 3;
-        matchedFields.push("category");
-      }
-
-      post.data.tags.forEach((tag) => {
-        if (tag.toLowerCase().includes(normalizedQuery)) {
-          score += 3;
-          if (!matchedFields.includes("tags")) matchedFields.push("tags");
-        }
-      });
-
-      if (post.data.is_featured) score += 1;
-      if (post.data.is_breaking_news) score += 2;
-
-      return { ...post, relevanceScore: score, matchedFields };
-    });
-
-    return scoredResults
-      .filter((r) => r.relevanceScore > 0)
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 10);
-  }, [posts]);
-
+  // Searches WordPress rather than the handful of posts this component happens
+  // to have been handed. The old behaviour scored an in-memory array of ten
+  // layout posts, so a reader searching a 75,000-article archive got "No
+  // Results Found" for nearly everything — including columns published that
+  // same morning.
   useEffect(() => {
-    searchPostsRef.current = searchPosts;
-  }, [searchPosts]);
-
-  useEffect(() => {
-    if (!query.trim()) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
       setResults([]);
       return;
     }
 
-    const timeoutId = setTimeout(() => {
-      const searchResults = searchPostsRef.current(query);
-      startTransition(() => {
-        setResults(searchResults);
-      });
+    let cancelled = false;
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const data: { posts: Post[] } = await res.json();
+        if (cancelled) return;
+        const scored = data.posts.map((post, i) => ({
+          ...post,
+          // WordPress returns these in relevance order; keep that order rather
+          // than re-ranking client-side on a partial view of the archive.
+          relevanceScore: data.posts.length - i,
+          matchedFields: matchedFieldsFor(post, trimmed),
+        }));
+        startTransition(() => setResults(scored));
+      } catch {
+        // Aborted by a newer keystroke, or the origin is unreachable — leave
+        // the previous results rather than flashing an error at the reader.
+        if (!cancelled) startTransition(() => setResults([]));
+      }
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, [query]);
 
   const saveSearch = (searchQuery: string) => {

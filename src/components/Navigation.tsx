@@ -1,10 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
+
+// Preview cards per page in the mega dropdown — the grid is 4 columns wide.
+const PREVIEW_PER_PAGE = 4;
 
 const navigationData = [
   {
@@ -72,6 +75,9 @@ const navigationData = [
   },
   {
     name: "Others",
+    // Sentinel, not a destination: the render below checks for this exact
+    // value and draws "Others" as a plain label rather than a link, since
+    // there is no /other-pages route. Do not "fix" it to a real path.
     href: "/other-pages",
     categoryKeywords: [],
     megaMenu: false,
@@ -90,6 +96,13 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpandedItems, setMobileExpandedItems] = useState<Set<string>>(new Set());
+  // Which page of preview cards the open dropdown is showing. Reset whenever a
+  // different nav item opens, so each menu starts at its newest articles.
+  const [previewPage, setPreviewPage] = useState(0);
+
+  useEffect(() => {
+    setPreviewPage(0);
+  }, [activeDropdown]);
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
@@ -102,16 +115,19 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
     setMobileExpandedItems(next);
   };
 
+  // Returns every match, not just the first four — the dropdown pages through
+  // them below. Editorial asked for the old site's control: hovering a nav item
+  // there gives you arrows under the preview cards so you can step through the
+  // section's articles without leaving the menu.
   const getPostsForCategory = (keywords: string[]) => {
-    if (!keywords.length) return navPosts.slice(0, 4);
-    return navPosts
-      .filter((p) =>
-        keywords.some((kw) =>
+    if (!keywords.length) return navPosts;
+    return navPosts.filter((p) =>
+      keywords.some(
+        (kw) =>
           p.data.category?.toLowerCase().includes(kw) ||
-          p.data.subcategory?.toLowerCase().includes(kw)
-        )
-      )
-      .slice(0, 4);
+          p.data.subcategory?.toLowerCase().includes(kw),
+      ),
+    );
   };
 
   useEffect(() => {
@@ -125,6 +141,12 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
 
   const activeItem = navigationData.find((i) => i.name === activeDropdown);
   const previewPosts = activeItem ? getPostsForCategory(activeItem.categoryKeywords ?? []) : [];
+  const previewPageCount = Math.max(1, Math.ceil(previewPosts.length / PREVIEW_PER_PAGE));
+  const currentPreviewPage = Math.min(previewPage, previewPageCount - 1);
+  const visiblePreviewPosts = previewPosts.slice(
+    currentPreviewPage * PREVIEW_PER_PAGE,
+    currentPreviewPage * PREVIEW_PER_PAGE + PREVIEW_PER_PAGE,
+  );
 
   return (
     <nav
@@ -241,9 +263,10 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
               </div>
             )}
 
-            {/* RIGHT — article preview cards */}
-            <div className="flex-1 grid grid-cols-4 gap-4">
-              {previewPosts.length > 0 ? previewPosts.map((post) => (
+            {/* RIGHT — article preview cards, paged */}
+            <div className="flex-1 flex flex-col">
+              <div className="grid grid-cols-4 gap-4">
+              {visiblePreviewPosts.length > 0 ? visiblePreviewPosts.map((post) => (
                 <Link key={post.id} href={`/blog/${post.uid}`} className="group block">
                   <article>
                     {/* Image */}
@@ -277,6 +300,35 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="aspect-[4/3] bg-white/5 animate-pulse" />
                 ))
+              )}
+              </div>
+
+              {/* Prev/next, as on the old site's dropdown */}
+              {previewPageCount > 1 && (
+                <div className="flex items-center gap-2 mt-4">
+                  <button
+                    type="button"
+                    aria-label={`Previous ${activeItem.name} articles`}
+                    disabled={currentPreviewPage === 0}
+                    onClick={() => setPreviewPage(currentPreviewPage - 1)}
+                    className="flex h-7 w-7 items-center justify-center border border-white/20 text-white/70 transition-colors hover:border-[#fcee16] hover:text-[#fcee16] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/20 disabled:hover:text-white/70"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Next ${activeItem.name} articles`}
+                    disabled={currentPreviewPage === previewPageCount - 1}
+                    onClick={() => setPreviewPage(currentPreviewPage + 1)}
+                    className="flex h-7 w-7 items-center justify-center border border-white/20 text-white/70 transition-colors hover:border-[#fcee16] hover:text-[#fcee16] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/20 disabled:hover:text-white/70"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                  <span aria-live="polite" className="sr-only">
+                    {activeItem.name} articles page {currentPreviewPage + 1} of{" "}
+                    {previewPageCount}
+                  </span>
+                </div>
               )}
             </div>
           </div>

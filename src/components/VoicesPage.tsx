@@ -2,20 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import type { ColumnistSummary, Post } from "../../lib/wordpress";
+import PaginatedOpinionGrid from "./PaginatedOpinionGrid";
 
 interface VoicesPageProps {
   columnists: ColumnistSummary[];
   recentPosts: Post[];
 }
-
-const formatDate = (s: string) =>
-  s
-    ? new Date(s).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "";
 
 function initialsOf(name: string) {
   return name
@@ -70,41 +62,12 @@ const ColumnistCard: React.FC<{ c: ColumnistSummary }> = ({ c }) => {
   );
 };
 
-// ── Article card — matches CategoryPage ArticleCard ───────────────────────────
-const ArticleCard: React.FC<{ post: Post }> = ({ post }) => (
-  <Link href={`/blog/${post.uid}`} className="block group">
-    <article className="pb-6 border-b border-gray-800 last:border-b-0">
-      {post.data.featured_image?.url && (
-        <div className="relative aspect-[16/10] mb-4 overflow-hidden">
-          <Image
-            src={post.data.featured_image.url}
-            alt={post.data.featured_image.alt || "Article image"}
-            fill
-            className="object-cover group-hover:opacity-90 transition-opacity duration-200"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        </div>
-      )}
-      <div className="space-y-2">
-        <h3 className="font-roboto font-bold text-white text-base leading-snug group-hover:text-[#fcee16] transition-colors duration-200">
-          {post.data.title}
-        </h3>
-        <p className="font-open-sans text-gray-400 text-sm leading-relaxed line-clamp-2">
-          {post.data.summary}
-        </p>
-        <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans pt-1">
-          <span>{post.data.author}</span>
-          <span>·</span>
-          <span>{formatDate(post.data.published_date)}</span>
-        </div>
-      </div>
-    </article>
-  </Link>
-);
-
 // ── Main component ─────────────────────────────────────────────────────────────
 const VoicesPage: React.FC<VoicesPageProps> = ({ columnists, recentPosts }) => {
-  const latestOpinions = recentPosts.slice(0, 6);
+  // All of them — PaginatedOpinionGrid pages through the rest. Keep the fetch
+  // at 20 in opinion/page.tsx: the note there records that 100 posts with
+  // _embed exceeded Next's 2 MB per-fetch data-cache limit.
+  const latestOpinions = recentPosts;
 
   return (
     <div className="bg-[#1b1a1b] min-h-screen text-white font-open-sans">
@@ -156,11 +119,7 @@ const VoicesPage: React.FC<VoicesPageProps> = ({ columnists, recentPosts }) => {
                 Latest Opinions
               </h2>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {latestOpinions.map((post) => (
-                <ArticleCard key={post.id} post={post} />
-              ))}
-            </div>
+            <PaginatedOpinionGrid posts={latestOpinions} />
           </div>
         </section>
       )}
