@@ -8,12 +8,15 @@ interface VoicesPageProps {
   recentPosts: Post[];
 }
 
+// Pinned to Asia/Manila like the homepage cards — the functions run in iad1,
+// so an unpinned date renders a day off for a PH newsroom.
 const formatDate = (s: string) =>
   s
     ? new Date(s).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
+        timeZone: "Asia/Manila",
       })
     : "";
 
@@ -92,10 +95,17 @@ const ArticleCard: React.FC<{ post: Post }> = ({ post }) => (
         <p className="font-open-sans text-gray-400 text-sm leading-relaxed line-clamp-2">
           {post.data.summary}
         </p>
+        {/* The separator only belongs between two values. Unbylined columns —
+            the DG Editorial among them — were rendering a stray "· Sep 16,
+            2026" with nothing before the dot. */}
         <div className="flex items-center gap-2 text-xs text-gray-500 font-open-sans pt-1">
-          <span>{post.data.author}</span>
-          <span>·</span>
-          <span>{formatDate(post.data.published_date)}</span>
+          {post.data.author && <span>{post.data.author}</span>}
+          {post.data.author && formatDate(post.data.published_date) && (
+            <span>·</span>
+          )}
+          {formatDate(post.data.published_date) && (
+            <span>{formatDate(post.data.published_date)}</span>
+          )}
         </div>
       </div>
     </article>
