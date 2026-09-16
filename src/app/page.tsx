@@ -232,7 +232,7 @@ export default async function Home() {
     console.error("Error fetching posts from WordPress API:", err);
     return (
       <div className="bg-[#1b1a1b] min-h-screen text-white">
-        <Header posts={[]} />
+        <Header />
         <NavigationBar />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-red-400">

@@ -752,6 +752,31 @@ export async function getPostSlugsForSitemap(
   );
 }
 
+// Full-archive search, backing /api/search.
+//
+// The header search used to score an in-memory array of whatever posts the
+// layout happened to have — ten of them — so a reader searching a 75,000-post
+// archive got "No Results Found" for almost anything, including columns
+// published the same day. WordPress already indexes the whole archive
+// (`?search=` reports 903 matches for "Boracay" alone); this just asks it.
+export async function searchPosts(
+  query: string,
+  perPage = 10,
+): Promise<Post[]> {
+  const wpPosts = await wpFetch<WPPost[]>(
+    "/posts",
+    {
+      search: query,
+      per_page: perPage,
+      status: "publish",
+      orderby: "relevance",
+      _embed: 1,
+    },
+    300,
+  ).catch(() => [] as WPPost[]);
+  return wpPosts.map(transformPost);
+}
+
 // Most-recently-edited posts, newest first. Backs the /api/revalidate-recent
 // cron: instead of every article page expiring on a timer and rebuilding on
 // the next crawler hit, we ask WordPress once per run which posts actually
