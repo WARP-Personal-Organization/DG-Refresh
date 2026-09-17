@@ -30,7 +30,7 @@ import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 import ArticleGallery from "@/components/ArticleGallery";
-import FlourishEmbeds from "@/components/FlourishEmbeds";
+import DataVizEmbeds, { type DatawrapperScript } from "@/components/DataVizEmbeds";
 import {
   addTargetBlankToExternalLinks,
   extractGallery,
@@ -69,6 +69,11 @@ const TRUSTED_EMBED_HOSTS = [
   "facebook.com",
   "instagram.com",
   "issuu.com",
+  // Data visualisations. flo.uri.sh is Flourish's direct iframe embed and
+  // datawrapper.dwcdn.net serves Datawrapper's; the script-based forms of both
+  // are handled by DataVizEmbeds instead.
+  "flo.uri.sh",
+  "datawrapper.dwcdn.net",
 ];
 
 function isTrustedEmbedSrc(src: string): boolean {
@@ -79,6 +84,46 @@ function isTrustedEmbedSrc(src: string): boolean {
     return false;
   }
   return TRUSTED_EMBED_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
+
+// Datawrapper's script embed is <div id="datawrapper-vis-ID"> holding a
+// <script src="https://datawrapper.dwcdn.net/ID/embed.js?dark=true"
+// data-target="#datawrapper-vis-ID">. The sanitizer removes the script, so this
+// reads it off the raw body first and DataVizEmbeds appends it again. The URL is
+// rebuilt from the parsed chart ID rather than passed through, so only
+// Datawrapper's own embed.js can ever be loaded this way.
+const DATAWRAPPER_SCRIPT = /<script\b[^>]*>/gi;
+
+function extractDatawrapperScripts(html: string): DatawrapperScript[] {
+  const scripts: DatawrapperScript[] = [];
+  for (const [tag] of html.matchAll(DATAWRAPPER_SCRIPT)) {
+    const src = tag.match(/\ssrc=["']([^"']+)["']/i)?.[1];
+    const target = tag.match(/\sdata-target=["']([^"']+)["']/i)?.[1];
+    if (!src || !target || !/^#datawrapper-vis-[A-Za-z0-9]+$/.test(target)) continue;
+
+    let url: URL;
+    try {
+      url = new URL(src, "https://placeholder.invalid");
+    } catch {
+      continue;
+    }
+    const id = url.pathname.match(/^\/([A-Za-z0-9]+)\/(?:\d+\/)?embed\.js$/)?.[1];
+    if (url.hostname !== "datawrapper.dwcdn.net" || !id) continue;
+
+    // The newsroom sets ?dark=true (the site is dark) and occasionally ?theme=;
+    // carry those, drop anything else.
+    const params = new URLSearchParams();
+    for (const key of ["dark", "theme"]) {
+      const value = url.searchParams.get(key);
+      if (value && /^[\w-]+$/.test(value)) params.set(key, value);
+    }
+    const query = params.toString();
+    scripts.push({
+      src: `https://datawrapper.dwcdn.net/${id}/embed.js${query ? `?${query}` : ""}`,
+      target,
+    });
+  }
+  return scripts;
 }
 
 const ALLOWED_TAGS = [
@@ -103,7 +148,7 @@ const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions["allowedAttributes"] = {
   video: ["src", "width", "height", "controls", "poster"],
   audio: ["src", "controls"],
   source: ["src", "srcset", "type", "media"],
-  iframe: ["src", "allow", "allowfullscreen", "frameborder", "scrolling", "width", "height", "title"],
+  iframe: ["src", "allow", "allowfullscreen", "frameborder", "scrolling", "width", "height", "title", "aria-label", "loading"],
   table: ["width", "border", "cellpadding", "cellspacing"],
   td: ["colspan", "rowspan"],
   th: ["colspan", "rowspan"],
@@ -186,9 +231,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
     ),
   );
 
-  // Only stories that actually carry a chart pay for the Flourish loader.
-  // See FlourishEmbeds for why the script cannot come from the post body.
+  // Only stories that actually carry a chart pay for the loaders. See
+  // DataVizEmbeds for why the scripts cannot come from the post body.
   const hasFlourishEmbed = articleContent.includes("flourish-embed");
+  const datawrapperScripts = extractDatawrapperScripts(contentWithoutGallery);
+  const hasDatawrapperIframe = articleContent.includes('id="datawrapper-chart-');
 
   // WordPress sets post_modified to the last save. For a scheduled story that
   // is *earlier* than the publish time — the newsroom writes in the evening and
@@ -374,7 +421,13 @@ export default async function BlogPost({ params }: BlogPageProps) {
           dangerouslySetInnerHTML={{ __html: articleContent }}
         />
 
-        {hasFlourishEmbed && <FlourishEmbeds />}
+        {(hasFlourishEmbed || datawrapperScripts.length > 0 || hasDatawrapperIframe) && (
+          <DataVizEmbeds
+            flourish={hasFlourishEmbed}
+            datawrapperScripts={datawrapperScripts}
+            datawrapperIframes={hasDatawrapperIframe}
+          />
+        )}
 
         {/* Comment Section */}
         <CommentSection postId={post.id} initialComments={initialComments} />
