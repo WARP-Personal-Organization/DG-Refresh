@@ -16,14 +16,33 @@ interface Props {
   opinionPosts: Post[];
 }
 
+// Pinned to Asia/Manila like the other homepage rails — the functions run in
+// iad1, so an unpinned date renders a day behind for a PH newsroom.
 const formatDate = (s: string) =>
   s
     ? new Date(s).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
+        timeZone: "Asia/Manila",
       })
     : "";
+
+// Byline and date on one line, with the separator drawn only when there are two
+// values to separate — an unbylined column would otherwise lead with a stray
+// "·". Same shape as the Opinion cards on /opinion.
+const Meta: React.FC<{ author?: string; date: string; className: string }> = ({
+  author,
+  date,
+  className,
+}) =>
+  author || date ? (
+    <p className={className}>
+      {author}
+      {author && date && <span className="mx-1.5">·</span>}
+      {date}
+    </p>
+  ) : null;
 
 const SectionHeading: React.FC<{ label: string }> = ({ label }) => (
   <div className="mb-6 pb-2 border-b-2 border-[#fbd203]">
@@ -122,11 +141,11 @@ export default function EditorialCartoonOpinion({
                   <h4 className="text-lg font-playfair font-bold text-white leading-snug group-hover:text-accent transition-colors">
                     {opinionFeatured.data.title}
                   </h4>
-                  {opinionFeatured.data.author && (
-                    <p className="text-xs text-gray-400 mt-1 font-open-sans">
-                      {opinionFeatured.data.author}
-                    </p>
-                  )}
+                  <Meta
+                    author={opinionFeatured.data.author}
+                    date={formatDate(opinionFeatured.data.published_date)}
+                    className="text-xs text-gray-400 mt-1 font-open-sans"
+                  />
                 </Link>
               )}
               {/* Editorial asked for paging here instead of "View All Opinion →",
@@ -144,11 +163,11 @@ export default function EditorialCartoonOpinion({
                         <h4 className="text-sm font-playfair font-bold text-white leading-snug group-hover:text-accent transition-colors">
                           {p.data.title}
                         </h4>
-                        {p.data.author && (
-                          <p className="text-xs text-gray-500 mt-1 font-open-sans">
-                            {p.data.author}
-                          </p>
-                        )}
+                        <Meta
+                          author={p.data.author}
+                          date={formatDate(p.data.published_date)}
+                          className="text-xs text-gray-500 mt-1 font-open-sans"
+                        />
                       </Link>
                     ))}
                   </div>

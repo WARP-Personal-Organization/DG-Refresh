@@ -30,6 +30,7 @@ import Link from "next/link";
 import { notFound, unstable_rethrow } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 import ArticleGallery from "@/components/ArticleGallery";
+import FlourishEmbeds from "@/components/FlourishEmbeds";
 import {
   addTargetBlankToExternalLinks,
   extractGallery,
@@ -91,6 +92,12 @@ const ALLOWED_TAGS = [
 
 const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions["allowedAttributes"] = {
   "*": ["class", "id", "style", "title", "lang", "dir"],
+  // Flourish (the newsroom's data-visualisation tool) marks up a chart as
+  // <div class="flourish-embed" data-src="visualisation/123">. data-src is the
+  // only thing telling embed.js which chart to draw, and stripping it left the
+  // container inert — which is exactly why the charts stopped being
+  // interactive. It is an inert data attribute, not a script or URL handler.
+  div: ["data-src"],
   a: ["href", "name", "target", "rel"],
   img: ["src", "srcset", "sizes", "alt", "width", "height", "loading"],
   video: ["src", "width", "height", "controls", "poster"],
@@ -107,6 +114,12 @@ function sanitizeArticleHtml(html: string): string {
     allowedTags: ALLOWED_TAGS,
     allowedAttributes: ALLOWED_ATTRIBUTES,
     allowProtocolRelative: true,
+    // Defaults plus "noscript". Without it sanitize-html drops the <noscript>
+    // wrapper but keeps its children, so an embed's no-JS fallback thumbnail
+    // rendered as a plain <img> for everyone — a flat picture of a chart sitting
+    // where the live chart belongs. Listing it here removes the tag and its
+    // contents, so the real embed is the only thing left.
+    nonTextTags: ["script", "style", "textarea", "option", "noscript"],
     // Drop any iframe whose src isn't one of the known-safe embed hosts.
     exclusiveFilter: (frame) =>
       frame.tag === "iframe" && !isTrustedEmbedSrc(frame.attribs.src ?? ""),
@@ -172,6 +185,10 @@ export default async function BlogPost({ params }: BlogPageProps) {
       stripGalleryStyles(stripLeadingByline(contentWithoutGallery, post.data.author)),
     ),
   );
+
+  // Only stories that actually carry a chart pay for the Flourish loader.
+  // See FlourishEmbeds for why the script cannot come from the post body.
+  const hasFlourishEmbed = articleContent.includes("flourish-embed");
 
   // WordPress sets post_modified to the last save. For a scheduled story that
   // is *earlier* than the publish time — the newsroom writes in the evening and
@@ -356,6 +373,8 @@ export default async function BlogPost({ params }: BlogPageProps) {
             [&_table]:w-full [&_table]:overflow-x-auto [&_table]:block"
           dangerouslySetInnerHTML={{ __html: articleContent }}
         />
+
+        {hasFlourishEmbed && <FlourishEmbeds />}
 
         {/* Comment Section */}
         <CommentSection postId={post.id} initialComments={initialComments} />
