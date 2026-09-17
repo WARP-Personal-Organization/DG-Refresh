@@ -60,6 +60,14 @@ body {
 .prose iframe {
   width: 100% !important;
   max-width: 100% !important;
+}
+
+/* Video frames get a 16:9 box. Data-visualisation frames are excluded: Flourish
+   and Datawrapper size their iframe to the chart (a height attribute, then an
+   inline height once the chart reports it), and `height: auto !important`
+   overrode both, so every chart was cropped to a 16:9 strip — a tall network or
+   sankey diagram lost most of itself. */
+.prose iframe:not([src*="flo.uri.sh"], [src*="datawrapper.dwcdn.net"]) {
   aspect-ratio: 16 / 9;
   height: auto !important;
 }
