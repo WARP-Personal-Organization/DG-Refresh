@@ -3,6 +3,7 @@ export const revalidate = 300;
 import VoicesPage from "@/components/VoicesPage";
 import {
   getOpinionColumnists,
+  getOtherOpinionColumns,
   getPostsByCategorySlugs,
 } from "../../../lib/wordpress";
 
@@ -17,10 +18,17 @@ export default async function OpinionPage() {
   // appears (not just whoever published in the last 20 posts). The "Latest
   // Opinions" strip stays a small 20-post fetch — 100 posts with _embed produced
   // ~5 MB, over Next.js's 2 MB data-cache limit, so it bypassed cache entirely.
-  const [columnists, { posts }] = await Promise.all([
+  const [columnists, { posts }, otherColumns] = await Promise.all([
     getOpinionColumnists().catch(() => []),
     getPostsByCategorySlugs(["opinion"], 20).catch(() => ({ posts: [] })),
+    getOtherOpinionColumns().catch(() => []),
   ]);
 
-  return <VoicesPage columnists={columnists} recentPosts={posts} />;
+  return (
+    <VoicesPage
+      columnists={columnists}
+      recentPosts={posts}
+      otherColumnCount={otherColumns.length}
+    />
+  );
 }
