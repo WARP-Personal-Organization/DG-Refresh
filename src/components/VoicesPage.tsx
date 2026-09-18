@@ -39,7 +39,15 @@ const ColumnistCard: React.FC<{ c: ColumnistSummary }> = ({ c }) => {
                 alt={c.author}
                 fill
                 className="object-cover object-left grayscale-[0.2] transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
-                sizes="120px"
+                // `sizes` is a WIDTH hint, but these sources are wide banners
+                // that object-cover crops to a square: at sizes="120px" a
+                // 1200x600 banner arrived 120 wide and only 60 tall, then got
+                // stretched to fill a 112px circle on a 2x screen — a ~3.7x
+                // upscale, which is why the portraits looked soft. The widest
+                // banner is 2:1, so ask for double the box: 224 CSS px is 448
+                // device px wide and 224 tall at 2x, exactly what the circle
+                // needs. The originals are 251-1200px, so nothing is upscaled.
+                sizes="224px"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
