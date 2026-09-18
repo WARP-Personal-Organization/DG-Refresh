@@ -1049,11 +1049,13 @@ const OPINION_ROSTER: ReadonlyArray<{
   { column: "RANT AND RAVE", slug: "rant-and-rave", author: "Joseph B.A Marzan", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/RANT-AND-RAVE-JOSEPH-MARZAN1.jpg" },
   { column: "CONTEMPLATIONS", slug: "contemplations", author: "Shay Cullen", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/Shay-Cullen-x-Contemplations-23.jpg" },
   { column: "BEYOND THE BEND", slug: "beyond-the-bend", author: "Michael Henry Yusingco, LL.M", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/12/Michael-Henry-Yusingco-x-beyond-the-bend.jpg" },
-  // The paper's own editorial — no byline and no face. The masthead stands in
-  // for a portrait: the logo is a transparent PNG whose D-mark sits at the left,
-  // which is exactly where ColumnistCard's object-left crop looks. Without this
-  // it would inherit whatever banner the latest editorial happened to carry.
-  { column: "EDITORIAL", slug: "editorial", author: "Daily Guardian", headshot: "/dg-logo.png" },
+  // The paper's own editorial — no byline and no face, so the masthead stands in
+  // for a portrait. It points at dg-mark.png, the D-mark cropped square out of
+  // dg-logo.png, rather than the logo itself: the full lockup is 3.65:1, and a
+  // square crop of something that wide arrives too short for the circle however
+  // generous ColumnistCard's `sizes` is. Without a headshot at all it would
+  // inherit whatever banner the latest editorial happened to carry.
+  { column: "EDITORIAL", slug: "editorial", author: "Daily Guardian", headshot: "/dg-mark.png" },
 ];
 
 // WP category slug of the Opinion section; every column is a child of it.
