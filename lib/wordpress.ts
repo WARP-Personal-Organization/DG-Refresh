@@ -1049,7 +1049,15 @@ const OPINION_ROSTER: ReadonlyArray<{
   { column: "RANT AND RAVE", slug: "rant-and-rave", author: "Joseph B.A Marzan", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/04/RANT-AND-RAVE-JOSEPH-MARZAN1.jpg" },
   { column: "CONTEMPLATIONS", slug: "contemplations", author: "Shay Cullen", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2023/01/Shay-Cullen-x-Contemplations-23.jpg" },
   { column: "BEYOND THE BEND", slug: "beyond-the-bend", author: "Michael Henry Yusingco, LL.M", headshot: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/12/Michael-Henry-Yusingco-x-beyond-the-bend.jpg" },
+  // The paper's own editorial — no byline and no face. The masthead stands in
+  // for a portrait: the logo is a transparent PNG whose D-mark sits at the left,
+  // which is exactly where ColumnistCard's object-left crop looks. Without this
+  // it would inherit whatever banner the latest editorial happened to carry.
+  { column: "EDITORIAL", slug: "editorial", author: "Daily Guardian", headshot: "/dg-logo.png" },
 ];
+
+// WP category slug of the Opinion section; every column is a child of it.
+const OPINION_CATEGORY_SLUG = "opinion";
 
 // Resolve category slugs → a slug→id map in ONE request (vs N).
 async function resolveCategoryIdMap(
@@ -1133,6 +1141,78 @@ export async function getOpinionColumnists(): Promise<ColumnistSummary[]> {
       ? { url: r.headshot, alt: r.author }
       : fetchedBySlug.get(r.slug) ?? null,
   }));
+}
+
+export interface OpinionColumn {
+  name: string; // display title, e.g. "CITY THAT READS"
+  slug: string;
+  count: number; // published posts, for ordering the directory
+}
+
+// Every Opinion column that is NOT on the curated roster above — the "OTHERS"
+// group on /opinion.
+//
+// The roster is hand-maintained and carries a headshot per columnist, so it
+// only ever covers the regulars: WordPress has ~85 columns under Opinion and
+// the roster names 36 of them. The remaining ~50 (2,400-odd posts, including
+// VOICEBOX, COMMENTARY, CITY THAT READS and IN DEPTH) had no route onto the
+// site at all — they were invisible on /opinion and their archives 404'd.
+// Rather than grow the roster with columnists who have no portrait, they are
+// listed from WordPress here, so a column added in WP shows up on its own.
+export async function getOtherOpinionColumns(): Promise<OpinionColumn[]> {
+  const idMap = await resolveCategoryIdMap([OPINION_CATEGORY_SLUG]).catch(
+    () => new Map<string, number>(),
+  );
+  const parent = idMap.get(OPINION_CATEGORY_SLUG);
+  if (!parent) return [];
+
+  const rostered = new Set(OPINION_ROSTER.map((r) => r.slug));
+  const columns: OpinionColumn[] = [];
+
+  // Paged rather than a single per_page=100 call: the section is already at 85
+  // children, so one more editorial whim would silently truncate the list.
+  for (let page = 1; page <= 5; page++) {
+    let batch: Array<{ name: string; slug: string; count: number }>;
+    try {
+      batch = await wpFetch<Array<{ name: string; slug: string; count: number }>>(
+        "/categories",
+        {
+          parent,
+          per_page: 100,
+          page,
+          _fields: "name,slug,count",
+          orderby: "count",
+          order: "desc",
+        },
+        86_400, // 24 h — the column list is stable
+      );
+    } catch {
+      break;
+    }
+    for (const c of batch) {
+      if (rostered.has(c.slug)) continue;
+      // Empty categories are editorial scaffolding, not a column to link to.
+      if (c.count < 1) continue;
+      columns.push({ name: stripHtml(c.name), slug: c.slug, count: c.count });
+    }
+    if (batch.length < 100) break;
+  }
+  return columns;
+}
+
+// Display title for any Opinion column, rostered or not. Used by the column
+// archive so an uncurated column gets its real name rather than its slug.
+export async function getOpinionColumnName(slug: string): Promise<string | null> {
+  try {
+    const cats = await wpFetch<Array<{ name: string; slug: string }>>(
+      "/categories",
+      { slug, per_page: 1, _fields: "name,slug" },
+      86_400,
+    );
+    return cats[0] ? stripHtml(cats[0].name) : null;
+  } catch {
+    return null;
+  }
 }
 
 // Look up a curated columnist by their column's category slug (e.g. "prometheus").

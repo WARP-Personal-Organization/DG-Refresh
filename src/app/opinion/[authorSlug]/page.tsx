@@ -4,10 +4,13 @@ import { notFound } from "next/navigation";
 import AuthorArticlesPage from "@/components/AuthorArticlesPage";
 import {
   findColumnistBySlug,
+  getOpinionColumnName,
   getOpinionColumnists,
   getOpinionPostsByAuthor,
   getOpinionPostsByColumnSlug,
+  getOtherOpinionColumns,
 } from "../../../../lib/wordpress";
+import type { Post } from "../../../../lib/wordpress";
 
 type Props = {
   params: Promise<{ authorSlug: string }>;
@@ -25,8 +28,14 @@ function slugToName(slug: string): string {
 // prebuilt; other author-search URLs still render on-demand and get cached
 // after their first hit.
 export async function generateStaticParams(): Promise<{ authorSlug: string }[]> {
-  const columnists = await getOpinionColumnists().catch(() => []);
-  return columnists.map((c) => ({ authorSlug: c.slug }));
+  // Both halves of the directory: the curated roster, and the columns the
+  // OTHERS page lists. Skipping the latter would leave every link on that page
+  // cold-rendering on a reader's first visit.
+  const [columnists, others] = await Promise.all([
+    getOpinionColumnists().catch(() => []),
+    getOtherOpinionColumns().catch(() => []),
+  ]);
+  return [...columnists, ...others].map((c) => ({ authorSlug: c.slug }));
 }
 
 // Server render always fetches page 1 — pagination beyond that is handled
@@ -38,26 +47,38 @@ export default async function AuthorPage({ params }: Props) {
 
   // The Opinion directory links by column category slug (e.g. "prometheus"),
   // which is reliable even when a column's posts have no parseable byline.
-  // Fall back to byline-based author search for legacy /opinion/<name> links.
+  //
+  // The category lookup is tried for *any* slug, not just rostered ones: the
+  // OTHERS directory links ~50 uncurated columns here, and routing those
+  // through the byline search 404'd every one of them — a column like CITY
+  // THAT READS is a section title, not a person's name. Byline search stays as
+  // the fallback for legacy /opinion/<author-name> links.
   const columnist = findColumnistBySlug(authorSlug);
   const searchName = slugToName(authorSlug);
-  const { posts, totalPages } = columnist
-    ? await getOpinionPostsByColumnSlug(authorSlug, 12, page).catch(() => ({
-        posts: [],
-        totalPages: 1,
-        total: 0,
-      }))
-    : await getOpinionPostsByAuthor(searchName, 12, page).catch(() => ({
-        posts: [],
-        totalPages: 1,
-        total: 0,
-      }));
+  let { posts, totalPages } = await getOpinionPostsByColumnSlug(
+    authorSlug,
+    12,
+    page,
+  ).catch(() => ({ posts: [] as Post[], totalPages: 1, total: 0 }));
+
+  if (posts.length === 0) {
+    ({ posts, totalPages } = await getOpinionPostsByAuthor(
+      searchName,
+      12,
+      page,
+    ).catch(() => ({ posts: [] as Post[], totalPages: 1, total: 0 })));
+  }
 
   if (posts.length === 0) notFound();
 
-  // Prefer the curated columnist name; else the post's resolved author field.
+  // Prefer the curated columnist name, then the column's own title (so an
+  // uncurated column reads "CITY THAT READS", not "city that reads"), then the
+  // post's resolved author.
   const displayName =
-    columnist?.author ?? posts[0]?.data.author ?? searchName;
+    columnist?.author ??
+    (await getOpinionColumnName(authorSlug).catch(() => null)) ??
+    posts[0]?.data.author ??
+    searchName;
 
   return (
     <AuthorArticlesPage

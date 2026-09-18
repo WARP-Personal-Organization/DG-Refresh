@@ -7,6 +7,8 @@ import PaginatedOpinionGrid from "./PaginatedOpinionGrid";
 interface VoicesPageProps {
   columnists: ColumnistSummary[];
   recentPosts: Post[];
+  /** How many Opinion columns sit outside the curated roster — the OTHERS tile. */
+  otherColumnCount: number;
 }
 
 function initialsOf(name: string) {
@@ -62,8 +64,36 @@ const ColumnistCard: React.FC<{ c: ColumnistSummary }> = ({ c }) => {
   );
 };
 
+// ── "OTHERS" tile — the way into every column that isn't on the roster ────────
+// Same shape as a ColumnistCard so the grid stays even, but it stands for a
+// group rather than a person: the circle carries the count, not a face.
+const OthersCard: React.FC<{ count: number }> = ({ count }) => (
+  <Link href="/opinion/others" className="block group">
+    <div className="flex flex-col items-center text-center transition-transform duration-300 group-hover:-translate-y-1">
+      <div className="relative mb-4">
+        <div className="absolute -inset-1 rounded-full bg-[#fcee16] opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-25" />
+        <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-gray-800 to-gray-900 ring-2 ring-gray-700 transition-all duration-300 group-hover:ring-[#fcee16] sm:h-28 sm:w-28">
+          <span className="font-roboto text-2xl font-black text-[#fcee16]/70">
+            +{count}
+          </span>
+        </div>
+      </div>
+      <h3 className="font-roboto text-sm font-black uppercase leading-tight tracking-wide text-[#fcee16]">
+        Others
+      </h3>
+      <p className="mt-1 font-open-sans text-[11px] uppercase tracking-wider text-gray-400 transition-colors duration-200 group-hover:text-white">
+        More columns
+      </p>
+    </div>
+  </Link>
+);
+
 // ── Main component ─────────────────────────────────────────────────────────────
-const VoicesPage: React.FC<VoicesPageProps> = ({ columnists, recentPosts }) => {
+const VoicesPage: React.FC<VoicesPageProps> = ({
+  columnists,
+  recentPosts,
+  otherColumnCount,
+}) => {
   // All of them — PaginatedOpinionGrid pages through the rest. Keep the fetch
   // at 20 in opinion/page.tsx: the note there records that 100 posts with
   // _embed exceeded Next's 2 MB per-fetch data-cache limit.
@@ -106,6 +136,7 @@ const VoicesPage: React.FC<VoicesPageProps> = ({ columnists, recentPosts }) => {
             {columnists.map((c) => (
               <ColumnistCard key={c.slug} c={c} />
             ))}
+            {otherColumnCount > 0 && <OthersCard count={otherColumnCount} />}
           </div>
         )}
       </section>
