@@ -33,12 +33,14 @@ import ArticleGallery from "@/components/ArticleGallery";
 import DataVizEmbeds, { type DatawrapperScript } from "@/components/DataVizEmbeds";
 import {
   addTargetBlankToExternalLinks,
-  extractGallery,
+  extractGalleries,
+  GALLERY_MARKER_RE,
   getCommentsByPostId,
   getPostBySlug,
   getPostSlugsForSitemap,
   getRelatedPosts,
   stripGalleryStyles,
+  stripHtml,
   stripLeadingByline,
 } from "../../../../lib/wordpress";
 import type { Post } from "../../../../lib/wordpress";
@@ -186,6 +188,26 @@ function sanitizeArticleHtml(html: string): string {
   });
 }
 
+const PROSE_CLASSES = `prose prose-base sm:prose-lg prose-invert max-w-none
+            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-base prose-p:sm:text-lg prose-p:font-open-sans prose-p:mb-7 sm:prose-p:mb-8
+            prose-h1:text-white prose-h1:font-roboto prose-h1:mt-6 prose-h1:mb-3 sm:prose-h1:mt-8 sm:prose-h1:mb-4
+            prose-h2:text-white prose-h2:font-roboto prose-h2:mt-6 prose-h2:mb-3 sm:prose-h2:mt-8 sm:prose-h2:mb-4
+            prose-h3:text-white prose-h3:font-roboto prose-h3:mt-5 prose-h3:mb-2 sm:prose-h3:mt-6 sm:prose-h3:mb-3
+            prose-strong:text-white prose-strong:font-bold
+            prose-em:text-[#fcee16] prose-em:italic
+            prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
+            prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200 prose-li:mb-2
+            prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:w-full prose-img:h-auto
+            prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
+            prose-code:text-green-400 prose-code:text-sm
+            [&_p]:mb-7 [&_p+p]:mt-0
+            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure]:!mt-8 [&_figure]:!mb-10
+            [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full [&_figure_img]:!mb-0
+            [&_figcaption]:!mt-3 [&_figcaption]:!mb-0 [&_figcaption]:!text-sm [&_figcaption]:!text-gray-400 [&_figcaption]:!italic [&_figcaption]:!leading-snug
+            [&_.wp-caption-text]:!mt-3 [&_.wp-caption-text]:!mb-0 [&_.wp-caption-text]:!text-sm [&_.wp-caption-text]:!text-gray-400 [&_.wp-caption-text]:!italic [&_.wp-caption-text]:!leading-snug
+            [&_img]:!max-w-full [&_img]:!h-auto
+            [&_table]:w-full [&_table]:overflow-x-auto [&_table]:block`;
+
 const formatDate = (dateString: string): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -224,12 +246,27 @@ export default async function BlogPost({ params }: BlogPageProps) {
   const readingTime = `${post.data.reading_time} min`;
   const articleUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.dailyguardian.com.ph"}/blog/${post.uid}`;
 
-  const { gallery, html: contentWithoutGallery } = extractGallery(post.data.content);
+  const { galleries, html: extracted } = extractGalleries(post.data.content);
+  // A gallery that opens the story (photo essays) keeps its slot above the
+  // byline; every other gallery renders where the editor placed it.
+  let leadGallery: (typeof galleries)[number] | null = null;
+  let contentWithoutGallery = extracted;
+  const firstMarker = extracted.match(GALLERY_MARKER_RE);
+  if (
+    firstMarker?.index !== undefined &&
+    !/<img\b/i.test(extracted.slice(0, firstMarker.index)) &&
+    stripHtml(extracted.slice(0, firstMarker.index)).trim() === ""
+  ) {
+    leadGallery = galleries[Number(firstMarker[1])];
+    contentWithoutGallery = extracted.slice(firstMarker.index + firstMarker[0].length);
+  }
   const articleContent = sanitizeArticleHtml(
     addTargetBlankToExternalLinks(
       stripGalleryStyles(stripLeadingByline(contentWithoutGallery, post.data.author)),
     ),
   );
+  // Odd entries are gallery indexes, even entries the HTML between them.
+  const contentParts = articleContent.split(new RegExp(GALLERY_MARKER_RE.source, "g"));
 
   // Only stories that actually carry a chart pay for the loaders. See
   // DataVizEmbeds for why the scripts cannot come from the post body.
@@ -343,6 +380,11 @@ export default async function BlogPost({ params }: BlogPageProps) {
           <h1 className="text-2xl sm:text-3xl lg:text-5xl font-roboto font-bold text-white leading-tight mb-4 sm:mb-6">
             {post.data.title}
           </h1>
+          {post.data.subtitle && (
+            <p className="-mt-2 sm:-mt-3 mb-4 sm:mb-6 text-base sm:text-lg italic text-gray-400 font-open-sans leading-snug">
+              {post.data.subtitle}
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-3 sm:gap-6 py-3 sm:py-4 border-t border-b border-gray-700">
             <span className="flex items-center gap-2 text-gray-400 text-sm font-open-sans">
@@ -369,7 +411,7 @@ export default async function BlogPost({ params }: BlogPageProps) {
         </header>
 
         {/* Gallery — for photo-essay / td-gallery articles */}
-        {gallery.length > 0 && <ArticleGallery images={gallery} />}
+        {leadGallery && <ArticleGallery images={leadGallery} />}
 
         {/* Author and Date Info */}
         <div className="flex items-center gap-3 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-default">
@@ -397,29 +439,22 @@ export default async function BlogPost({ params }: BlogPageProps) {
           </div>
         </div>
 
-        {/* Article Content (WordPress HTML) */}
-        <div
-          className="prose prose-base sm:prose-lg prose-invert max-w-none
-            prose-p:text-gray-200 prose-p:leading-relaxed prose-p:text-base prose-p:sm:text-lg prose-p:font-open-sans prose-p:mb-7 sm:prose-p:mb-8
-            prose-h1:text-white prose-h1:font-roboto prose-h1:mt-6 prose-h1:mb-3 sm:prose-h1:mt-8 sm:prose-h1:mb-4
-            prose-h2:text-white prose-h2:font-roboto prose-h2:mt-6 prose-h2:mb-3 sm:prose-h2:mt-8 sm:prose-h2:mb-4
-            prose-h3:text-white prose-h3:font-roboto prose-h3:mt-5 prose-h3:mb-2 sm:prose-h3:mt-6 sm:prose-h3:mb-3
-            prose-strong:text-white prose-strong:font-bold
-            prose-em:text-[#fcee16] prose-em:italic
-            prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
-            prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200 prose-li:mb-2
-            prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:w-full prose-img:h-auto
-            prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
-            prose-code:text-green-400 prose-code:text-sm
-            [&_p]:mb-7 [&_p+p]:mt-0
-            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure]:!mt-8 [&_figure]:!mb-10
-            [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full [&_figure_img]:!mb-0
-            [&_figcaption]:!mt-3 [&_figcaption]:!mb-0 [&_figcaption]:!text-sm [&_figcaption]:!text-gray-400 [&_figcaption]:!italic [&_figcaption]:!leading-snug
-            [&_.wp-caption-text]:!mt-3 [&_.wp-caption-text]:!mb-0 [&_.wp-caption-text]:!text-sm [&_.wp-caption-text]:!text-gray-400 [&_.wp-caption-text]:!italic [&_.wp-caption-text]:!leading-snug
-            [&_img]:!max-w-full [&_img]:!h-auto
-            [&_table]:w-full [&_table]:overflow-x-auto [&_table]:block"
-          dangerouslySetInnerHTML={{ __html: articleContent }}
-        />
+        {/* Article Content (WordPress HTML), with galleries in place */}
+        {contentParts.map((part, i) =>
+          i % 2 === 1 ? (
+            galleries[Number(part)] && (
+              <ArticleGallery key={i} images={galleries[Number(part)]} />
+            )
+          ) : (
+            part.trim() && (
+              <div
+                key={i}
+                className={PROSE_CLASSES}
+                dangerouslySetInnerHTML={{ __html: part }}
+              />
+            )
+          ),
+        )}
 
         {(hasFlourishEmbed || datawrapperScripts.length > 0 || hasDatawrapperIframe) && (
           <DataVizEmbeds
