@@ -42,6 +42,9 @@ export interface WPPost {
   yoast_head_json?: {
     og_image?: Array<{ url: string; width?: number; height?: number; type?: string }>;
   };
+  // Newspaper theme's "Subtitle" field. It lives in the td_post_theme_settings
+  // meta, which core REST doesn't expose; the old site registers this field.
+  td_subtitle?: string;
 }
 
 export interface WPUser {
@@ -68,6 +71,7 @@ export interface Post {
   uid: string;
   data: {
     title: string;
+    subtitle: string;
     summary: string;
     content: string;
     category: string;
@@ -222,49 +226,20 @@ export interface GalleryImage {
   caption: string;
 }
 
-// Extract the td-gallery slider from WP content, returning the images and the
-// HTML with the gallery block removed. Returns empty gallery + original html
-// when no gallery is detected.
-export function extractGallery(html: string): {
-  gallery: GalleryImage[];
-  html: string;
-} {
-  if (!html || !html.includes("td-gallery")) return { gallery: [], html };
+// Stands in for a gallery inside the article HTML so the page can render the
+// slider where the editor placed it. Plain text, not a comment, because
+// sanitize-html drops comments.
+export const GALLERY_MARKER_RE = /\[\[dg-gallery:(\d+)\]\]/;
 
-  const gallery: GalleryImage[] = [];
-
-  // Each slide has: <a class="slide-gallery-image-link" href="FULL_URL" data-caption="TEXT">
-  const linkRe = /<a\s[^>]*class="[^"]*slide-gallery-image-link[^"]*"[^>]*>/gi;
-  let m;
-  while ((m = linkRe.exec(html)) !== null) {
-    const tag = m[0];
-    const url = tag.match(/\bhref="([^"]+)"/i)?.[1];
-    const caption = tag.match(/\bdata-caption="([^"]*)"/i)?.[1] ?? "";
-    if (url) gallery.push({ url, caption });
-  }
-
-  if (gallery.length === 0) return { gallery: [], html };
-
-  // Remove the gallery block from the HTML. The block starts with either an
-  // optional <style> tag (thumbnail CSS keyed to #tdi_N) or the div itself.
-  // We find the div.td-gallery start, count nested <div> depth to find its
-  // closing tag, then remove that whole span (plus any preceding style block).
-  const galleryDivMatch = html.match(/<div[^>]*class="[^"]*td-gallery[^"]*"/i);
-  if (!galleryDivMatch || galleryDivMatch.index === undefined) {
-    // Fallback: strip everything before the first <p>
-    const firstPara = html.indexOf("<p>");
-    return { gallery, html: firstPara > 0 ? html.slice(firstPara) : html };
-  }
-
-  const divStart = galleryDivMatch.index;
-
-  // Walk forward from divStart counting <div> opens and </div> closes.
+// Find the end of the <div> that opens at `divStart` by counting nested
+// <div> opens and </div> closes.
+function findDivEnd(html: string, divStart: number): number {
   let depth = 0;
   let pos = divStart;
   while (pos < html.length) {
     const nextOpen = html.indexOf("<div", pos);
     const nextClose = html.indexOf("</div>", pos);
-    if (nextClose === -1) break;
+    if (nextClose === -1) return html.length;
     if (nextOpen !== -1 && nextOpen < nextClose) {
       // Only count if it's actually a div tag (not e.g. <divider>)
       const ch = html[nextOpen + 4];
@@ -275,22 +250,59 @@ export function extractGallery(html: string): {
     } else {
       depth--;
       pos = nextClose + 6;
-      if (depth <= 0) break;
+      if (depth <= 0) return pos;
     }
   }
-  const galleryEnd = pos;
+  return pos;
+}
 
-  // Also include a preceding <style> block if it targets the gallery IDs
-  const beforeGallery = html.slice(0, divStart);
-  const styleMatch = beforeGallery.match(/<style[^>]*>[\s\S]*?#tdi_[\s\S]*?<\/style>\s*$/i);
-  const blockStart = styleMatch
-    ? divStart - styleMatch[0].length
-    : divStart;
+// Extract every td-gallery slider from WP content. Each one is replaced by a
+// [[dg-gallery:N]] marker (see GALLERY_MARKER_RE) so it can be rendered in
+// place — a post can carry several sliders between paragraphs, and merging
+// them into one gallery at the top loses the editor's layout.
+export function extractGalleries(html: string): {
+  galleries: GalleryImage[][];
+  html: string;
+} {
+  if (!html || !html.includes("td-gallery")) return { galleries: [], html };
 
-  const stripped =
-    html.slice(0, blockStart).trimEnd() + "\n" + html.slice(galleryEnd).trimStart();
+  const galleries: GalleryImage[][] = [];
+  const divRe = /<div[^>]*class="[^"]*\btd-gallery\b[^"]*"/gi;
+  let out = "";
+  let cursor = 0;
+  let m;
+  while ((m = divRe.exec(html)) !== null) {
+    const divStart = m.index;
+    if (divStart < cursor) continue;
+    const divEnd = findDivEnd(html, divStart);
+    const block = html.slice(divStart, divEnd);
 
-  return { gallery, html: stripped };
+    // Each slide has: <a class="slide-gallery-image-link" href="FULL_URL" data-caption="TEXT">
+    const images: GalleryImage[] = [];
+    const linkRe = /<a\s[^>]*class="[^"]*slide-gallery-image-link[^"]*"[^>]*>/gi;
+    let l;
+    while ((l = linkRe.exec(block)) !== null) {
+      const url = l[0].match(/\bhref="([^"]+)"/i)?.[1];
+      const caption = l[0].match(/\bdata-caption="([^"]*)"/i)?.[1] ?? "";
+      if (url) images.push({ url, caption });
+    }
+
+    // Take the preceding <style> block too (thumbnail CSS keyed to #tdi_N).
+    const before = html.slice(cursor, divStart);
+    const styleMatch = before.match(/<style[^>]*>[\s\S]*?#tdi_[\s\S]*?<\/style>\s*$/i);
+    const blockStart = styleMatch ? divStart - styleMatch[0].length : divStart;
+
+    out += html.slice(cursor, blockStart).trimEnd() + "\n";
+    if (images.length > 0) {
+      out += `[[dg-gallery:${galleries.length}]]\n`;
+      galleries.push(images);
+    }
+    cursor = divEnd;
+    divRe.lastIndex = divEnd;
+  }
+  out += html.slice(cursor).trimStart();
+
+  return { galleries, html: out };
 }
 
 function estimateReadingTime(htmlContent: string): number {
@@ -501,6 +513,7 @@ export function transformPost(wpPost: WPPost): Post {
     uid: wpPost.slug,
     data: {
       title: stripHtml(wpPost.title?.rendered ?? ""),
+      subtitle: stripHtml(wpPost.td_subtitle ?? "").trim(),
       summary: excerpt,
       content: rawContent,
       category,

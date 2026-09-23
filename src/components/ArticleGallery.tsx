@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export interface GalleryImage {
   url: string;
@@ -22,17 +22,6 @@ export default function ArticleGallery({ images }: { images: GalleryImage[] }) {
     [images.length],
   );
 
-  // Keyboard ← → navigation
-  useEffect(() => {
-    if (!images.length) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [images.length, prev, next]);
-
   if (!images.length) return null;
 
   const { url, caption } = images[current];
@@ -48,8 +37,15 @@ export default function ArticleGallery({ images }: { images: GalleryImage[] }) {
     touchStartX.current = null;
   };
 
+  // Keyboard ← → navigation, scoped to this gallery: an article can carry
+  // several, and a window listener would move all of them at once.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") prev();
+    if (e.key === "ArrowRight") next();
+  };
+
   return (
-    <div className="mb-10">
+    <div className="mb-10" onKeyDown={onKeyDown}>
       {/* Counter + arrow controls */}
       <div className="flex items-center justify-end gap-0 mb-2 text-sm text-gray-400 font-open-sans select-none">
         <span className="mr-2">
