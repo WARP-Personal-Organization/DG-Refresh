@@ -197,12 +197,12 @@ const PROSE_CLASSES = `prose prose-base sm:prose-lg prose-invert max-w-none
             prose-em:text-[#fcee16] prose-em:italic
             prose-a:text-[#fcee16] prose-a:underline hover:prose-a:text-[#fcee16]/80
             prose-ul:text-gray-200 prose-ol:text-gray-200 prose-li:text-gray-200 prose-li:mb-2
-            prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:w-full prose-img:h-auto
+            prose-img:rounded-lg prose-img:border prose-img:border-gray-700 prose-img:h-auto
             prose-pre:bg-gray-800 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
             prose-code:text-green-400 prose-code:text-sm
             [&_p]:mb-7 [&_p+p]:mt-0
-            [&_figure]:!max-w-full [&_figure]:!w-full [&_figure]:!mt-8 [&_figure]:!mb-10
-            [&_figure_img]:!w-full [&_figure_img]:!h-auto [&_figure_img]:!max-w-full [&_figure_img]:!mb-0
+            [&_figure]:!max-w-full [&_figure]:!mt-8 [&_figure]:!mb-10
+            [&_figure_img]:!h-auto [&_figure_img]:!max-w-full [&_figure_img]:!mb-0
             [&_figcaption]:!mt-3 [&_figcaption]:!mb-0 [&_figcaption]:!text-sm [&_figcaption]:!text-gray-400 [&_figcaption]:!italic [&_figcaption]:!leading-snug
             [&_.wp-caption-text]:!mt-3 [&_.wp-caption-text]:!mb-0 [&_.wp-caption-text]:!text-sm [&_.wp-caption-text]:!text-gray-400 [&_.wp-caption-text]:!italic [&_.wp-caption-text]:!leading-snug
             [&_img]:!max-w-full [&_img]:!h-auto

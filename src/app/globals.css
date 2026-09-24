@@ -49,6 +49,23 @@ body {
   color: #fbd203cc !important;
 }
 
+/* Article body text, sized to match the old site (Newspaper theme: 17px Open
+   Sans on a 31px line). This has to be plain CSS: the prose-p:* / prose-li:*
+   classes on the article wrapper do nothing, because @tailwindcss/typography
+   is not installed, so the body was falling back to the browser's 16px/24px. */
+.prose p,
+.prose li {
+  font-size: 16px;
+  line-height: 1.8;
+}
+@media (min-width: 640px) {
+  .prose p,
+  .prose li {
+    font-size: 17px;
+    line-height: 1.82;
+  }
+}
+
 /* Override Facebook Page Plugin injected wrapper classes that clip the embed */
 ._1dro, ._2ph- {
   overflow: visible !important;
@@ -85,14 +102,39 @@ body {
  * max-width still caps anything wider than the column (which is what the
  * original comment about WP's inline style="width:Xpx" was guarding against).
  *
+ * Figures are the common case: WordPress wraps a captioned photo in
+ * <figure class="wp-caption aligncenter" style="width: 600px">. The old site
+ * honours that inline width and centres the figure, so the figure is left at
+ * its own width here (capped by max-width) rather than forced to auto, and
+ * centred with auto margins. Images inside it, and bare `aligncenter` images,
+ * are centred as blocks; other bare images stay inline (emoji, icons).
+ *
+ * These rules only win because nothing in the article's Tailwind classes sets
+ * an important width on img or figure: Tailwind v4 puts utilities in a cascade
+ * layer, and a layered !important beats an unlayered one, so a stray
+ * `[&_figure_img]:!w-full` there silently overrides everything below. That is
+ * how the in-figure photos went back to full-column width.
+ *
  * The .td-gallery rules below deliberately re-assert width:100% for gallery
  * tiles — those are grid cells and should fill their column. */
-.prose figure,
+.prose figure {
+  max-width: 100% !important;
+}
+.prose figure:not(.alignleft, .alignright) {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
 .prose figure img,
 .prose img {
   max-width: 100% !important;
   width: auto !important;
   height: auto !important;
+}
+.prose figure img,
+.prose img.aligncenter {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── td-gallery plugin: flatten slider into a photo grid ─────────────────────

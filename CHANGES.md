@@ -4,6 +4,19 @@ Grouped by session/date, most recent first. Entries are committed and merged to 
 
 ---
 
+## 2026-09-24 — Editorial feedback: oversized article photos, small body text, an opinion in Features
+
+| File | Change |
+|---|---|
+| `src/app/blog/[uid]/page.tsx`, `src/app/globals.css` | **Captioned photos no longer stretched to the full column.** The Aug fix (`width: auto`) only ever reached bare `<img>`s. Captioned photos sit in `<figure class="wp-caption" style="width: 600px">`, and the article wrapper's `[&_figure]:!w-full` / `[&_figure_img]:!w-full` beat it: Tailwind v4 utilities live in a cascade layer, and a *layered* `!important` wins over an unlayered one. Removed those; figures now keep WordPress's inline width, capped at the column and centred, as on the old site. |
+| `src/app/globals.css` | **Body text 16px/24px → 17px/31px on desktop** (16px/1.8 on mobile), matching the old site. The `prose-p:*` classes that were meant to set this never did anything — `@tailwindcss/typography` is not installed, so every `prose*` class in `PROSE_CLASSES` is inert. |
+
+**Verified** against `next build` + `next start` on the article Editorial's complaint matches (PSA National ID): old site figure 600px centred, img 600px, text 17px/31px; new site before 600px photo stretched to ~920px, text 16px/24px; after, 600px centred, 17px/30.9px.
+
+**Not a code bug:** the opinion showing under FEATURES is "'Edjop' and the hurrying of history" (post 474332) by columnist John Anthony S. Estolloso. In WordPress it is filed under FEATURES (56) only — the old site labels it FEATURES too. His column "Canvas, Celluloid, Curtain" (15244, under OPINION) is where it belongs; recategorising it in WP fixes it everywhere.
+
+---
+
 ## 2026-09-01 — Editorial feedback: category leakage and editorial mis-tagging (branch `fix/editorial-category-leakage`, **not yet merged**)
 
 Acting on `for website.docx` — 12 annotated screenshots with review comments from DG-Editorial-Rex, written in Hiligaynon. Three of the items are real bugs; the rest are design/feature requests, listed at the bottom as still open.
