@@ -1,6 +1,9 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { getRecentlyModifiedPosts } from "../../../../lib/wordpress";
+import {
+  getRecentlyModifiedPosts,
+  getRecentlyPublishedPosts,
+} from "../../../../lib/wordpress";
 
 // Cron-driven counterpart to /api/revalidate (the WordPress webhook).
 //
@@ -34,9 +37,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let posts: Awaited<ReturnType<typeof getRecentlyModifiedPosts>>;
+  // Edits surface by `modified`; scheduled posts going live surface only by
+  // publish `date` (see getRecentlyPublishedPosts) — both are needed.
+  let posts: Array<{ slug: string; changed_gmt: string }>;
   try {
-    posts = await getRecentlyModifiedPosts(MAX_POSTS_PER_RUN);
+    const [modified, published] = await Promise.all([
+      getRecentlyModifiedPosts(MAX_POSTS_PER_RUN),
+      getRecentlyPublishedPosts(MAX_POSTS_PER_RUN),
+    ]);
+    posts = [
+      ...modified.map((p) => ({ slug: p.slug, changed_gmt: p.modified_gmt })),
+      ...published.map((p) => ({ slug: p.slug, changed_gmt: p.date_gmt })),
+    ];
   } catch (err) {
     // Surface the failure rather than reporting a silent success — a cron that
     // quietly stops working would leave articles stale for up to 24h.
@@ -48,21 +60,28 @@ export async function GET(request: NextRequest) {
   }
 
   const cutoff = Date.now() - LOOKBACK_MINUTES * 60_000;
-  const changed = posts.filter((post) => {
-    // WordPress returns `modified_gmt` without a timezone suffix; append "Z"
-    // so it isn't parsed as local time.
-    const modified = Date.parse(`${post.modified_gmt}Z`);
-    return Number.isFinite(modified) && modified >= cutoff;
-  });
+  const changed = [
+    ...new Set(
+      posts
+        .filter((post) => {
+          // WordPress returns `*_gmt` without a timezone suffix; append "Z"
+          // so it isn't parsed as local time.
+          const at = Date.parse(`${post.changed_gmt}Z`);
+          // Scheduled posts carry a future date until they go live.
+          return Number.isFinite(at) && at >= cutoff && at <= Date.now();
+        })
+        .map((post) => post.slug),
+    ),
+  ];
 
-  for (const post of changed) {
-    revalidatePath(`/blog/${post.slug}`);
+  for (const slug of changed) {
+    revalidatePath(`/blog/${slug}`);
   }
 
   // Index pages keep their own short revalidate windows (they are a handful of
   // paths, so their write cost is negligible) and are intentionally not
   // touched here.
-  if (changed.length === MAX_POSTS_PER_RUN) {
+  if (changed.length >= MAX_POSTS_PER_RUN) {
     console.warn(
       `revalidate-recent: hit the ${MAX_POSTS_PER_RUN}-post cap — possible bulk edit in WordPress.`,
     );
@@ -70,7 +89,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     revalidated: changed.length,
-    slugs: changed.map((p) => p.slug),
+    slugs: changed,
     lookbackMinutes: LOOKBACK_MINUTES,
   });
 }
