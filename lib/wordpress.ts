@@ -866,6 +866,29 @@ export async function getRecentlyModifiedPosts(
   );
 }
 
+// The other half of what the cron has to catch: scheduled posts. WordPress
+// publishes a scheduled post by flipping its status when `date` arrives, and
+// that does NOT touch `modified` — it stays at whenever the editor last saved
+// the draft, usually hours earlier. If anything requested the article URL in
+// between (a pre-shared link, a crawler), the "not found" render is cached
+// for the page's 24h backstop, and getRecentlyModifiedPosts never sees the
+// post go live. Ordering by publish date surfaces exactly those.
+export async function getRecentlyPublishedPosts(
+  perPage = 20,
+): Promise<Array<{ slug: string; date_gmt: string }>> {
+  return wpFetch<Array<{ slug: string; date_gmt: string }>>(
+    "/posts",
+    {
+      per_page: perPage,
+      status: "publish",
+      orderby: "date",
+      order: "desc",
+      _fields: "slug,date_gmt",
+    },
+    0,
+  );
+}
+
 export async function getAllPosts(
   perPage = 40,
   revalidateSeconds = 300,
