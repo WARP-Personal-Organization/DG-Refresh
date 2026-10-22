@@ -66,6 +66,35 @@ body {
   }
 }
 
+/* Article subheadings, matching the old site (Newspaper theme: Roboto in the
+   accent yellow). Plain CSS for the same reason as above — without it the
+   prose-h*:* classes do nothing and Tailwind's reset renders an <h2> as body
+   text. */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: #fbd203;
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  margin-top: 1.75em;
+  margin-bottom: 0.75em;
+}
+.prose h1 { font-size: 28px; line-height: 1.3; }
+.prose h2 { font-size: 24px; line-height: 1.35; }
+.prose h3 { font-size: 20px; line-height: 1.4; }
+.prose h4 { font-size: 18px; line-height: 1.45; }
+.prose h5 { font-size: 17px; line-height: 1.45; }
+.prose h6 { font-size: 16px; line-height: 1.45; }
+@media (min-width: 640px) {
+  .prose h1 { font-size: 32px; }
+  .prose h2 { font-size: 27px; }
+  .prose h3 { font-size: 22px; }
+  .prose h4 { font-size: 19px; }
+}
+
 /* Override Facebook Page Plugin injected wrapper classes that clip the embed */
 ._1dro, ._2ph- {
   overflow: visible !important;
