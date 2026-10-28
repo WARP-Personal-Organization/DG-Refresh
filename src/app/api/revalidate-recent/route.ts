@@ -29,6 +29,15 @@ const LOOKBACK_MINUTES = 20;
 // backstop on the article pages themselves.
 const MAX_POSTS_PER_RUN = 20;
 
+// Scheduled posts can't share that cap. The newsroom schedules the next day's
+// paper for midnight, so 30–40 posts go live within a few minutes; with only
+// the newest 20 fetched, everything older in the batch fell outside the
+// window before any run saw it, and any of those whose URL had been hit
+// before going live stayed on "Article Not Found" for the 24h backstop.
+// 100 is the WordPress per_page maximum — far above any real batch — and
+// revalidatePath only marks paths stale, so a large run is cheap.
+const MAX_PUBLISHED_PER_RUN = 100;
+
 export async function GET(request: NextRequest) {
   // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`. Without this the
   // endpoint would let anyone force arbitrary revalidation work.
@@ -43,8 +52,18 @@ export async function GET(request: NextRequest) {
   try {
     const [modified, published] = await Promise.all([
       getRecentlyModifiedPosts(MAX_POSTS_PER_RUN),
-      getRecentlyPublishedPosts(MAX_POSTS_PER_RUN),
+      getRecentlyPublishedPosts(MAX_PUBLISHED_PER_RUN),
     ]);
+    if (modified.length >= MAX_POSTS_PER_RUN) {
+      console.warn(
+        `revalidate-recent: hit the ${MAX_POSTS_PER_RUN}-post cap — possible bulk edit in WordPress.`,
+      );
+    }
+    if (published.length >= MAX_PUBLISHED_PER_RUN) {
+      console.warn(
+        `revalidate-recent: hit the ${MAX_PUBLISHED_PER_RUN}-post published cap — some newly live posts may be missed.`,
+      );
+    }
     posts = [
       ...modified.map((p) => ({ slug: p.slug, changed_gmt: p.modified_gmt })),
       ...published.map((p) => ({ slug: p.slug, changed_gmt: p.date_gmt })),
@@ -81,12 +100,6 @@ export async function GET(request: NextRequest) {
   // Index pages keep their own short revalidate windows (they are a handful of
   // paths, so their write cost is negligible) and are intentionally not
   // touched here.
-  if (changed.length >= MAX_POSTS_PER_RUN) {
-    console.warn(
-      `revalidate-recent: hit the ${MAX_POSTS_PER_RUN}-post cap — possible bulk edit in WordPress.`,
-    );
-  }
-
   return NextResponse.json({
     revalidated: changed.length,
     slugs: changed,
