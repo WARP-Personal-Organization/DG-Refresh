@@ -41,13 +41,8 @@ const marketing = [
 const editorial = [
   {
     name: "Joseph Bernard Marzan",
-    role: "Senior Reporter",
-    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/10/241079043_1458172951221024_5452883474456689570_n.jpg",
-  },
-  {
-    name: "Dolly Yasa",
     role: "Reporter",
-    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2022/06/Dolly-Yasa-Reporter.jpg",
+    photo: "https://old.dailyguardian.com.ph/wp-content/uploads/2021/10/241079043_1458172951221024_5452883474456689570_n.jpg",
   },
   {
     name: "Glazyl Jane Masculino",
