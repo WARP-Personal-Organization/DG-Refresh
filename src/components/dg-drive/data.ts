@@ -196,3 +196,9 @@ export const NEVER_MISS = {
 export const COPYRIGHT = "© 2024 DG Drive. All rights reserved.";
 
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.id === slug);
+
+/**
+ * True when the article has a clean photo (no title art baked in). Thumbnails
+ * include their own frame and text, so they must never be cropped or slanted.
+ */
+export const hasCleanPhoto = (a: Pick<DriveArticle, "image" | "thumb">) => a.image !== a.thumb;

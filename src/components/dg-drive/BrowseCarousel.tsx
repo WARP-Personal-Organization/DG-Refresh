@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ARTICLES } from "./data";
+import { ARTICLES, hasCleanPhoto } from "./data";
 
 // Frame-unit helper shared with the desktop artboard (see dg-drive/page.tsx).
 const u = (n: number) => `calc(var(--u) * ${n})`;
@@ -51,21 +51,107 @@ function useCarousel() {
     return () => clearTimeout(id);
   }, [v, paused]);
 
-  return { v, active: v % N, direction, paused, setPaused, step, next, prev, goTo };
+  return {
+    v,
+    active: v % N,
+    direction,
+    paused,
+    setPaused,
+    step,
+    next,
+    prev,
+    goTo,
+  };
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
 // Slot geometry in frame units, taken from the Canva design. Every clip-path
 // has four points so the browser can animate between them.
-type Slot = { x: number; y: number; w: number; h: number; clip: string; shade: number; opacity: number; z: number };
+type Slot = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  clip: string;
+  shade: number;
+  opacity: number;
+  z: number;
+};
 const SLOTS: Record<number, Slot> = {
-  [-2]: { x: -420, y: 1215, w: 380, h: 279, clip: "polygon(30% 0, 100% 0, 70% 100%, 0 100%)", shade: 0.6, opacity: 0, z: 1 },
-  [-1]: { x: 0, y: 1215, w: 60, h: 279, clip: "polygon(0 0, 92% 0, 0 90%, 0 90%)", shade: 0.3, opacity: 1, z: 10 },
-  0: { x: 0, y: 1215, w: 692, h: 279, clip: "polygon(10.1% 0, 100% 0, 81.6% 100%, 1% 100%)", shade: 0, opacity: 1, z: 30 },
-  1: { x: 588, y: 1278, w: 309, h: 275, clip: "polygon(40.5% 0, 100% 0, 58.9% 100%, 0 100%)", shade: 0.55, opacity: 1, z: 20 },
-  2: { x: 792, y: 1345, w: 380, h: 260, clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)", shade: 0.65, opacity: 1, z: 15 },
-  3: { x: 1110, y: 1400, w: 380, h: 260, clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)", shade: 0.7, opacity: 0, z: 1 },
+  [-2]: {
+    x: -420,
+    y: 1215,
+    w: 380,
+    h: 279,
+    clip: "polygon(30% 0, 100% 0, 70% 100%, 0 100%)",
+    shade: 0.6,
+    opacity: 0,
+    z: 1,
+  },
+  [-1]: {
+    x: 0,
+    y: 1215,
+    w: 60,
+    h: 279,
+    clip: "polygon(0 0, 92% 0, 0 90%, 0 90%)",
+    shade: 0.3,
+    opacity: 1,
+    z: 10,
+  },
+  0: {
+    x: 0,
+    y: 1215,
+    w: 692,
+    h: 279,
+    clip: "polygon(10.1% 0, 100% 0, 81.6% 100%, 1% 100%)",
+    shade: 0,
+    opacity: 1,
+    z: 30,
+  },
+  1: {
+    x: 588,
+    y: 1278,
+    w: 309,
+    h: 275,
+    clip: "polygon(40.5% 0, 100% 0, 58.9% 100%, 0 100%)",
+    shade: 0.55,
+    opacity: 1,
+    z: 20,
+  },
+  2: {
+    x: 792,
+    y: 1345,
+    w: 380,
+    h: 260,
+    clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)",
+    shade: 0.65,
+    opacity: 1,
+    z: 15,
+  },
+  3: {
+    x: 1110,
+    y: 1400,
+    w: 380,
+    h: 260,
+    clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)",
+    shade: 0.7,
+    opacity: 0,
+    z: 1,
+  },
+};
+
+// Main slot for articles that only have a thumbnail: the thumbnail's own
+// aspect ratio and no slant, so its baked-in title text is never cropped.
+const MAIN_THUMB: Slot = {
+  x: 70,
+  y: 1215,
+  w: 279 * (1270 / 720),
+  h: 279,
+  clip: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+  shade: 0,
+  opacity: 1,
+  z: 30,
 };
 
 /** Offset of virtual item i from the active one, normalised to -2..3. */
@@ -80,7 +166,8 @@ const offsetOf = (i: number, v: number) => {
  * progress bar sit beside the "Go to Article" button.
  */
 export function BrowseCarouselDesktop() {
-  const { v, active, direction, paused, setPaused, step, next, prev } = useCarousel();
+  const { v, active, direction, paused, setPaused, step, next, prev } =
+    useCarousel();
   const router = useRouter();
   const current = ARTICLES[active];
 
@@ -104,11 +191,14 @@ export function BrowseCarouselDesktop() {
     >
       {VIRTUAL.map((article, i) => {
         const offset = offsets[i];
-        const slot = SLOTS[offset];
+        const slot =
+          offset === 0 && !hasCleanPhoto(article) ? MAIN_THUMB : SLOTS[offset];
         const jumped = Math.abs(offset - prevOffsets.current[i]) > 1;
         const isMain = offset === 0;
         const visible = offset >= -1 && offset <= 2;
-        const label = isMain ? `Read ${article.title}` : `Show ${article.title}`;
+        const label = isMain
+          ? `Read ${article.title}`
+          : `Show ${article.title}`;
         return (
           <div
             key={`${article.id}-${i}`}
@@ -116,7 +206,9 @@ export function BrowseCarouselDesktop() {
             aria-label={visible ? label : undefined}
             aria-hidden={visible ? undefined : true}
             tabIndex={visible ? 0 : -1}
-            onClick={() => (isMain ? router.push(article.href) : visible && step(offset))}
+            onClick={() =>
+              isMain ? router.push(article.href) : visible && step(offset)
+            }
             onKeyDown={(e) => {
               if (e.key !== "Enter" && e.key !== " ") return;
               e.preventDefault();
@@ -147,8 +239,8 @@ export function BrowseCarouselDesktop() {
               alt=""
               fill
               sizes="30vw"
-              className="object-cover transition-[opacity,transform] duration-700 group-hover:scale-105"
-              style={{ opacity: isMain && article.image !== article.thumb ? 0 : 1 }}
+              className="object-cover transition-opacity duration-700"
+              style={{ opacity: isMain && hasCleanPhoto(article) ? 0 : 1 }}
             />
             {article.image !== article.thumb && (
               <Image
@@ -169,15 +261,28 @@ export function BrowseCarouselDesktop() {
       })}
 
       {/* Active article text */}
-      <div className="absolute overflow-hidden" style={{ left: u(51), top: u(1520), width: u(560), height: u(170) }}>
-        <div key={`${current.id}-text`} className={`text-black ${textSlide}`} style={{ paddingTop: u(6) }}>
+      <div
+        className="absolute overflow-hidden"
+        style={{ left: u(51), top: u(1520), width: u(560), height: u(170) }}
+      >
+        <div
+          key={`${current.id}-text`}
+          className={`text-black ${textSlide}`}
+          style={{ paddingTop: u(6) }}
+        >
           <h3 className="font-black leading-none" style={{ fontSize: u(38) }}>
             {current.title}
           </h3>
-          <p className="font-extrabold leading-none" style={{ fontSize: u(21), marginTop: u(9) }}>
+          <p
+            className="font-extrabold leading-none"
+            style={{ fontSize: u(21), marginTop: u(9) }}
+          >
             {current.subtitle}
           </p>
-          <p className="font-normal" style={{ fontSize: u(17.5), lineHeight: u(25), marginTop: u(13) }}>
+          <p
+            className="font-normal"
+            style={{ fontSize: u(17.5), lineHeight: u(25), marginTop: u(13) }}
+          >
             {current.descriptionLines.map((line) => (
               <span key={line} className="block whitespace-nowrap">
                 {line}
@@ -190,7 +295,14 @@ export function BrowseCarouselDesktop() {
       <Link
         href={current.href}
         className="group absolute flex items-center justify-center gap-2 bg-black font-semibold text-white transition-colors hover:bg-neutral-800"
-        style={{ left: u(52), top: u(1700), width: u(176), height: u(32), fontSize: u(15), zIndex: 40 }}
+        style={{
+          left: u(52),
+          top: u(1700),
+          width: u(176),
+          height: u(32),
+          fontSize: u(15),
+          zIndex: 40,
+        }}
       >
         Go to Article
         <ChevronRight
@@ -217,14 +329,23 @@ export function BrowseCarouselDesktop() {
       ))}
       <div
         className="absolute font-extrabold text-black tabular-nums"
-        style={{ left: u(322), top: u(1700), height: u(32), fontSize: u(14), lineHeight: u(32) }}
+        style={{
+          left: u(322),
+          top: u(1700),
+          height: u(32),
+          fontSize: u(14),
+          lineHeight: u(32),
+        }}
         aria-live="polite"
       >
         {pad(active + 1)} <span className="opacity-40">/ {pad(N)}</span>
       </div>
 
       {/* Autoplay progress */}
-      <div className="absolute overflow-hidden bg-black/15" style={{ left: u(52), top: u(1744), width: u(316), height: u(3) }}>
+      <div
+        className="absolute overflow-hidden bg-black/15"
+        style={{ left: u(52), top: u(1744), width: u(316), height: u(3) }}
+      >
         {/* Re-keyed on pause too: the autoplay timer restarts from zero when
             the pointer leaves, so the bar must restart with it. */}
         <div
@@ -264,7 +385,10 @@ export function BrowseCarouselMobile() {
       >
         <div
           className="flex"
-          style={{ transform: `translateX(-${active * 100}%)`, transition: `transform ${SLIDE_MS}ms ${EASE}` }}
+          style={{
+            transform: `translateX(-${active * 100}%)`,
+            transition: `transform ${SLIDE_MS}ms ${EASE}`,
+          }}
         >
           {ARTICLES.map((a, i) => (
             <Link
@@ -272,10 +396,20 @@ export function BrowseCarouselMobile() {
               href={a.href}
               aria-hidden={i !== active}
               tabIndex={i === active ? 0 : -1}
-              className="relative block aspect-[16/9] w-full shrink-0 overflow-hidden"
-              style={{ clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)" }}
+              className="relative block aspect-[1270/720] w-full shrink-0 overflow-hidden"
+              style={
+                hasCleanPhoto(a)
+                  ? { clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)" }
+                  : undefined
+              }
             >
-              <Image src={a.image} alt={a.title} fill sizes="100vw" className="object-cover" />
+              <Image
+                src={a.image}
+                alt={a.title}
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
             </Link>
           ))}
         </div>
@@ -315,9 +449,15 @@ export function BrowseCarouselMobile() {
 
       <div className="mt-5 overflow-hidden">
         <div key={`${current.id}-text`} className={`text-black ${textSlide}`}>
-          <h3 className="text-[28px] font-black leading-none">{current.title}</h3>
-          <p className="mt-2 text-[17px] font-extrabold leading-none">{current.subtitle}</p>
-          <p className="mt-3 text-[15px] leading-relaxed">{current.descriptionLines.join(" ")}</p>
+          <h3 className="text-[28px] font-black leading-none">
+            {current.title}
+          </h3>
+          <p className="mt-2 text-[17px] font-extrabold leading-none">
+            {current.subtitle}
+          </p>
+          <p className="mt-3 text-[15px] leading-relaxed">
+            {current.descriptionLines.join(" ")}
+          </p>
           <Link
             href={current.href}
             className="mt-5 inline-flex h-10 items-center gap-2 bg-black px-7 text-[14px] font-semibold text-white"
