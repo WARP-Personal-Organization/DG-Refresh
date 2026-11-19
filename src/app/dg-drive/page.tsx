@@ -327,7 +327,7 @@ function DGDriveDesktop() {
         <BrowseCarouselDesktop />
 
         {/* ---------- Never miss a story ---------- */}
-        <Abs x={493} y={1736} w={500} className="text-right">
+        <Abs x={493} y={1724} w={500} className="text-right">
           <Reveal variant="right">
             <h2
               className="font-extrabold leading-none"
@@ -336,10 +336,11 @@ function DGDriveDesktop() {
               {NEVER_MISS.heading}
             </h2>
             <p
-              className="whitespace-nowrap text-white"
-              style={{ fontSize: u(10.6), marginTop: u(6) }}
+              className="text-white"
+              style={{ fontSize: u(10.6), lineHeight: u(15), marginTop: u(6) }}
             >
-              {NEVER_MISS.sub}
+              {/* Two lines so the copy stays clear of the yellow diagonal. */}
+              <Lines lines={NEVER_MISS.subLines} />
             </p>
           </Reveal>
         </Abs>

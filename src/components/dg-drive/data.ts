@@ -191,6 +191,7 @@ export const SOCIALS = [
 export const NEVER_MISS = {
   heading: "Never miss a story.",
   sub: "Subscribe & follow to get the latest automotive news, reviews, and exclusive content.",
+  subLines: ["Subscribe & follow to get the latest automotive news,", "reviews, and exclusive content."],
 };
 
 export const COPYRIGHT = "© 2024 DG Drive. All rights reserved.";
