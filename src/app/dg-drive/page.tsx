@@ -449,93 +449,137 @@ function DGDriveDesktop() {
   );
 }
 
+// Phone / tablet layout (< lg). The desktop artboard is too wide to scale down,
+// so this restacks the same content while keeping the design's language:
+// black/yellow diagonals, slanted bars, and a dark wedge into the footer.
+const MOBILE_DARK_BG =
+  "radial-gradient(ellipse 80% 45% at 100% 100%, #6e6226 0%, rgba(12,11,20,0) 100%), linear-gradient(180deg, #0c0a16 0%, #0b0a12 100%)";
+
 function DGDriveMobile() {
   return (
     <div
       className="overflow-hidden lg:hidden"
       style={{ backgroundColor: DG_YELLOW }}
     >
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden px-5 pt-8 pb-24 text-white"
-        style={{
-          background:
-            "radial-gradient(ellipse 90% 60% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
-          clipPath: "polygon(0 0, 100% 0, 100% 82%, 0 100%)",
-        }}
-      >
-        <div className="relative h-[60px] w-[260px] sm:h-[80px] sm:w-[350px]">
-          <Image
-            src="/dg-drive/dg-drive-logo.png"
-            alt="DG Drive"
-            fill
-            priority
-            sizes="350px"
-            className="object-contain object-left"
-          />
-        </div>
-        <p className="mt-4 text-[14px] leading-relaxed">
-          {HERO.overviewTitle}
-          <br />
-          {HERO.overviewLines.join(" ")}
-        </p>
-      </section>
-
-      <div className="mt-2 px-5 text-right">
-        <h1 className="text-[34px] leading-[1.05] font-black text-black sm:text-[46px]">
-          {HERO.taglineLines.map((l, i) => (
-            <Reveal key={l} variant="right" delay={200 + i * 150}>
-              <span className="block">{l}</span>
-            </Reveal>
-          ))}
-        </h1>
-      </div>
-
-      {/* Latest */}
-      <section className="mt-8">
-        <h2 className="px-5 text-[28px] font-extrabold leading-none text-black">
-          {LATEST.label}
-        </h2>
-        <div className="mt-3 border-b-[3px] border-black bg-black">
-          <h3
-            className="ml-2 py-2.5 pl-6 text-[22px] font-extrabold text-black"
-            style={{
-              backgroundColor: DG_YELLOW,
-              clipPath: "polygon(14px 0, 100% 0, 100% 100%, 0 100%)",
-            }}
+      {/* ---------- Hero ---------- */}
+      <section className="relative">
+        <div
+          className="dgd-wipe-article absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 90% 60% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
+            clipPath: "polygon(0 0, 100% 0, 100% 58%, 0 82%)",
+          }}
+        />
+        <div className="relative px-5 pt-8 pb-6">
+          <Reveal
+            variant="left"
+            delay={300}
+            className="relative h-[60px] w-[260px] sm:h-[80px] sm:w-[350px]"
           >
-            {LATEST.heading}
-          </h3>
-        </div>
-        <div className="bg-black px-5 pt-5 pb-6 text-white">
-          <p className="text-[15px] leading-relaxed">
-            {LATEST.blurbLines.join(" ")}
-          </p>
-          <ReadMore
-            href={LATEST.href}
-            className="mt-4 h-10 gap-2 px-5 text-[14px]"
-          />
-          <Reveal variant="zoom">
-            <Link
-              href={LATEST.href}
-              className="relative mt-5 block aspect-[1270/720] w-full overflow-hidden"
-            >
-              <Image
-                src={LATEST.thumbnail}
-                alt={LATEST.thumbnailAlt}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover"
-              />
-              <PlayBadge size="52px" alwaysVisible />
-            </Link>
+            <Image
+              src="/dg-drive/dg-drive-logo.png"
+              alt="DG Drive"
+              fill
+              priority
+              sizes="350px"
+              className="object-contain object-left"
+            />
           </Reveal>
+          <Reveal delay={450}>
+            <p className="mt-4 max-w-[34ch] text-[14px] leading-relaxed text-white">
+              {HERO.overviewTitle}
+              <br />
+              {HERO.overviewLines.join(" ")}
+            </p>
+          </Reveal>
+          <h1 className="mt-16 text-right text-[34px] leading-[1.02] font-black text-black sm:mt-20 sm:text-[48px]">
+            {HERO.taglineLines.map((l, i) => (
+              <Reveal key={l} variant="right" delay={550 + i * 150}>
+                <span className="block">{l}</span>
+              </Reveal>
+            ))}
+          </h1>
         </div>
       </section>
 
-      {/* Spotlight */}
-      <section className="px-5 pt-8 pb-10">
+      {/* ---------- Latest ---------- */}
+      <section className="relative mt-4 pb-8">
+        {/* Black block with a slanted top, then a yellow wedge the thumbnail straddles */}
+        <div
+          className="absolute inset-0 bg-black"
+          style={{ clipPath: "polygon(0 0, 100% 34px, 100% 100%, 0 100%)" }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: DG_YELLOW,
+            clipPath: "polygon(0 78%, 100% 58%, 100% 100%, 0 100%)",
+          }}
+        />
+        <div className="relative pt-10">
+          <Reveal variant="left">
+            <h2 className="px-5 text-[30px] leading-none font-extrabold text-white">
+              {LATEST.label}
+            </h2>
+          </Reveal>
+          <Reveal variant="left" delay={120}>
+            <h3
+              className="mt-4 mr-8 py-2.5 pr-8 pl-5 text-[22px] font-extrabold text-black"
+              style={{
+                backgroundColor: DG_YELLOW,
+                clipPath:
+                  "polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%)",
+              }}
+            >
+              {LATEST.heading}
+            </h3>
+          </Reveal>
+          <div className="mt-1 h-[3px] bg-black" />
+          <div className="px-5 pt-5">
+            <Reveal delay={150}>
+              <p className="text-[15px] leading-relaxed text-white">
+                {LATEST.blurbLines.join(" ")}
+              </p>
+              <ReadMore
+                href={LATEST.href}
+                className="mt-4 h-10 gap-2 px-5 text-[14px]"
+              />
+            </Reveal>
+            <Reveal variant="zoom" delay={150}>
+              <Link
+                href={LATEST.href}
+                className="relative mt-6 block aspect-[1270/720] w-full overflow-hidden shadow-2xl"
+              >
+                <Image
+                  src={LATEST.thumbnail}
+                  alt={LATEST.thumbnailAlt}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover"
+                />
+                <PlayBadge size="52px" alwaysVisible />
+              </Link>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Spotlight ---------- */}
+      <section className="relative px-5 pt-6 pb-12">
+        {/* Black corner behind the car and a dark wedge bottom-right, as on desktop */}
+        <div
+          className="absolute inset-0 bg-black"
+          style={{ clipPath: "polygon(0 0, 38% 0, 0 46%)" }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: MOBILE_DARK_BG,
+            clipPath: "polygon(100% 62%, 100% 100%, 74% 100%)",
+          }}
+        />
         <div className="relative mx-auto aspect-[3/2] w-full max-w-[520px]">
           <div className="absolute right-[5%] bottom-[2%] left-[12%] h-[30%] opacity-90">
             <Image
@@ -556,46 +600,58 @@ function DGDriveMobile() {
             />
           </Reveal>
         </div>
-        <h3 className="mt-4 inline-block bg-black px-6 py-2 text-[18px] font-semibold text-white">
-          {SPOTLIGHT.name}
-        </h3>
-        <ul className="mt-3 list-disc pl-5 text-[14px] leading-relaxed text-black italic">
-          {SPOTLIGHT.features.map((f) => (
-            <li key={f}>{f}</li>
+        <Reveal variant="right" delay={200}>
+          <h3 className="relative mt-2 inline-block bg-black px-6 py-2 text-[18px] font-semibold text-white">
+            {SPOTLIGHT.name}
+          </h3>
+        </Reveal>
+        <ul className="relative mt-3 list-disc pl-5 text-[14px] leading-relaxed text-black italic">
+          {SPOTLIGHT.features.map((f, i) => (
+            <li key={f}>
+              <Reveal variant="right" delay={300 + i * 100}>
+                {f}
+              </Reveal>
+            </li>
           ))}
         </ul>
       </section>
 
-      {/* Browse */}
-      <section className="pb-10">
-        <h2
-          className="mb-5 inline-block bg-black py-2.5 pr-10 pl-5 text-[24px] font-extrabold text-white"
-          style={{ clipPath: "polygon(0 0, 100% 0, 92% 100%, 0 100%)" }}
-        >
-          BROWSE ARTICLES
-        </h2>
+      {/* ---------- Browse articles ---------- */}
+      <section className="pb-16">
+        <Reveal variant="left">
+          <h2
+            className="mb-5 inline-block bg-black py-2.5 pr-10 pl-5 text-[24px] font-extrabold text-white"
+            style={{
+              clipPath: "polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)",
+            }}
+          >
+            BROWSE ARTICLES
+          </h2>
+        </Reveal>
         <div className="px-5">
           <BrowseCarouselMobile />
         </div>
       </section>
 
-      {/* Never miss a story */}
+      {/* ---------- Never miss a story ---------- */}
       <section
-        className="px-5 pt-12 pb-8"
+        className="-mt-10 px-5 pt-20 pb-8"
         style={{
-          background:
-            "radial-gradient(ellipse 70% 40% at 100% 100%, #6e6226 0%, rgba(12,11,20,0) 100%), linear-gradient(180deg, #0c0a16 0%, #0b0a12 100%)",
+          background: MOBILE_DARK_BG,
+          clipPath: "polygon(0 56px, 100% 0, 100% 100%, 0 100%)",
         }}
       >
-        <h2
-          className="text-right text-[26px] font-extrabold leading-none"
-          style={{ color: DG_YELLOW }}
-        >
-          {NEVER_MISS.heading}
-        </h2>
-        <p className="mt-2 text-right text-[12px] text-white">
-          {NEVER_MISS.sub}
-        </p>
+        <Reveal variant="right">
+          <h2
+            className="text-right text-[26px] leading-none font-extrabold"
+            style={{ color: DG_YELLOW }}
+          >
+            {NEVER_MISS.heading}
+          </h2>
+          <p className="mt-2 text-right text-[12px] text-white">
+            {NEVER_MISS.sub}
+          </p>
+        </Reveal>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SOCIALS.map((s, i) => (
             <Reveal key={s.name} delay={i * 100}>
