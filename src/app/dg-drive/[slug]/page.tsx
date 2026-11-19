@@ -11,11 +11,11 @@ import {
   SOCIALS,
   SPOTLIGHT,
   type ArticleBlock,
-  type DriveArticle,
 } from "@/components/dg-drive/data";
 import { hasCleanPhoto } from "@/components/dg-drive/data";
 import { montserrat } from "@/components/dg-drive/font";
 import ReadingProgress from "@/components/dg-drive/ReadingProgress";
+import RelatedSlider from "@/components/dg-drive/RelatedSlider";
 import Reveal from "@/components/dg-drive/Reveal";
 import ShareButtons from "@/components/dg-drive/ShareButtons";
 
@@ -170,44 +170,6 @@ function Block({ block, index }: { block: ArticleBlock; index: number }) {
         </Reveal>
       );
   }
-}
-
-function RelatedCard({ article, i }: { article: DriveArticle; i: number }) {
-  return (
-    <Reveal delay={i * 120}>
-      <Link href={article.href} className="group block">
-        <div className="relative aspect-[1270/720] overflow-hidden transition-transform duration-300 group-hover:-translate-y-1">
-          <Image
-            src={article.thumb}
-            alt={article.title}
-            fill
-            sizes="(min-width: 768px) 45vw, 100vw"
-            className="object-cover"
-          />
-          <span className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/15" />
-        </div>
-        <p
-          className="mt-4 text-[12px] font-bold tracking-widest uppercase"
-          style={{ color: DG_YELLOW }}
-        >
-          {article.category} · {article.date}
-        </p>
-        <h3 className="mt-1 text-[24px] leading-tight font-black text-white">
-          {article.title}
-        </h3>
-        <p className="text-[15px] font-extrabold text-white/80">
-          {article.subtitle}
-        </p>
-        <span className="mt-3 inline-flex items-center gap-2 text-[14px] font-semibold text-white transition-colors group-hover:text-[#FCD400]">
-          Read Article{" "}
-          <ArrowRight
-            size={15}
-            className="transition-transform duration-300 group-hover:translate-x-1"
-          />
-        </span>
-      </Link>
-    </Reveal>
-  );
 }
 
 export default async function DGDriveArticlePage({ params }: Props) {
@@ -435,10 +397,8 @@ export default async function DGDriveArticlePage({ params }: Props) {
               />
             </Link>
           </div>
-          <div className="mt-10 grid gap-10 md:grid-cols-2">
-            {related.map((a, i) => (
-              <RelatedCard key={a.id} article={a} i={i} />
-            ))}
+          <div className="mt-6">
+            <RelatedSlider articles={related} />
           </div>
         </div>
       </section>
