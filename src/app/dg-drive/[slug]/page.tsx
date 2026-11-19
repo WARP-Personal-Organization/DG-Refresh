@@ -113,7 +113,7 @@ function Block({ block, index }: { block: ArticleBlock; index: number }) {
   switch (block.type) {
     case "p":
       return index === 0 ? (
-        <p className="text-[19px] leading-[1.75] font-medium text-black first-letter:float-left first-letter:mr-3 first-letter:bg-black first-letter:px-3 first-letter:pt-1 first-letter:text-[56px] first-letter:leading-[1] first-letter:font-black first-letter:text-[#FCD400]">
+        <p className="text-[19px] leading-[1.75] font-medium text-black">
           {block.text}
         </p>
       ) : (
