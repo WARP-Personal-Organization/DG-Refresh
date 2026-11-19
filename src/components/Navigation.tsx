@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import type { Post } from "../../lib/wordpress";
 
@@ -86,6 +87,12 @@ const navigationData = [
       { name: "CONTACT US", href: "/contact-us" },
     ],
   },
+  {
+    name: "DG Drive",
+    href: "/dg-drive",
+    categoryKeywords: [],
+    megaMenu: false,
+  },
 ];
 
 interface NavProps {
@@ -94,6 +101,8 @@ interface NavProps {
 
 const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const onDGDrive = pathname?.startsWith("/dg-drive") ?? false;
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpandedItems, setMobileExpandedItems] = useState<Set<string>>(new Set());
   // Which page of preview cards the open dropdown is showing. Reset whenever a
@@ -164,7 +173,24 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
               onMouseEnter={() => setActiveDropdown(item.name)}
               onMouseLeave={() => item.megaMenu === false && setActiveDropdown(null)}
             >
-              {item.href === "/other-pages" ? (
+              {item.href === "/dg-drive" ? (
+                // DG Drive is a sub-brand, so its nav item is a slanted yellow
+                // chip in the DG Drive style rather than a plain text link.
+                <Link
+                  href={item.href}
+                  aria-current={onDGDrive ? "page" : undefined}
+                  className="group relative flex items-center px-4 py-2 transition-transform duration-300 hover:-translate-y-0.5"
+                >
+                  <span
+                    className={`absolute inset-0 -skew-x-12 overflow-hidden bg-[#FCD400] transition-shadow duration-300 group-hover:shadow-[0_0_18px_rgba(252,212,0,0.55)] ${
+                      onDGDrive ? "ring-2 ring-white ring-offset-2 ring-offset-[#1a1a1a]" : ""
+                    }`}
+                  >
+                    <span className="absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/70 to-transparent transition-all duration-700 ease-out group-hover:left-[150%]" />
+                  </span>
+                  <span className="relative font-roboto font-black italic tracking-wider text-black">DG DRIVE</span>
+                </Link>
+              ) : item.href === "/other-pages" ? (
                 <span className="flex items-center gap-1 py-2 px-3 font-roboto font-medium tracking-wider transition-all duration-300 hover:text-[#ffe600] cursor-default">
                   {item.name.toUpperCase()}
                   <ChevronDown size={12} className={`transition-transform duration-200 ${activeDropdown === item.name ? "rotate-180" : ""}`} />
@@ -374,7 +400,9 @@ const NavigationBar: React.FC<NavProps> = ({ navPosts = [] }) => {
                 <Link
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className="flex-1 px-5 py-4 text-[11px] font-black tracking-widest uppercase text-white/80 hover:text-[#fcee16] transition-colors"
+                  className={`flex-1 px-5 py-4 text-[11px] font-black tracking-widest uppercase transition-colors hover:text-[#fcee16] ${
+                    item.href === "/dg-drive" ? "italic text-[#FCD400]" : "text-white/80"
+                  }`}
                 >
                   {item.name}
                 </Link>
