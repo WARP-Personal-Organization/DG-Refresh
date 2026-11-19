@@ -279,31 +279,6 @@ body {
 .dgd-text-next { animation: dgd-text-next 750ms cubic-bezier(0.65, 0, 0.35, 1); }
 .dgd-text-prev { animation: dgd-text-prev 750ms cubic-bezier(0.65, 0, 0.35, 1); }
 
-/* "More from DG Drive" trapezoid slider (components/dg-drive/RelatedSlider.tsx) */
-@keyframes dgd-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.dgd-marquee-track { animation: dgd-marquee var(--dgd-marquee-dur, 40s) linear infinite; }
-.dgd-marquee:hover .dgd-marquee-track,
-.dgd-marquee:focus-within .dgd-marquee-track { animation-play-state: paused; }
-.dgd-pop {
-  z-index: 1;
-  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 450ms ease;
-}
-.dgd-pop-shape {
-  clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%);
-  transition: clip-path 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.dgd-pop:hover,
-.dgd-pop:focus-visible {
-  z-index: 10;
-  transform: translateY(-14px) scale(1.07);
-  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 22px rgba(252, 212, 0, 0.25));
-}
-.dgd-pop:hover .dgd-pop-shape,
-.dgd-pop:focus-visible .dgd-pop-shape { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-
 /* Carousel autoplay progress bar */
 @keyframes dgd-progress {
   from { transform: scaleX(0); }
@@ -329,8 +304,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .dgd-wipe-article { animation: none !important; }
   .dgd-slide-card { transition: none !important; }
-  .dgd-marquee-track { animation: none !important; }
-  .dgd-marquee { overflow-x: auto; }
   .dgd-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .dg-drive-fade, .dgd-wipe, .dgd-slide-next, .dgd-slide-prev, .dgd-text-next, .dgd-text-prev { animation: none !important; }
 }

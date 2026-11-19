@@ -3,12 +3,67 @@ import Image from "next/image";
 import Link from "next/link";
 import { DG_YELLOW, type DriveArticle } from "./data";
 
+// Slanted crop at rest; opens to a full rectangle on hover / keyboard focus.
+const SLANT = "[clip-path:polygon(18%_0,100%_0,82%_100%,0_100%)]";
+const OPEN =
+  "group-hover:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)] group-focus-visible:[clip-path:polygon(0_0,100%_0,100%_100%,0_100%)]";
+
+function Card({
+  article,
+  className = "",
+  style,
+}: {
+  article: DriveArticle;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <Link
+      href={article.href}
+      aria-label={`${article.title} — ${article.subtitle}`}
+      className={`group block outline-none transition-[transform,filter] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:z-30 hover:-translate-y-3 hover:scale-[1.06] hover:drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] focus-visible:z-30 focus-visible:-translate-y-3 focus-visible:scale-[1.06] ${className}`}
+      style={style}
+    >
+      <div
+        className={`relative aspect-[1270/720] overflow-hidden transition-[clip-path] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${SLANT} ${OPEN}`}
+      >
+        <Image
+          src={article.thumb}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 52vw, 100vw"
+          className="object-cover"
+        />
+        {/* Dimmed at rest, like the landing page's faded preview cards */}
+        <span className="absolute inset-0 bg-black/60 transition-opacity duration-500 group-hover:opacity-0 group-focus-visible:opacity-0" />
+      </div>
+      {/* Caption below the card (the thumbnail already carries the title art) */}
+      <div className="mt-3 pr-[18%] transition-transform duration-300 group-hover:translate-x-1">
+        <p
+          className="text-[11px] font-bold tracking-widest uppercase sm:text-[12px]"
+          style={{ color: DG_YELLOW }}
+        >
+          {article.category} · {article.date}
+        </p>
+        <h3 className="mt-1 text-[18px] leading-tight font-black text-white sm:text-[20px]">
+          {article.title}
+        </h3>
+        <span className="mt-1 inline-flex items-center gap-2 text-[13px] font-semibold text-white/80 transition-colors group-hover:text-[#FCD400]">
+          Read Article
+          <ArrowRight
+            size={14}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 /**
- * "More from DG Drive": an endlessly sliding row of slanted (trapezoid) cards.
- * Hovering pauses the row and pops the card up: it lifts, scales and its
- * slanted crop opens to a full rectangle so the whole thumbnail shows.
- * Pure CSS (see .dgd-marquee* in globals.css); reduced-motion users get a
- * static, horizontally scrollable row instead.
+ * "More from DG Drive": the other articles as static, staggered trapezoid
+ * cards in the style of the landing carousel's faded previews. Hovering a card
+ * brings it forward, brightens it and opens it to show the full thumbnail.
  */
 export default function RelatedSlider({
   articles,
@@ -16,72 +71,43 @@ export default function RelatedSlider({
   articles: DriveArticle[];
 }) {
   if (!articles.length) return null;
-
-  // Repeat until the row is comfortably wider than the screen, then double it
-  // so translating by -50% loops seamlessly.
-  const base: DriveArticle[] = [];
-  while (base.length < 6) base.push(...articles);
-  const track = [...base, ...base];
+  const n = articles.length;
+  const STEP = 90; // vertical offset between cards, px
 
   return (
-    <div
-      className="dgd-marquee relative -mx-5 overflow-hidden py-8 sm:mx-0"
-      // Edge fade as a mask, so it blends with whatever background sits behind.
-      style={{
-        maskImage:
-          "linear-gradient(to right, transparent, #000 5%, #000 95%, transparent)",
-        WebkitMaskImage:
-          "linear-gradient(to right, transparent, #000 5%, #000 95%, transparent)",
-      }}
-    >
-      <div
-        className="dgd-marquee-track flex w-max"
-        style={
-          { "--dgd-marquee-dur": `${base.length * 7}s` } as React.CSSProperties
-        }
-      >
-        {track.map((article, i) => (
-          <Link
-            key={`${article.id}-${i}`}
-            href={article.href}
-            aria-hidden={i >= base.length ? true : undefined}
-            tabIndex={i >= base.length ? -1 : undefined}
-            className="dgd-pop group relative -mr-10 block w-[78vw] shrink-0 sm:w-[420px] lg:w-[460px]"
-          >
-            <div className="dgd-pop-shape relative aspect-[1270/720] overflow-hidden">
-              <Image
-                src={article.thumb}
-                alt={article.title}
-                fill
-                sizes="(min-width: 1024px) 460px, (min-width: 640px) 420px, 78vw"
-                className="object-cover"
-              />
-              <span className="absolute inset-0 bg-black/25 transition-opacity duration-300 group-hover:opacity-0" />
-            </div>
-            <div className="mt-4 pr-16 pl-10 transition-transform duration-300 group-hover:translate-x-2">
-              <p
-                className="text-[12px] font-bold tracking-widest uppercase"
-                style={{ color: DG_YELLOW }}
-              >
-                {article.category} · {article.date}
-              </p>
-              <h3 className="mt-1 text-[22px] leading-tight font-black text-white">
-                {article.title}
-              </h3>
-              <p className="text-[14px] font-extrabold text-white/80">
-                {article.subtitle}
-              </p>
-              <span className="mt-2 inline-flex items-center gap-2 text-[14px] font-semibold text-white transition-colors group-hover:text-[#FCD400]">
-                Read Article
-                <ArrowRight
-                  size={15}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </span>
-            </div>
-          </Link>
+    <>
+      {/* Desktop: overlapping, stepped cards */}
+      <div className="relative hidden lg:block">
+        {/* Spacer sized by the first card so the absolutely placed cards get room */}
+        <div
+          className="invisible w-[52%]"
+          style={{ paddingBottom: (n - 1) * STEP + 130 }}
+        >
+          <div className="aspect-[1270/720]" />
+        </div>
+        {articles.map((a, i) => (
+          <Card
+            key={a.id}
+            article={a}
+            // z-index via a variable: an inline zIndex would beat hover:z-30.
+            className="absolute z-[var(--z)] w-[52%]"
+            style={
+              {
+                left: n === 1 ? "24%" : `${(i * 48) / (n - 1)}%`,
+                top: 20 + i * STEP,
+                "--z": 20 - i,
+              } as React.CSSProperties
+            }
+          />
         ))}
       </div>
-    </div>
+
+      {/* Mobile / tablet: stacked */}
+      <div className="grid gap-6 py-4 sm:grid-cols-2 lg:hidden">
+        {articles.map((a) => (
+          <Card key={a.id} article={a} />
+        ))}
+      </div>
+    </>
   );
 }
