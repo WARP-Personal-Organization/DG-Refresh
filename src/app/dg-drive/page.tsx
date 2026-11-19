@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import {
   BrowseCarouselDesktop,
   BrowseCarouselMobile,
@@ -27,7 +27,6 @@ export const metadata: Metadata = {
     "Driven. Tested. Experienced. Automotive news, reviews, and exclusive content from Daily Guardian.",
   alternates: { canonical: "https://www.dailyguardian.com.ph/dg-drive" },
 };
-
 
 // The desktop layout is an artboard measured in "frame units": the Canva
 // design is 1044 units wide and every position below is taken straight from
@@ -76,6 +75,28 @@ function Lines({ lines }: { lines: readonly string[] }) {
       {line}
     </span>
   ));
+}
+
+/** Yellow "Read More" button used on the black side of the Latest section. */
+function ReadMore({
+  href,
+  className = "",
+  style,
+}: {
+  href: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group inline-flex items-center bg-[#FCD400] font-bold text-black transition-colors hover:bg-white ${className}`}
+      style={style}
+    >
+      Read More
+      <ArrowRight className="h-[1.05em] w-[1.05em] transition-transform duration-300 group-hover:translate-x-1" />
+    </Link>
+  );
 }
 
 /** Yellow play button over the "Latest" video thumbnail; appears on hover on desktop. */
@@ -230,6 +251,20 @@ function DGDriveDesktop() {
             <p>
               <Lines lines={LATEST.blurbLines} />
             </p>
+          </Reveal>
+        </Abs>
+
+        <Abs x={68} y={624}>
+          <Reveal delay={280}>
+            <ReadMore
+              href={LATEST.href}
+              style={{
+                height: u(32),
+                paddingInline: u(16),
+                fontSize: u(14),
+                gap: u(8),
+              }}
+            />
           </Reveal>
         </Abs>
 
@@ -416,7 +451,10 @@ function DGDriveDesktop() {
 
 function DGDriveMobile() {
   return (
-    <div className="overflow-hidden lg:hidden" style={{ backgroundColor: DG_YELLOW }}>
+    <div
+      className="overflow-hidden lg:hidden"
+      style={{ backgroundColor: DG_YELLOW }}
+    >
       {/* Hero */}
       <section
         className="relative overflow-hidden px-5 pt-8 pb-24 text-white"
@@ -473,6 +511,10 @@ function DGDriveMobile() {
           <p className="text-[15px] leading-relaxed">
             {LATEST.blurbLines.join(" ")}
           </p>
+          <ReadMore
+            href={LATEST.href}
+            className="mt-4 h-10 gap-2 px-5 text-[14px]"
+          />
           <Reveal variant="zoom">
             <Link
               href={LATEST.href}
