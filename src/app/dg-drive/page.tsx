@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import {
   BrowseCarouselDesktop,
   BrowseCarouselMobile,
@@ -15,7 +15,6 @@ import {
   LATEST,
   NEVER_MISS,
   SOCIALS,
-  SPOTLIGHT,
 } from "@/components/dg-drive/data";
 
 // DG Drive landing page, built 1:1 from the Canva design ("DG DRIVE - Website",
@@ -29,12 +28,15 @@ export const metadata: Metadata = {
 };
 
 // The desktop layout is an artboard measured in "frame units": the Canva
-// design is 1044 units wide and every position below is taken straight from
+// design is 1366 units wide (y values are Canva's minus its 152-unit mock nav) and every position below is taken straight from
 // it. --u is one unit, so the whole composition scales with the viewport and
 // the diagonals always line up with the content.
-const FRAME_W = 1044;
-const FRAME_H = 2033;
+const FRAME_W = 1366;
+const FRAME_H = 2688;
 const u = (n: number) => `calc(var(--u) * ${n})`;
+// Canva's font sizes render ~0.864x of the same CSS size in Montserrat, so
+// text sizes are scaled to match the design's measured glyph widths.
+const fs = (n: number) => u(n * 0.864);
 
 function Abs({
   x,
@@ -77,28 +79,6 @@ function Lines({ lines }: { lines: readonly string[] }) {
   ));
 }
 
-/** Yellow "Read More" button used on the black side of the Latest section. */
-function ReadMore({
-  href,
-  className = "",
-  style,
-}: {
-  href: string;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group inline-flex items-center bg-[#FCD400] font-bold text-black transition-colors hover:bg-white ${className}`}
-      style={style}
-    >
-      Read More
-      <ArrowRight className="h-[1.05em] w-[1.05em] transition-transform duration-300 group-hover:translate-x-1" />
-    </Link>
-  );
-}
-
 /** Yellow play button over the "Latest" video thumbnail; appears on hover on desktop. */
 function PlayBadge({
   size,
@@ -125,6 +105,17 @@ function PlayBadge({
   );
 }
 
+const SLANT_BAR = "polygon(6.4% 0, 100% 0, 93.6% 100%, 0 100%)";
+const CAPTION_BAR = "polygon(7.6% 0, 100% 0, 92.4% 100%, 0 100%)";
+const NAVY = "#020015";
+// Where each platform icon sits relative to its card (Canva page 1).
+const CARD_ICON = [
+  { dx: 210, dy: 171, w: 66, h: 47 },
+  { dx: 217, dy: 164, w: 54, h: 54 },
+  { dx: 226, dy: 164, w: 52, h: 52 },
+  { dx: 217, dy: 164, w: 55, h: 55 },
+];
+
 function DGDriveDesktop() {
   return (
     <div className="hidden lg:block" style={{ containerType: "inline-size" }}>
@@ -142,7 +133,7 @@ function DGDriveDesktop() {
         <div
           className="dgd-wipe absolute inset-0"
           style={{
-            clipPath: "polygon(0 0, 54.5% 0, 0 62.52%)",
+            clipPath: "polygon(0 0, 58.8% 0, 0 65.8%)",
             background:
               "radial-gradient(ellipse 55% 30% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
           }}
@@ -150,14 +141,14 @@ function DGDriveDesktop() {
         <div
           className="absolute inset-0"
           style={{
-            clipPath: "polygon(100% 33.2%, 100% 100%, 41.95% 100%)",
+            clipPath: "polygon(100% 33.8%, 100% 100%, 40.8% 100%)",
             background:
               "radial-gradient(ellipse 45% 22% at 100% 100%, #6e6226 0%, rgba(60,54,22,0.6) 45%, rgba(12,11,20,0) 100%), linear-gradient(180deg, #0c0a16 0%, #0b0a12 70%, #1d1b10 100%)",
           }}
         />
 
         {/* ---------- Hero ---------- */}
-        <Abs x={58} y={29} w={386} h={89}>
+        <Abs x={77} y={60} w={521} h={120}>
           <Reveal variant="left" delay={350} className="relative h-full w-full">
             <Image
               src="/dg-drive/dg-drive-logo.png"
@@ -165,35 +156,33 @@ function DGDriveDesktop() {
               fill
               priority
               sizes="40vw"
-              className="object-contain"
+              className="object-contain object-left"
             />
           </Reveal>
         </Abs>
 
         <Abs
-          x={68}
-          y={140}
+          x={90}
+          y={194}
           className="text-white"
-          style={{ fontSize: u(15), lineHeight: u(22.4) }}
+          style={{ fontSize: fs(21.33), lineHeight: u(29) }}
         >
           <Reveal delay={550}>
-            <span className="block whitespace-nowrap">
-              {HERO.overviewTitle}
-            </span>
-            <Lines lines={HERO.overviewLines} />
+            <p>
+              <Lines lines={HERO.overviewLines} />
+            </p>
+            <p style={{ marginTop: u(29) }}>
+              <Lines lines={HERO.mottoLines} />
+            </p>
           </Reveal>
         </Abs>
 
         <Abs
-          x={406}
-          y={226}
-          w={600}
+          x={418}
+          y={288}
+          w={900}
           className="text-right font-black text-black"
-          style={{
-            fontSize: u(51),
-            lineHeight: u(54),
-            letterSpacing: "-0.01em",
-          }}
+          style={{ fontSize: fs(80), lineHeight: u(72) }}
         >
           <h1>
             {HERO.taglineLines.map((line, i) => (
@@ -204,48 +193,45 @@ function DGDriveDesktop() {
           </h1>
         </Abs>
 
+        <Abs x={1078} y={513} w={230} h={43}>
+          <Reveal variant="right" delay={1000} className="h-full w-full">
+            <a
+              href="#browse-articles"
+              className="flex h-full w-full items-center justify-center bg-black font-bold text-white transition-colors hover:bg-neutral-800"
+              style={{ fontSize: fs(21.3) }}
+            >
+              {HERO.cta}
+            </a>
+          </Reveal>
+        </Abs>
+
         {/* ---------- Latest ---------- */}
+        <Abs x={39} y={662} w={520} h={68}>
+          <Reveal
+            variant="left"
+            className="h-full w-full"
+            style={{ backgroundColor: DG_YELLOW, clipPath: SLANT_BAR }}
+          />
+        </Abs>
         <Abs
-          x={68}
-          y={360}
-          className="font-extrabold leading-none text-white"
-          style={{ fontSize: u(36) }}
+          x={89}
+          y={662}
+          h={68}
+          className="flex items-center font-black text-black"
+          style={{ fontSize: fs(42.67) }}
         >
-          <Reveal variant="left">
+          <Reveal variant="left" delay={120}>
             <h2>{LATEST.label}</h2>
           </Reveal>
         </Abs>
 
-        <Abs x={0} y={412} w={600} h={51}>
-          <Reveal
-            variant="left"
-            delay={120}
-            className="h-full w-full"
-            style={{
-              backgroundColor: DG_YELLOW,
-              clipPath: "polygon(9.17% 0, 100% 0, 100% 100%, 5% 100%)",
-            }}
-          />
-        </Abs>
-        <Abs
-          x={68}
-          y={412}
-          h={51}
-          className="flex items-center font-extrabold whitespace-nowrap text-black"
-          style={{ fontSize: u(28) }}
-        >
-          <Reveal variant="left" delay={220}>
-            <h3>{LATEST.heading}</h3>
-          </Reveal>
-        </Abs>
-
-        <Abs x={0} y={463} w={FRAME_W} h={3} className="bg-black" />
+        <Abs x={402} y={731} w={FRAME_W - 402} h={3} className="bg-black" />
 
         <Abs
-          x={68}
-          y={490}
+          x={90}
+          y={762}
           className="text-white"
-          style={{ fontSize: u(15), lineHeight: u(22.3) }}
+          style={{ fontSize: fs(21.33), lineHeight: u(29) }}
         >
           <Reveal delay={150}>
             <p>
@@ -254,21 +240,7 @@ function DGDriveDesktop() {
           </Reveal>
         </Abs>
 
-        <Abs x={68} y={624}>
-          <Reveal delay={280}>
-            <ReadMore
-              href={LATEST.href}
-              style={{
-                height: u(32),
-                paddingInline: u(16),
-                fontSize: u(14),
-                gap: u(8),
-              }}
-            />
-          </Reveal>
-        </Abs>
-
-        <Abs x={392} y={500} w={612} h={347}>
+        <Abs x={436} y={786} w={818} h={464}>
           <Reveal variant="zoom" className="h-full w-full">
             <Link
               href={LATEST.href}
@@ -282,77 +254,32 @@ function DGDriveDesktop() {
                 sizes="60vw"
                 className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
               />
-              <PlayBadge size={u(72)} />
+              <PlayBadge size={u(88)} />
             </Link>
           </Reveal>
         </Abs>
 
-        <Abs x={457} y={880} w={FRAME_W - 457} h={3} className="bg-black" />
-
-        {/* ---------- Spotlight ---------- */}
-        <Abs x={90} y={1030} w={520} h={148} className="opacity-90">
-          <Reveal variant="zoom" delay={500} className="relative h-full w-full">
-            <Image
-              src={SPOTLIGHT.shadow}
-              alt=""
-              fill
-              sizes="50vw"
-              className="object-fill"
-            />
-          </Reveal>
-        </Abs>
-        <Abs x={26} y={793} w={520} h={347}>
-          <Reveal variant="drive" className="relative h-full w-full">
-            <Image
-              src={SPOTLIGHT.image}
-              alt={SPOTLIGHT.name}
-              fill
-              sizes="50vw"
-              className="object-contain"
-            />
-          </Reveal>
-        </Abs>
-
-        <Abs x={563} y={919} w={241} h={38} style={{ fontSize: u(20) }}>
-          <Reveal
-            variant="right"
-            delay={300}
-            className="flex h-full w-full items-center justify-center bg-black font-semibold text-white"
-          >
-            <h3>{SPOTLIGHT.name}</h3>
-          </Reveal>
-        </Abs>
-        <Abs
-          x={600}
-          y={972}
-          className="text-black italic"
-          style={{ fontSize: u(14.5), lineHeight: u(20.3) }}
-        >
-          <ul className="list-disc" style={{ paddingLeft: u(12) }}>
-            {SPOTLIGHT.features.map((f, i) => (
-              <li key={f} className="whitespace-nowrap">
-                <Reveal variant="right" delay={450 + i * 110}>
-                  {f}
-                </Reveal>
-              </li>
-            ))}
-          </ul>
-        </Abs>
+        <Abs x={598} y={1289} w={FRAME_W - 598} h={3} className="bg-black" />
 
         {/* ---------- Browse articles ---------- */}
-        <Abs x={0} y={1145} w={370} h={50}>
+        <div
+          id="browse-articles"
+          className="absolute scroll-mt-24"
+          style={{ top: u(1478) }}
+        />
+        <Abs x={-35} y={1478} w={520} h={68}>
           <Reveal
             variant="left"
-            className="h-full w-full bg-black"
-            style={{ clipPath: "polygon(0 0, 100% 0, 93.2% 100%, 0 100%)" }}
+            className="h-full w-full"
+            style={{ backgroundColor: NAVY, clipPath: SLANT_BAR }}
           />
         </Abs>
         <Abs
-          x={50}
-          y={1145}
-          h={50}
-          className="flex items-center font-extrabold whitespace-nowrap text-white"
-          style={{ fontSize: u(30) }}
+          x={65}
+          y={1478}
+          h={68}
+          className="flex items-center font-bold whitespace-nowrap text-white"
+          style={{ fontSize: fs(37.33) }}
         >
           <Reveal variant="left" delay={120}>
             <h2>BROWSE ARTICLES</h2>
@@ -362,69 +289,89 @@ function DGDriveDesktop() {
         <BrowseCarouselDesktop />
 
         {/* ---------- Never miss a story ---------- */}
-        <Abs x={493} y={1724} w={500} className="text-right">
+        <Abs x={600} y={2294} w={700} className="text-right">
           <Reveal variant="right">
             <h2
-              className="font-extrabold leading-none"
-              style={{ fontSize: u(28), color: DG_YELLOW }}
+              className="font-bold"
+              style={{ fontSize: fs(37.33), lineHeight: u(52), color: DG_YELLOW }}
             >
               {NEVER_MISS.heading}
             </h2>
             <p
-              className="text-white"
-              style={{ fontSize: u(10.6), lineHeight: u(15), marginTop: u(6) }}
+              className="whitespace-nowrap"
+              style={{ fontSize: fs(14.67), lineHeight: u(20), color: DG_YELLOW }}
             >
-              {/* Two lines so the copy stays clear of the yellow diagonal. */}
-              <Lines lines={NEVER_MISS.subLines} />
+              {NEVER_MISS.sub}
             </p>
           </Reveal>
         </Abs>
 
         {SOCIALS.map((s, i) => {
-          const iconH = (s.icon.displayW * s.icon.h) / s.icon.w;
-          const btnH = (s.button.displayW * s.button.h) / s.button.w;
+          const icon = CARD_ICON[i];
           return (
-            <Abs key={s.name} x={51 + i * 240.7} y={1800} w={219} h={171}>
+            <Abs key={s.name} x={65 + i * 316} y={2379} w={287} h={225}>
               <Reveal delay={i * 120} className="h-full w-full">
                 <a
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`DG Drive on ${s.name}`}
-                  className="group relative block h-full w-full bg-white shadow-[0_0_0_rgba(0,0,0,0)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
-                  style={{ borderRadius: u(10) }}
+                  className="group relative block h-full w-full transition-transform duration-300 hover:-translate-y-1.5"
                 >
                   <span
-                    className="absolute left-1/2 -translate-x-1/2 transition-transform duration-300 group-hover:scale-110"
+                    className="absolute inset-0 overflow-hidden bg-white shadow-[0_0_0_rgba(0,0,0,0)] transition-shadow duration-300 group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
+                    style={{ borderRadius: u(17) }}
+                  >
+                    <Image
+                      src={s.card.image}
+                      alt=""
+                      fill
+                      sizes="22vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      style={{ objectPosition: s.card.position }}
+                    />
+                  </span>
+                  <span
+                    className="absolute transition-transform duration-300 group-hover:scale-110"
                     style={{
-                      top: u(85 - iconH / 2),
-                      width: u(s.icon.displayW),
-                      height: u(iconH),
+                      left: u(icon.dx),
+                      top: u(icon.dy),
+                      width: u(icon.w),
+                      height: u(icon.h),
                     }}
                   >
                     <Image
                       src={s.icon.src}
                       alt=""
                       fill
-                      sizes="80px"
+                      sizes="60px"
                       className="object-contain"
                     />
                   </span>
+                  {/* Slanted caption bar with a black drop shadow */}
                   <span
-                    className="absolute left-1/2 -translate-x-1/2"
+                    className="absolute bg-black"
                     style={{
-                      top: u(152 - btnH / 2),
-                      width: u(s.button.displayW),
-                      height: u(btnH),
+                      left: u(44),
+                      top: u(209),
+                      width: u(188),
+                      height: u(31),
+                      clipPath: CAPTION_BAR,
+                    }}
+                  />
+                  <span
+                    className="absolute flex items-center justify-center font-bold text-black"
+                    style={{
+                      left: u(56),
+                      top: u(204),
+                      width: u(188),
+                      height: u(31),
+                      fontSize: fs(18.67),
+                      backgroundColor: DG_YELLOW,
+                      clipPath: CAPTION_BAR,
                     }}
                   >
-                    <Image
-                      src={s.button.src}
-                      alt={s.button.alt}
-                      fill
-                      sizes="130px"
-                      className="object-contain"
-                    />
+                    {s.card.caption}
                   </span>
                 </a>
               </Reveal>
@@ -433,14 +380,14 @@ function DGDriveDesktop() {
         })}
 
         {/* ---------- Copyright ---------- */}
-        <Abs x={51} y={1993} w={200} h={3}>
+        <Abs x={66} y={2638} w={263} h={3}>
           <Reveal variant="left" className="h-full w-full bg-black" />
         </Abs>
         <Abs
-          x={51}
-          y={2002}
+          x={69}
+          y={2650}
           className="font-bold whitespace-nowrap text-black"
-          style={{ fontSize: u(11) }}
+          style={{ fontSize: fs(13.33) }}
         >
           {COPYRIGHT}
         </Abs>
@@ -462,16 +409,16 @@ function DGDriveMobile() {
       style={{ backgroundColor: DG_YELLOW }}
     >
       {/* ---------- Hero ---------- */}
+      {/* Black copy block, then a black wedge slanting down to the left, so the
+          diagonal always clears the copy and the tagline whatever the wrap. */}
       <section className="relative">
         <div
-          className="dgd-wipe-article absolute inset-0"
+          className="dgd-wipe-article relative px-5 pt-8 pb-6"
           style={{
             background:
               "radial-gradient(ellipse 90% 60% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
-            clipPath: "polygon(0 0, 100% 0, 100% 58%, 0 82%)",
           }}
-        />
-        <div className="relative px-5 pt-8 pb-6">
+        >
           <Reveal
             variant="left"
             delay={300}
@@ -487,24 +434,44 @@ function DGDriveMobile() {
             />
           </Reveal>
           <Reveal delay={450}>
-            <p className="mt-4 max-w-[34ch] text-[14px] leading-relaxed text-white">
-              {HERO.overviewTitle}
-              <br />
+            <p className="mt-4 max-w-[36ch] text-[14px] leading-relaxed text-white">
               {HERO.overviewLines.join(" ")}
             </p>
+            <p className="mt-3 text-[14px] leading-relaxed text-white">
+              {HERO.mottoLines.map((l) => (
+                <span key={l} className="block">
+                  {l}
+                </span>
+              ))}
+            </p>
           </Reveal>
-          <h1 className="mt-16 text-right text-[34px] leading-[1.02] font-black text-black sm:mt-20 sm:text-[48px]">
+        </div>
+        <div
+          aria-hidden
+          className="-mt-px h-16 bg-black sm:h-24"
+          style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+        />
+        <div className="relative px-5 pb-8">
+          <h1 className="text-right text-[34px] leading-[1.02] font-black text-black sm:text-[48px]">
             {HERO.taglineLines.map((l, i) => (
               <Reveal key={l} variant="right" delay={550 + i * 150}>
                 <span className="block">{l}</span>
               </Reveal>
             ))}
           </h1>
+          <Reveal variant="right" delay={850} className="mt-5 flex justify-end">
+            <a
+              href="#browse-articles-m"
+              className="inline-flex h-10 w-40 items-center justify-center bg-black text-[15px] font-bold text-white"
+            >
+              {HERO.cta}
+            </a>
+          </Reveal>
         </div>
       </section>
 
       {/* ---------- Latest ---------- */}
-      <section className="relative mt-4 pb-8">
+      <section className="relative pb-10">
         {/* Black block with a slanted top, then a yellow wedge the thumbnail straddles */}
         <div
           className="absolute inset-0 bg-black"
@@ -514,37 +481,24 @@ function DGDriveMobile() {
           className="absolute inset-0"
           style={{
             backgroundColor: DG_YELLOW,
-            clipPath: "polygon(0 78%, 100% 58%, 100% 100%, 0 100%)",
+            clipPath: "polygon(0 74%, 100% 52%, 100% 100%, 0 100%)",
           }}
         />
         <div className="relative pt-10">
           <Reveal variant="left">
-            <h2 className="px-5 text-[30px] leading-none font-extrabold text-white">
+            <h2
+              className="mr-auto inline-block py-2 pr-12 pl-5 text-[30px] leading-none font-black text-black"
+              style={{ backgroundColor: DG_YELLOW, clipPath: SLANT_BAR }}
+            >
               {LATEST.label}
             </h2>
           </Reveal>
-          <Reveal variant="left" delay={120}>
-            <h3
-              className="mt-4 mr-8 py-2.5 pr-8 pl-5 text-[22px] font-extrabold text-black"
-              style={{
-                backgroundColor: DG_YELLOW,
-                clipPath:
-                  "polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%)",
-              }}
-            >
-              {LATEST.heading}
-            </h3>
-          </Reveal>
-          <div className="mt-1 h-[3px] bg-black" />
+          <div className="mt-1 ml-[30%] h-[3px] bg-black" />
           <div className="px-5 pt-5">
             <Reveal delay={150}>
-              <p className="text-[15px] leading-relaxed text-white">
+              <p className="max-w-[60ch] text-[15px] leading-relaxed text-white">
                 {LATEST.blurbLines.join(" ")}
               </p>
-              <ReadMore
-                href={LATEST.href}
-                className="mt-4 h-10 gap-2 px-5 text-[14px]"
-              />
             </Reveal>
             <Reveal variant="zoom" delay={150}>
               <Link
@@ -563,67 +517,16 @@ function DGDriveMobile() {
               </Link>
             </Reveal>
           </div>
+          <div className="mt-6 ml-[40%] h-[3px] bg-black" />
         </div>
-      </section>
-
-      {/* ---------- Spotlight ---------- */}
-      <section className="relative px-5 pt-6 pb-12">
-        {/* Black corner behind the car and a dark wedge bottom-right, as on desktop */}
-        <div
-          className="absolute inset-0 bg-black"
-          style={{ clipPath: "polygon(0 0, 38% 0, 0 46%)" }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: MOBILE_DARK_BG,
-            clipPath: "polygon(100% 62%, 100% 100%, 74% 100%)",
-          }}
-        />
-        <div className="relative mx-auto aspect-[3/2] w-full max-w-[520px]">
-          <div className="absolute right-[5%] bottom-[2%] left-[12%] h-[30%] opacity-90">
-            <Image
-              src={SPOTLIGHT.shadow}
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-fill"
-            />
-          </div>
-          <Reveal variant="drive" className="absolute inset-0">
-            <Image
-              src={SPOTLIGHT.image}
-              alt={SPOTLIGHT.name}
-              fill
-              sizes="100vw"
-              className="object-contain"
-            />
-          </Reveal>
-        </div>
-        <Reveal variant="right" delay={200}>
-          <h3 className="relative mt-2 inline-block bg-black px-6 py-2 text-[18px] font-semibold text-white">
-            {SPOTLIGHT.name}
-          </h3>
-        </Reveal>
-        <ul className="relative mt-3 list-disc pl-5 text-[14px] leading-relaxed text-black italic">
-          {SPOTLIGHT.features.map((f, i) => (
-            <li key={f}>
-              <Reveal variant="right" delay={300 + i * 100}>
-                {f}
-              </Reveal>
-            </li>
-          ))}
-        </ul>
       </section>
 
       {/* ---------- Browse articles ---------- */}
-      <section className="pb-16">
+      <section id="browse-articles-m" className="scroll-mt-20 pb-16">
         <Reveal variant="left">
           <h2
-            className="mb-5 inline-block bg-black py-2.5 pr-10 pl-5 text-[24px] font-extrabold text-white"
-            style={{
-              clipPath: "polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%)",
-            }}
+            className="mb-5 inline-block py-2.5 pr-12 pl-5 text-[24px] font-bold text-white"
+            style={{ backgroundColor: NAVY, clipPath: SLANT_BAR }}
           >
             BROWSE ARTICLES
           </h2>
@@ -643,16 +546,16 @@ function DGDriveMobile() {
       >
         <Reveal variant="right">
           <h2
-            className="text-right text-[26px] leading-none font-extrabold"
+            className="text-right text-[26px] leading-none font-bold"
             style={{ color: DG_YELLOW }}
           >
             {NEVER_MISS.heading}
           </h2>
-          <p className="mt-2 text-right text-[12px] text-white">
+          <p className="mt-2 text-right text-[12px]" style={{ color: DG_YELLOW }}>
             {NEVER_MISS.sub}
           </p>
         </Reveal>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4">
           {SOCIALS.map((s, i) => (
             <Reveal key={s.name} delay={i * 100}>
               <a
@@ -660,45 +563,43 @@ function DGDriveMobile() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`DG Drive on ${s.name}`}
-                className="flex aspect-[219/171] flex-col items-center justify-center gap-4 rounded-[10px] bg-white transition-transform active:scale-95"
+                className="relative block aspect-[287/225] transition-transform active:scale-95"
               >
-                <span
-                  className="relative"
-                  style={{
-                    width: s.icon.displayW * 0.8,
-                    height: (s.icon.displayW * 0.8 * s.icon.h) / s.icon.w,
-                  }}
-                >
+                <span className="absolute inset-0 overflow-hidden rounded-[10px] bg-white">
+                  <Image
+                    src={s.card.image}
+                    alt=""
+                    fill
+                    sizes="50vw"
+                    className="object-cover"
+                    style={{ objectPosition: s.card.position }}
+                  />
+                </span>
+                <span className="absolute right-[6%] bottom-[8%] h-[22%] w-[22%]">
                   <Image
                     src={s.icon.src}
                     alt=""
                     fill
-                    sizes="80px"
+                    sizes="40px"
                     className="object-contain"
                   />
                 </span>
                 <span
-                  className="relative"
-                  style={{
-                    width: s.button.displayW * 0.85,
-                    height:
-                      (s.button.displayW * 0.85 * s.button.h) / s.button.w,
-                  }}
+                  className="absolute top-[94%] left-[14%] h-[14%] w-[66%] bg-black"
+                  style={{ clipPath: CAPTION_BAR }}
+                />
+                <span
+                  className="absolute top-[91%] left-[18%] flex h-[14%] w-[66%] items-center justify-center text-[12px] font-bold text-black"
+                  style={{ backgroundColor: DG_YELLOW, clipPath: CAPTION_BAR }}
                 >
-                  <Image
-                    src={s.button.src}
-                    alt={s.button.alt}
-                    fill
-                    sizes="130px"
-                    className="object-contain"
-                  />
+                  {s.card.caption}
                 </span>
               </a>
             </Reveal>
           ))}
         </div>
         <div
-          className="mt-8 h-[3px] w-40"
+          className="mt-10 h-[3px] w-40"
           style={{ backgroundColor: DG_YELLOW }}
         />
         <p className="mt-2 text-[11px] font-bold text-white">{COPYRIGHT}</p>

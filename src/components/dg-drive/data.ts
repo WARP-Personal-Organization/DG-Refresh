@@ -4,14 +4,16 @@
 export const DG_YELLOW = "#FCD400";
 
 export const HERO = {
-  overviewTitle: "Overview of DG Drive",
   // Explicit lines so the copy wraps exactly like the Canva design.
   overviewLines: [
-    "lorem ipsum dolor sit amet consectetur adipiscing",
-    "elit facilis ut aut assumenda et nihil eos quibusdam",
-    "proident libero veniam dignissimos in eos",
+    "Pondering on what car to get that suits your",
+    "lifestyle? Choose the vehicle with DG Drive, your",
+    "daily guide to cars with comprehensive reviews,",
+    "updates, and comparisons with other vehicles.",
   ],
+  mottoLines: ["Driven, Tested, Experienced.", "Roll out with DG Drive."],
   taglineLines: ["DRIVEN. TESTED.", "EXPERIENCED."],
+  cta: "Articles",
 };
 
 export const LATEST = {
@@ -98,7 +100,7 @@ export const ARTICLES: DriveArticle[] = [
     subtitle: "2026 ISUZU MU-X",
     descriptionLines: [
       "Hit the roads with a vehicle built to adapt to different",
-      "conditions. See why the sleek new 2026 MU-X is",
+      "conditions! See why the sleek new 2026 MU-X is",
       "the modern car for modern days.",
     ],
     image: "/dg-drive/photo-best-in-class.jpg",
@@ -166,18 +168,23 @@ export const SOCIALS = [
     href: "https://youtube.com/dailyguardian",
     icon: { src: "/dg-drive/youtube.png", w: 200, h: 141, displayW: 78 },
     button: { src: "/dg-drive/yt-subscribe.png", w: 800, h: 242, displayW: 107, alt: "Subscribe" },
+    // Landing-page card (Canva page 1). YouTube/TikTok are still Canva
+    // placeholders in the design, so they borrow article art for now.
+    card: { image: "/dg-drive/thumb-best-in-class.jpg", position: "50% 50%", caption: "Subscribe" },
   },
   {
     name: "Facebook",
     href: "https://www.facebook.com/DailyGuardianPH/",
     icon: { src: "/dg-drive/facebook.webp", w: 200, h: 200, displayW: 50 },
     button: { src: "/dg-drive/fb-follow.webp", w: 200, h: 64, displayW: 91, alt: "Follow" },
+    card: { image: "/dg-drive/social-facebook.png", position: "30% 50%", caption: "Follow" },
   },
   {
     name: "Instagram",
     href: "https://www.instagram.com/dailyguardianph",
     icon: { src: "/dg-drive/instagram.webp", w: 200, h: 200, displayW: 52 },
     button: { src: "/dg-drive/ig-follow.png", w: 149, h: 72, displayW: 66, alt: "Follow" },
+    card: { image: "/dg-drive/social-instagram.png", position: "0% 50%", caption: "Follow" },
   },
   {
     name: "TikTok",
@@ -185,6 +192,7 @@ export const SOCIALS = [
     href: "#",
     icon: { src: "/dg-drive/tiktok.webp", w: 200, h: 200, displayW: 54 },
     button: { src: "/dg-drive/tt-follow.png", w: 800, h: 209, displayW: 124, alt: "Follow" },
+    card: { image: "/dg-drive/thumb-still-the-best.jpg", position: "50% 50%", caption: "Follow" },
   },
 ] as const;
 

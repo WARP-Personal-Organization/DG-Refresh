@@ -9,6 +9,9 @@ import { ARTICLES, hasCleanPhoto } from "./data";
 
 // Frame-unit helper shared with the desktop artboard (see dg-drive/page.tsx).
 const u = (n: number) => `calc(var(--u) * ${n})`;
+// Canva's font sizes render ~0.864x of the same CSS size in Montserrat, so
+// text sizes are scaled to match the design's measured glyph widths.
+const fs = (n: number) => u(n * 0.864);
 
 const AUTO_ADVANCE_MS = 6000;
 const SLIDE_MS = 750;
@@ -80,78 +83,76 @@ type Slot = {
 };
 const SLOTS: Record<number, Slot> = {
   [-2]: {
-    x: -420,
-    y: 1215,
-    w: 380,
-    h: 279,
-    clip: "polygon(30% 0, 100% 0, 70% 100%, 0 100%)",
+    x: -900,
+    y: 1570,
+    w: 480,
+    h: 308,
+    clip: "polygon(28.6% 0, 100% 0, 71.5% 100%, 0 100%)",
     shade: 0.6,
     opacity: 0,
     z: 1,
   },
   [-1]: {
-    x: 0,
-    y: 1215,
-    w: 60,
-    h: 279,
-    clip: "polygon(0 0, 92% 0, 0 90%, 0 90%)",
+    x: -390,
+    y: 1570,
+    w: 480,
+    h: 308,
+    clip: "polygon(28.6% 0, 100% 0, 71.5% 100%, 0 100%)",
     shade: 0.3,
     opacity: 1,
     z: 10,
   },
   0: {
-    x: 0,
-    y: 1215,
-    w: 692,
-    h: 279,
-    clip: "polygon(10.1% 0, 100% 0, 81.6% 100%, 1% 100%)",
+    x: -7,
+    y: 1571,
+    w: 913,
+    h: 365,
+    clip: "polygon(18.5% 0, 100% 0, 81.6% 100%, 0 100%)",
     shade: 0,
     opacity: 1,
     z: 30,
   },
   1: {
-    x: 588,
-    y: 1278,
-    w: 309,
-    h: 275,
-    clip: "polygon(40.5% 0, 100% 0, 58.9% 100%, 0 100%)",
+    x: 767,
+    y: 1654,
+    w: 408,
+    h: 360,
+    clip: "polygon(40.8% 0, 100% 0, 59.3% 100%, 0 100%)",
     shade: 0.55,
     opacity: 1,
     z: 20,
   },
   2: {
-    x: 792,
-    y: 1345,
-    w: 380,
-    h: 260,
-    clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)",
+    x: 1035,
+    y: 1741,
+    w: 529,
+    h: 341,
+    clip: "polygon(29.7% 0, 100% 0, 70.4% 100%, 0 100%)",
     shade: 0.65,
     opacity: 1,
     z: 15,
   },
   3: {
-    x: 1110,
-    y: 1400,
-    w: 380,
-    h: 260,
-    clip: "polygon(29.7% 0, 100% 0, 100% 100%, 0 100%)",
+    x: 1450,
+    y: 1800,
+    w: 529,
+    h: 341,
+    clip: "polygon(29.7% 0, 100% 0, 70.4% 100%, 0 100%)",
     shade: 0.7,
     opacity: 0,
     z: 1,
   },
 };
 
-// Main slot for articles that only have a thumbnail: the thumbnail's own
-// aspect ratio and no slant, so its baked-in title text is never cropped.
-const MAIN_THUMB: Slot = {
-  x: 70,
-  y: 1215,
-  w: 279 * (1270 / 720),
-  h: 279,
-  clip: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-  shade: 0,
-  opacity: 1,
-  z: 30,
+// Thumbnail-only articles keep the slanted main slot, but their baked-in
+// title art must never be cropped. The largest 1270x720 box that fits inside
+// the main parallelogram (913x365, slanted 169 units) is 590x334 at (162, 15);
+// the wedges around it show a blurred copy.
+const MAIN_THUMB_INSET = {
+  left: `${(162 / 913) * 100}%`,
+  width: `${(590 / 913) * 100}%`,
+  top: `${(15 / 365) * 100}%`,
+  height: `${(334 / 365) * 100}%`,
 };
 
 /** Offset of virtual item i from the active one, normalised to -2..3. */
@@ -191,8 +192,8 @@ export function BrowseCarouselDesktop() {
     >
       {VIRTUAL.map((article, i) => {
         const offset = offsets[i];
-        const slot =
-          offset === 0 && !hasCleanPhoto(article) ? MAIN_THUMB : SLOTS[offset];
+        const slot = SLOTS[offset];
+        const thumbOnly = !hasCleanPhoto(article);
         const jumped = Math.abs(offset - prevOffsets.current[i]) > 1;
         const isMain = offset === 0;
         const visible = offset >= -1 && offset <= 2;
@@ -239,9 +240,27 @@ export function BrowseCarouselDesktop() {
               alt=""
               fill
               sizes="30vw"
-              className="object-cover transition-opacity duration-700"
-              style={{ opacity: isMain && hasCleanPhoto(article) ? 0 : 1 }}
+              className="object-cover transition-[opacity,filter,transform] duration-700"
+              style={{
+                opacity: isMain && !thumbOnly ? 0 : 1,
+                filter: isMain && thumbOnly ? "blur(14px) brightness(0.7)" : "none",
+                transform: isMain && thumbOnly ? "scale(1.15)" : "none",
+              }}
             />
+            {thumbOnly && (
+              <div
+                className="absolute transition-opacity duration-700"
+                style={{ ...MAIN_THUMB_INSET, opacity: isMain ? 1 : 0 }}
+              >
+                <Image
+                  src={article.thumb}
+                  alt={isMain ? article.title : ""}
+                  fill
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="object-contain transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+                />
+              </div>
+            )}
             {article.image !== article.thumb && (
               <Image
                 src={article.image}
@@ -263,25 +282,24 @@ export function BrowseCarouselDesktop() {
       {/* Active article text */}
       <div
         className="absolute overflow-hidden"
-        style={{ left: u(51), top: u(1520), width: u(560), height: u(170) }}
+        style={{ left: u(65), top: u(1973), width: u(680), height: u(212) }}
       >
-        <div
-          key={`${current.id}-text`}
-          className={`text-black ${textSlide}`}
-          style={{ paddingTop: u(6) }}
-        >
-          <h3 className="font-black leading-none" style={{ fontSize: u(38) }}>
+        <div key={`${current.id}-text`} className={`text-black ${textSlide}`}>
+          <h3
+            className="font-black"
+            style={{ fontSize: fs(42.67), lineHeight: u(59) }}
+          >
             {current.title}
           </h3>
           <p
-            className="font-extrabold leading-none"
-            style={{ fontSize: u(21), marginTop: u(9) }}
+            className="font-bold"
+            style={{ fontSize: fs(28), lineHeight: u(39), marginTop: u(-7) }}
           >
             {current.subtitle}
           </p>
           <p
             className="font-normal"
-            style={{ fontSize: u(17.5), lineHeight: u(25), marginTop: u(13) }}
+            style={{ fontSize: fs(24), lineHeight: u(33), marginTop: u(16) }}
           >
             {current.descriptionLines.map((line) => (
               <span key={line} className="block whitespace-nowrap">
@@ -294,27 +312,27 @@ export function BrowseCarouselDesktop() {
 
       <Link
         href={current.href}
-        className="group absolute flex items-center justify-center gap-2 bg-black font-semibold text-white transition-colors hover:bg-neutral-800"
+        className="group absolute flex items-center justify-center gap-2 bg-black font-bold text-white transition-colors hover:bg-neutral-800"
         style={{
-          left: u(52),
-          top: u(1700),
-          width: u(176),
-          height: u(32),
-          fontSize: u(15),
+          left: u(69),
+          top: u(2205),
+          width: u(230),
+          height: u(43),
+          fontSize: fs(21.3),
           zIndex: 40,
         }}
       >
         Go to Article
         <ChevronRight
           className="-ml-1 transition-transform duration-300 group-hover:translate-x-1"
-          style={{ width: u(15), height: u(15) }}
+          style={{ width: u(20), height: u(20) }}
         />
       </Link>
 
       {/* Arrows + counter */}
       {[
-        { label: "Previous article", onClick: prev, Icon: ChevronLeft, x: 240 },
-        { label: "Next article", onClick: next, Icon: ChevronRight, x: 278 },
+        { label: "Previous article", onClick: prev, Icon: ChevronLeft, x: 317 },
+        { label: "Next article", onClick: next, Icon: ChevronRight, x: 370 },
       ].map(({ label, onClick, Icon, x }) => (
         <button
           key={label}
@@ -322,19 +340,19 @@ export function BrowseCarouselDesktop() {
           aria-label={label}
           onClick={onClick}
           className="absolute flex items-center justify-center border-2 border-black text-black transition-colors hover:bg-black hover:text-[#FCD400]"
-          style={{ left: u(x), top: u(1700), width: u(32), height: u(32) }}
+          style={{ left: u(x), top: u(2205), width: u(43), height: u(43) }}
         >
-          <Icon strokeWidth={3} style={{ width: u(18), height: u(18) }} />
+          <Icon strokeWidth={3} style={{ width: u(24), height: u(24) }} />
         </button>
       ))}
       <div
         className="absolute font-extrabold text-black tabular-nums"
         style={{
-          left: u(322),
-          top: u(1700),
-          height: u(32),
-          fontSize: u(14),
-          lineHeight: u(32),
+          left: u(428),
+          top: u(2205),
+          height: u(43),
+          fontSize: fs(18.5),
+          lineHeight: u(43),
         }}
         aria-live="polite"
       >
@@ -344,7 +362,7 @@ export function BrowseCarouselDesktop() {
       {/* Autoplay progress */}
       <div
         className="absolute overflow-hidden bg-black/15"
-        style={{ left: u(52), top: u(1744), width: u(316), height: u(3) }}
+        style={{ left: u(69), top: u(2262), width: u(420), height: u(4) }}
       >
         {/* Re-keyed on pause too: the autoplay timer restarts from zero when
             the pointer leaves, so the bar must restart with it. */}
@@ -397,19 +415,38 @@ export function BrowseCarouselMobile() {
               aria-hidden={i !== active}
               tabIndex={i === active ? 0 : -1}
               className="relative block aspect-[1270/720] w-full shrink-0 overflow-hidden"
-              style={
-                hasCleanPhoto(a)
-                  ? { clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)" }
-                  : undefined
-              }
+              style={{ clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)" }}
             >
-              <Image
-                src={a.image}
-                alt={a.title}
-                fill
-                sizes="100vw"
-                className="object-cover"
-              />
+              {hasCleanPhoto(a) ? (
+                <Image
+                  src={a.image}
+                  alt={a.title}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              ) : (
+                <>
+                  {/* Blurred fill for the slanted wedges; the full thumbnail
+                      sits inset so its title art stays inside the slant. */}
+                  <Image
+                    src={a.image}
+                    alt=""
+                    fill
+                    sizes="100vw"
+                    className="scale-110 object-cover blur-md brightness-75"
+                  />
+                  <div className="absolute inset-[6%]">
+                    <Image
+                      src={a.image}
+                      alt={a.title}
+                      fill
+                      sizes="90vw"
+                      className="object-contain"
+                    />
+                  </div>
+                </>
+              )}
             </Link>
           ))}
         </div>
@@ -455,7 +492,7 @@ export function BrowseCarouselMobile() {
           <p className="mt-2 text-[17px] font-extrabold leading-none">
             {current.subtitle}
           </p>
-          <p className="mt-3 text-[15px] leading-relaxed">
+          <p className="mt-3 max-w-[60ch] text-[15px] leading-relaxed">
             {current.descriptionLines.join(" ")}
           </p>
           <Link
