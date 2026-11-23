@@ -206,7 +206,7 @@ export const ARTICLES: DriveArticle[] = [
 export const SOCIALS = [
   {
     name: "YouTube",
-    href: "https://youtube.com/dailyguardian",
+    href: "https://youtube.com/@dgdrive_ilo",
     icon: { src: "/dg-drive/youtube.png", w: 200, h: 141, displayW: 78 },
     button: { src: "/dg-drive/yt-subscribe.png", w: 800, h: 242, displayW: 107, alt: "Subscribe" },
     // Landing-page card (Canva page 1). YouTube/TikTok are still Canva
@@ -215,22 +215,21 @@ export const SOCIALS = [
   },
   {
     name: "Facebook",
-    href: "https://www.facebook.com/DailyGuardianPH/",
+    href: "https://www.facebook.com/DGDrive",
     icon: { src: "/dg-drive/facebook.webp", w: 200, h: 200, displayW: 50 },
     button: { src: "/dg-drive/fb-follow.webp", w: 200, h: 64, displayW: 91, alt: "Follow" },
     card: { image: "/dg-drive/social-facebook.png", position: "30% 50%", caption: "Follow" },
   },
   {
     name: "Instagram",
-    href: "https://www.instagram.com/dailyguardianph",
+    href: "https://www.instagram.com/dgdrive_ilo",
     icon: { src: "/dg-drive/instagram.webp", w: 200, h: 200, displayW: 52 },
     button: { src: "/dg-drive/ig-follow.png", w: 149, h: 72, displayW: 66, alt: "Follow" },
     card: { image: "/dg-drive/social-instagram.png", position: "0% 50%", caption: "Follow" },
   },
   {
     name: "TikTok",
-    // TODO: real DG Drive TikTok URL once provided.
-    href: "#",
+    href: "https://www.tiktok.com/@dgdrive_ilo",
     icon: { src: "/dg-drive/tiktok.webp", w: 200, h: 200, displayW: 54 },
     button: { src: "/dg-drive/tt-follow.png", w: 800, h: 209, displayW: 124, alt: "Follow" },
     card: { image: "/dg-drive/thumb-still-the-best.jpg", position: "50% 50%", caption: "Follow" },
