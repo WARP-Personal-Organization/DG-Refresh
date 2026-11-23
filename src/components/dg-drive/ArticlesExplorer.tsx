@@ -76,6 +76,70 @@ function ArticleCard({ article }: { article: DriveArticle }) {
   );
 }
 
+/**
+ * Used when only one article matches, so a lone small card doesn't leave the
+ * section looking empty: big thumbnail on the left, full copy on the right.
+ */
+function FeaturedCard({ article }: { article: DriveArticle }) {
+  return (
+    <Link
+      href={article.href}
+      className="group grid overflow-hidden bg-black text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]"
+    >
+      <div className="relative aspect-[1270/720] overflow-hidden md:aspect-auto md:min-h-[360px]">
+        <Image
+          src={article.thumb}
+          alt={article.title}
+          fill
+          sizes="(min-width: 768px) 60vw, 100vw"
+          className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+        />
+        <span className="absolute top-3 left-3">
+          <CategoryTag>{article.category}</CategoryTag>
+        </span>
+      </div>
+      <div className="relative flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+        {/* Yellow slanted edge between photo and copy */}
+        <span
+          className="absolute inset-y-0 -left-px hidden w-5 md:block"
+          style={{ backgroundColor: DG_YELLOW, clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+          aria-hidden
+        />
+        <p className="text-[12px] font-extrabold tracking-[0.2em] uppercase" style={{ color: DG_YELLOW }}>
+          Latest episode
+        </p>
+        <h3 className="mt-3 text-[28px] leading-[1.05] font-black sm:text-[36px] lg:text-[42px]">
+          {article.title}
+        </h3>
+        <p className="mt-2 text-[14px] font-extrabold sm:text-[16px]">{article.subtitle}</p>
+        <p className="mt-4 text-[14px] leading-relaxed text-white/75 sm:text-[15.5px]">
+          {article.dek}.
+        </p>
+        <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] font-semibold text-white/60">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar size={14} /> {article.date}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Clock size={14} /> {article.readTime}
+          </span>
+        </p>
+        <span
+          className="mt-6 inline-flex h-11 w-fit items-center gap-2 px-6 text-[14px] font-bold text-black transition-[gap] duration-300 group-hover:gap-3"
+          style={{ backgroundColor: DG_YELLOW, clipPath: SLANT_TAG }}
+        >
+          Read Article <ArrowRight size={16} />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+// Fewer articles get wider columns so the row never looks half empty.
+const GRID_COLS: Record<number, string> = {
+  2: "lg:grid-cols-2",
+  3: "lg:grid-cols-3",
+};
+
 export default function ArticlesExplorer({ articles }: { articles: DriveArticle[] }) {
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(articles.map((a) => a.category)))],
@@ -165,8 +229,14 @@ export default function ArticlesExplorer({ articles }: { articles: DriveArticle[
             Show all articles
           </button>
         </div>
+      ) : filtered.length === 1 ? (
+        <div className="mt-6">
+          <FeaturedCard article={filtered[0]} />
+        </div>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-6">
+        <div
+          className={`mt-6 grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 sm:gap-y-10 lg:gap-x-6 ${GRID_COLS[filtered.length] ?? "lg:grid-cols-4"}`}
+        >
           {filtered.map((a) => (
             <ArticleCard key={a.id} article={a} />
           ))}
