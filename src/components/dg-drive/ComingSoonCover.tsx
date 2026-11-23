@@ -24,7 +24,7 @@ export default function ComingSoonCover({
         alt=""
         fill
         sizes={sizes}
-        className="scale-125 object-cover blur-xl brightness-[0.55] saturate-50"
+        className="scale-125 object-cover blur-lg brightness-[0.75] saturate-75"
       />
       <span className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.45)_100%)]" />
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-[2.5cqw] text-center">

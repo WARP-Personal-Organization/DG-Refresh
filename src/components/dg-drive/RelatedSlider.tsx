@@ -1,7 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DG_YELLOW, type DriveArticle } from "./data";
+import ComingSoonCover from "./ComingSoonCover";
+import { type CarouselItem, DG_YELLOW, type DriveArticle } from "./data";
+
+type RelatedItem = DriveArticle | CarouselItem;
 
 // Slanted crop at rest; opens to a full rectangle on hover / keyboard focus.
 const SLANT = "[clip-path:polygon(18%_0,100%_0,82%_100%,0_100%)]";
@@ -13,14 +16,42 @@ function Card({
   className = "",
   style,
 }: {
-  article: DriveArticle;
+  article: RelatedItem;
   className?: string;
   style?: React.CSSProperties;
 }) {
+  if ("comingSoon" in article && article.comingSoon) {
+    return (
+      <div
+        aria-label={`${article.subtitle}, coming soon`}
+        className={`group block transition-transform duration-500 hover:z-30 hover:-translate-y-2 ${className}`}
+        style={style}
+      >
+        <div
+          className={`relative aspect-[1270/720] overflow-hidden bg-neutral-900 ${SLANT}`}
+          style={{ containerType: "inline-size" }}
+        >
+          <ComingSoonCover src={article.image} sizes="(min-width: 1024px) 52vw, 100vw" />
+        </div>
+        <div className="mt-3 pr-[18%]">
+          <p
+            className="text-[11px] font-bold tracking-widest uppercase sm:text-[12px]"
+            style={{ color: DG_YELLOW }}
+          >
+            Coming Soon
+          </p>
+          <h3 className="mt-1 text-[18px] leading-tight font-black text-white sm:text-[20px]">
+            {article.subtitle}
+          </h3>
+        </div>
+      </div>
+    );
+  }
+  const a = article as DriveArticle;
   return (
     <Link
-      href={article.href}
-      aria-label={`${article.title} — ${article.subtitle}`}
+      href={a.href}
+      aria-label={`${a.title} — ${a.subtitle}`}
       className={`group block outline-none transition-[transform,filter] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:z-30 hover:-translate-y-3 hover:scale-[1.06] hover:drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] focus-visible:z-30 focus-visible:-translate-y-3 focus-visible:scale-[1.06] ${className}`}
       style={style}
     >
@@ -28,7 +59,7 @@ function Card({
         className={`relative aspect-[1270/720] overflow-hidden transition-[clip-path] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${SLANT} ${OPEN}`}
       >
         <Image
-          src={article.thumb}
+          src={a.thumb}
           alt=""
           fill
           sizes="(min-width: 1024px) 52vw, 100vw"
@@ -43,10 +74,10 @@ function Card({
           className="text-[11px] font-bold tracking-widest uppercase sm:text-[12px]"
           style={{ color: DG_YELLOW }}
         >
-          {article.category} · {article.date}
+          {a.category} · {a.date}
         </p>
         <h3 className="mt-1 text-[18px] leading-tight font-black text-white sm:text-[20px]">
-          {article.title}
+          {a.title}
         </h3>
         <span className="mt-1 inline-flex items-center gap-2 text-[13px] font-semibold text-white/80 transition-colors group-hover:text-[#FCD400]">
           Read Article
@@ -68,7 +99,7 @@ function Card({
 export default function RelatedSlider({
   articles,
 }: {
-  articles: DriveArticle[];
+  articles: RelatedItem[];
 }) {
   if (!articles.length) return null;
   const n = articles.length;

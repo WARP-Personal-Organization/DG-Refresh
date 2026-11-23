@@ -36,10 +36,10 @@ export const SPOTLIGHT = {
   image: "/dg-drive/mux-black-cutout.png",
   shadow: "/dg-drive/car-shadow.png",
   features: [
-    "Product Feature 1",
-    "Product Feature 2, Lorem Ipsum",
-    "Product Feature 3, Lorem",
-    "Product Feature 4",
+    "3.0L 4-cylinder turbo-diesel",
+    "140 kW and 450 Nm, 6-speed automatic",
+    "4WD with high/low range and rear diff lock",
+    "7 seats, 800mm wading depth",
   ],
 };
 
@@ -67,30 +67,118 @@ export type ArticleBlock =
   | { type: "h2"; text: string }
   | { type: "quote"; text: string; by: string }
   | { type: "image"; src: string; caption: string }
+  | { type: "gallery"; images: { src: string; caption: string }[] }
+  | { type: "list"; intro?: string; items: { label?: string; text: string }[] }
+  | { type: "proscons"; pros: string[]; cons: string[] }
   | { type: "specs" };
 
-const LOREM =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer facilisis, ut aut assumenda et nihil eos quibusdam proident, libero veniam dignissimos in eos. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam quis nostrud exercitation.";
-const LOREM_2 =
-  "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.";
-
-/** Shared placeholder article body; the intro paragraph differs per article. */
-const placeholderBody = (intro: string, image: string): ArticleBlock[] => [
-  { type: "p", text: intro },
-  { type: "p", text: LOREM },
-  { type: "h2", text: "First Impressions" },
-  { type: "p", text: LOREM_2 },
-  { type: "p", text: LOREM },
-  { type: "quote", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod.", by: "DG Drive" },
-  { type: "h2", text: "On the Road" },
-  { type: "p", text: LOREM },
-  { type: "image", src: image, caption: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-  { type: "p", text: LOREM_2 },
-  { type: "h2", text: "Specs at a Glance" },
+/** Episode 1 copy, as supplied by the DG Drive team. */
+const BEST_IN_CLASS_BODY: ArticleBlock[] = [
+  {
+    type: "p",
+    text: "The 2026 Isuzu MU-X arrives as a significant update to one of the market’s most dependable 7-seater SUVs. Sharing its robust body-on-frame platform with the D-Max pickup, the MU-X has long built its reputation on durability, impressive towing capabilities, and genuine off-road performance. For 2026, Isuzu focused on modernizing the vehicle’s aesthetic, upgrading cabin technology, and refining safety systems to better compete with rivals like the Ford Everest, Mitsubishi Montero Sport, and Toyota Fortuner.",
+  },
+  { type: "h2", text: "Exterior Design" },
+  {
+    type: "p",
+    text: "Isuzu’s design team has given the 2026 MU-X a sharper, more assertive front-end look. The updated front fascia features a bolder front grille flanked by sleeker LED headlights with revised daytime running light (DRL) signatures.",
+  },
+  {
+    type: "image",
+    src: "/dg-drive/mux/front-grass.jpg",
+    caption: "A bolder grille and sleeker LED headlights give the 2026 MU-X a sharper face.",
+  },
+  {
+    type: "list",
+    intro: "Key exterior highlights include:",
+    items: [
+      { label: "Front Styling", text: "Redesigned bumper intakes and updated chrome/dark finish accents depending on the trim level." },
+      { label: "Profile & Wheels", text: "New alloy wheel designs ranging from 18 to 20 inches, retaining practical roof rails across mid- and upper-tier trims." },
+      { label: "Rear End", text: "Updated LED taillights with a unified lighting bar aesthetic and a reshaped rear bumper that improves departure angles slightly." },
+    ],
+  },
+  {
+    type: "image",
+    src: "/dg-drive/mux/rear-three-quarter.jpg",
+    caption: "Updated LED taillights and a reshaped rear bumper.",
+  },
+  { type: "h2", text: "Interior and Comfort" },
+  {
+    type: "p",
+    text: "Step inside the 2026 MU-X, and the effort to elevate passenger comfort is immediately evident. While rugged plastics remain in high-wear areas—underscoring its utilitarian roots—the touchpoints feature premium soft-touch materials, contrast stitching, and upgraded upholstery choices.",
+  },
+  {
+    type: "list",
+    items: [
+      { label: "Seating Layout", text: "Standard 7-seat configuration with flexible folding mechanisms." },
+      { label: "First & Second Rows", text: "High seating position offering excellent visibility, supportive front bucket seats, and generous second-row legroom with reclining seatbacks." },
+      { label: "Third Row", text: "Suitable for children on longer trips or adults on shorter commutes, featuring dedicated air vents and cup holders." },
+      { label: "NVH Control", text: "Improved sound insulation reduces diesel engine chatter and highway wind noise compared to previous iterations." },
+    ],
+  },
+  {
+    type: "gallery",
+    images: [
+      { src: "/dg-drive/mux/steering-wide.jpg", caption: "Driver’s seat" },
+      { src: "/dg-drive/mux/window-switches.jpg", caption: "Door controls" },
+      { src: "/dg-drive/mux/start-button.jpg", caption: "Push-button start" },
+    ],
+  },
+  { type: "h2", text: "Technology and Features" },
+  {
+    type: "p",
+    text: "The most notable upgrades for 2026 reside in the infotainment and driver assistance suites, directly addressing previous customer feedback. The infotainment sports an updated 9.0-inch touchscreen with improved graphic resolution and faster response times. Connectivity is also great as Apple CarPlay and Android Auto are both available wirelessly, with multiple USB-C ports across all three rows.",
+  },
+  {
+    type: "image",
+    src: "/dg-drive/mux/dashboard.jpg",
+    caption: "The updated 9.0-inch touchscreen with wireless Apple CarPlay and Android Auto.",
+  },
+  { type: "h2", text: "Performance and Driving Experience" },
+  {
+    type: "p",
+    text: "Under the hood, the 2026 MU-X continues to rely on Isuzu’s proven turbo-diesel engine, engineered for longevity and heavy-duty performance rather than outright speed.",
+  },
+  {
+    type: "p",
+    text: "The 3.0-liter 4-cylinder turbo-diesel delivers 140 kW of power and 450 Nm of torque, paired with a smooth 6-speed automatic transmission, is ideal for transporting the family around and highway cruising. Coil-spring rear suspension delivers a significantly smoother ride than its pickup counterpart. Steering is light and easy for urban maneuvering, though body roll is present during enthusiastic cornering. The MU-X also has some off-road capability with its 4WD with high/low range selection, a locking rear differential, rough terrain mode, and an impressive 800mm wading depth.",
+  },
   { type: "specs" },
-  { type: "h2", text: "The Verdict" },
-  { type: "p", text: LOREM },
-  { type: "p", text: LOREM_2 },
+  {
+    type: "image",
+    src: "/dg-drive/mux/gear-shifter.jpg",
+    caption: "A smooth 6-speed automatic sends power from the 3.0-liter turbo-diesel.",
+  },
+  { type: "h2", text: "Practicality" },
+  {
+    type: "p",
+    text: "Practicality remains the core strength of the MU-X platform. Ample room with all seats up, expanding dramatically to over 1,800 liters when the second and third rows are folded flat. Plentiful cabin storage including dual gloveboxes, deep door pockets, and a large central console bin.",
+  },
+  {
+    type: "image",
+    src: "/dg-drive/mux/center-console.jpg",
+    caption: "Dual gloveboxes, deep door pockets, and a large central console bin.",
+  },
+  { type: "h2", text: "Strengths & Weaknesses" },
+  {
+    type: "proscons",
+    pros: [
+      "Isuzu’s proven track record of durability.",
+      "Genuine off-road capability supported by low-range 4WD and rear diff lock.",
+      "Upgraded infotainment system with wireless smartphone integration.",
+      "Roomy, comfortable second row and versatile cabin storage solutions.",
+    ],
+    cons: [
+      "3.0L turbo-diesel engine, while durable, lacks the top-end punch of twin-turbo V6 competitors.",
+      "Steering feel remains overly light at higher highway speeds.",
+      "Firm ride quality when unladen compared to softer road-focused SUVs.",
+    ],
+  },
+  { type: "h2", text: "Final Verdict" },
+  {
+    type: "p",
+    text: "The 2026 Isuzu MU-X strikes an effective balance between rugged capability and modern family convenience. While it does not aim to be the fastest or most luxurious vehicle in the 7-seat SUV segment, its updates to technology, interior comfort, and safety make it far more refined for daily driving. For buyers seeking a dependable, go-anywhere family tourer, the updated MU-X remains one of the most practical and sensible choices on the market.",
+  },
 ];
 
 export const ARTICLES: DriveArticle[] = [
@@ -109,56 +197,9 @@ export const ARTICLES: DriveArticle[] = [
     category: "Review",
     author: "DG Drive Team",
     date: "November 17, 2026",
-    readTime: "5 min read",
+    readTime: "4 min read",
     dek: "Hit the roads with a vehicle built to adapt to different conditions. See why the sleek new 2026 MU-X is the modern car for modern days",
-    body: placeholderBody(
-      "Hit the roads with a vehicle built to adapt to different conditions. See why the sleek new 2026 MU-X is the modern car for modern days — lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "/dg-drive/thumb-off-road.jpg",
-    ),
-  },
-  {
-    id: "still-the-best",
-    title: "STILL THE BEST?",
-    subtitle: "2026 ISUZU MU-X",
-    descriptionLines: [
-      "Lorem ipsum dolor sit amet consectetur adipiscing elit",
-      "facilis ut aut assumenda. Et nihil eos quibusdam",
-      "proident libero veniam dignissimos.",
-    ],
-    image: "/dg-drive/thumb-still-the-best.jpg",
-    thumb: "/dg-drive/thumb-still-the-best.jpg",
-    href: "/dg-drive/still-the-best",
-    category: "Review",
-    author: "DG Drive Team",
-    date: "November 10, 2026",
-    readTime: "5 min read",
-    dek: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. The 2026 MU-X returns to defend its title",
-    body: placeholderBody(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. The 2026 MU-X returns to defend its title — facilis ut aut assumenda et nihil eos quibusdam proident.",
-      "/dg-drive/thumb-off-road.jpg",
-    ),
-  },
-  {
-    id: "off-road-beast",
-    title: "OFF-ROAD BEAST",
-    subtitle: "2026 ISUZU MU-X",
-    descriptionLines: [
-      "Lorem ipsum dolor sit amet consectetur adipiscing elit",
-      "facilis ut aut assumenda. Et nihil eos quibusdam",
-      "proident libero veniam dignissimos.",
-    ],
-    image: "/dg-drive/thumb-off-road.jpg",
-    thumb: "/dg-drive/thumb-off-road.jpg",
-    href: "/dg-drive/off-road-beast",
-    category: "Off-Road",
-    author: "DG Drive Team",
-    date: "November 3, 2026",
-    readTime: "5 min read",
-    dek: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. We took the 2026 MU-X off the pavement to see what it is really made of",
-    body: placeholderBody(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. We took the 2026 MU-X off the pavement to see what it is really made of — libero veniam dignissimos in eos.",
-      "/dg-drive/thumb-still-the-best.jpg",
-    ),
+    body: BEST_IN_CLASS_BODY,
   },
 ];
 
@@ -217,30 +258,16 @@ export type CarouselItem = Pick<
  */
 export const COMING_SOON: CarouselItem[] = [
   {
-    id: "coming-soon-ep-4",
+    id: "coming-soon-ep-2",
     title: "COMING SOON",
-    subtitle: "DG DRIVE EPISODE 4",
+    subtitle: "DG DRIVE EPISODE 2",
     descriptionLines: [
       "A new DG Drive episode is on the way.",
       "Stay tuned and follow DG Drive so you",
       "don’t miss the release.",
     ],
-    image: "/dg-drive/photo-best-in-class-clean.jpg",
-    thumb: "/dg-drive/photo-best-in-class-clean.jpg",
-    href: "",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-ep-5",
-    title: "COMING SOON",
-    subtitle: "DG DRIVE EPISODE 5",
-    descriptionLines: [
-      "Another road test is being filmed.",
-      "Follow DG Drive to be the first to",
-      "watch it when it drops.",
-    ],
-    image: "/dg-drive/thumb-off-road.jpg",
-    thumb: "/dg-drive/thumb-off-road.jpg",
+    image: "/dg-drive/mux/rear-three-quarter.jpg",
+    thumb: "/dg-drive/mux/rear-three-quarter.jpg",
     href: "",
     comingSoon: true,
   },

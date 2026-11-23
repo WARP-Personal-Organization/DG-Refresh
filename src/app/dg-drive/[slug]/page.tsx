@@ -1,10 +1,11 @@
-import { ArrowLeft, ArrowRight, Calendar, Clock, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Minus, User } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ARTICLES,
+  COMING_SOON,
   DG_YELLOW,
   getArticle,
   NEVER_MISS,
@@ -163,10 +164,98 @@ function Block({ block, index }: { block: ArticleBlock; index: number }) {
           </figure>
         </Reveal>
       );
+    case "gallery":
+      return (
+        <Reveal variant="zoom">
+          <div className="my-10 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+            {block.images.map((img, i) => (
+              <figure
+                key={img.src}
+                className={i === 0 ? "col-span-2 sm:col-span-1" : undefined}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                  <Image
+                    src={img.src}
+                    alt={img.caption}
+                    fill
+                    sizes="(min-width: 640px) 240px, 50vw"
+                    className="object-cover"
+                  />
+                </div>
+                <figcaption className="mt-1.5 text-[12px] font-semibold text-neutral-600">
+                  {img.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </Reveal>
+      );
+    case "list":
+      return (
+        <div className="mt-5">
+          {block.intro && (
+            <p className="text-[17px] leading-[1.8] font-semibold text-black">{block.intro}</p>
+          )}
+          <ul className="mt-3 space-y-3">
+            {block.items.map((item) => (
+              <li key={item.text} className="relative pl-6 text-[17px] leading-[1.7] text-neutral-800">
+                <span
+                  className="absolute top-[0.6em] left-0 h-2.5 w-3.5"
+                  style={{
+                    backgroundColor: DG_YELLOW,
+                    clipPath: "polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%)",
+                  }}
+                  aria-hidden
+                />
+                {item.label && <strong className="font-extrabold text-black">{item.label}: </strong>}
+                {item.text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    case "proscons":
+      return (
+        <Reveal>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="bg-black p-6 text-white">
+              <p
+                className="inline-block px-3 py-1 text-[13px] font-extrabold tracking-wider text-black uppercase"
+                style={{ backgroundColor: DG_YELLOW }}
+              >
+                What we like
+              </p>
+              <ul className="mt-4 space-y-3">
+                {block.pros.map((t) => (
+                  <li key={t} className="flex gap-2.5 text-[15px] leading-relaxed">
+                    <Check size={18} className="mt-0.5 shrink-0" style={{ color: DG_YELLOW }} />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="border-[3px] border-black bg-white p-6">
+              <p className="inline-block bg-black px-3 py-1 text-[13px] font-extrabold tracking-wider text-white uppercase">
+                Weaknesses
+              </p>
+              <ul className="mt-4 space-y-3">
+                {block.cons.map((t) => (
+                  <li key={t} className="flex gap-2.5 text-[15px] leading-relaxed text-neutral-800">
+                    <Minus size={18} className="mt-0.5 shrink-0 text-black" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Reveal>
+      );
     case "specs":
       return (
         <Reveal>
-          <SpecCard />
+          <div className="mt-8">
+            <SpecCard />
+          </div>
         </Reveal>
       );
   }
@@ -177,7 +266,7 @@ export default async function DGDriveArticlePage({ params }: Props) {
   const article = getArticle(slug);
   if (!article) notFound();
 
-  const related = ARTICLES.filter((a) => a.id !== article.id);
+  const related = [...ARTICLES.filter((a) => a.id !== article.id), ...COMING_SOON];
 
   return (
     <main className={montserrat.className}>
