@@ -253,15 +253,10 @@ export default async function DGDriveArticlePage({ params }: Props) {
           </div>
 
           <Reveal variant="right" delay={250}>
-            {/* Thumbnails already carry their own yellow frame and title art,
-                so only clean photos get the slanted crop. */}
+            {/* Plain rectangle at the image's own ratio, so nothing is cropped:
+                clean photos are 16:9, thumbnails 1270x720. */}
             <div
-              className={`relative overflow-hidden shadow-2xl ${hasCleanPhoto(article) ? "aspect-[16/10]" : "aspect-[1270/720]"}`}
-              style={
-                hasCleanPhoto(article)
-                  ? { clipPath: "polygon(10% 0, 100% 0, 90% 100%, 0 100%)" }
-                  : undefined
-              }
+              className={`relative overflow-hidden shadow-2xl ${hasCleanPhoto(article) ? "aspect-video" : "aspect-[1270/720]"}`}
             >
               <Image
                 src={article.image}

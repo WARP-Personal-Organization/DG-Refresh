@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ARTICLES, hasCleanPhoto } from "./data";
+import ComingSoonCover from "./ComingSoonCover";
+import { CAROUSEL_ITEMS, hasCleanPhoto } from "./data";
 
 // Frame-unit helper shared with the desktop artboard (see dg-drive/page.tsx).
 const u = (n: number) => `calc(var(--u) * ${n})`;
@@ -17,12 +18,13 @@ const AUTO_ADVANCE_MS = 6000;
 const SLIDE_MS = 750;
 const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
 
-const N = ARTICLES.length;
+const ITEMS = CAROUSEL_ITEMS;
+const N = ITEMS.length;
 // The article list is doubled so every visible slot (sliver, main, two
 // previews) plus an off-screen slot on each side always has its own element,
 // even with only three articles. Each element keeps its identity and just
 // moves between slots, which is what makes the cards physically slide.
-const VIRTUAL = [...ARTICLES, ...ARTICLES];
+const VIRTUAL = [...ITEMS, ...ITEMS];
 const V = VIRTUAL.length;
 
 function useCarousel() {
@@ -155,10 +157,12 @@ const MAIN_THUMB_INSET = {
   height: `${(334 / 365) * 100}%`,
 };
 
-/** Offset of virtual item i from the active one, normalised to -2..3. */
+/** Offset of virtual item i from the active one, clamped to the -2..3 slots. */
 const offsetOf = (i: number, v: number) => {
   const o = (((i - v) % V) + V) % V;
-  return o > V / 2 ? o - V : o === V / 2 ? 3 : o;
+  const signed = o > V / 2 ? o - V : o === V / 2 ? 3 : o;
+  // With more than three items, extra cards wait in the off-screen slots.
+  return Math.min(3, Math.max(-2, signed));
 };
 
 /**
@@ -170,7 +174,7 @@ export function BrowseCarouselDesktop() {
   const { v, active, direction, paused, setPaused, step, next, prev } =
     useCarousel();
   const router = useRouter();
-  const current = ARTICLES[active];
+  const current = ITEMS[active];
 
   // Remember each card's previous slot: a card wrapping from one end to the
   // other (-2 <-> 3) must jump there without animating across the page.
@@ -193,31 +197,40 @@ export function BrowseCarouselDesktop() {
       {VIRTUAL.map((article, i) => {
         const offset = offsets[i];
         const slot = SLOTS[offset];
-        const thumbOnly = !hasCleanPhoto(article);
+        const soon = !!article.comingSoon;
+        const thumbOnly = !soon && !hasCleanPhoto(article);
         const jumped = Math.abs(offset - prevOffsets.current[i]) > 1;
         const isMain = offset === 0;
         const visible = offset >= -1 && offset <= 2;
-        const label = isMain
-          ? `Read ${article.title}`
-          : `Show ${article.title}`;
+        // Coming-soon cards can be brought to the front but link nowhere.
+        const opens = isMain && !soon;
+        const label = soon
+          ? `${article.subtitle}, coming soon`
+          : isMain
+            ? `Read ${article.title}`
+            : `Show ${article.title}`;
         return (
           <div
             key={`${article.id}-${i}`}
-            role={visible ? (isMain ? "link" : "button") : undefined}
+            role={visible ? (opens ? "link" : "button") : undefined}
             aria-label={visible ? label : undefined}
             aria-hidden={visible ? undefined : true}
             tabIndex={visible ? 0 : -1}
-            onClick={() =>
-              isMain ? router.push(article.href) : visible && step(offset)
-            }
+            onClick={() => {
+              if (opens) router.push(article.href);
+              else if (visible && !isMain) step(offset);
+            }}
             onKeyDown={(e) => {
               if (e.key !== "Enter" && e.key !== " ") return;
               e.preventDefault();
-              if (isMain) router.push(article.href);
-              else if (visible) step(offset);
+              if (opens) router.push(article.href);
+              else if (visible && !isMain) step(offset);
             }}
-            className="dgd-slide-card group absolute cursor-pointer overflow-hidden outline-none focus-visible:brightness-110"
+            className={`dgd-slide-card group absolute overflow-hidden outline-none focus-visible:brightness-110 ${
+              isMain && soon ? "cursor-default" : "cursor-pointer"
+            }`}
             style={{
+              containerType: "inline-size",
               left: u(slot.x),
               top: u(slot.y),
               width: u(slot.w),
@@ -233,20 +246,30 @@ export function BrowseCarouselDesktop() {
                     .join(", "),
             }}
           >
+            {soon && (
+              <ComingSoonCover
+                src={article.image}
+                label={article.subtitle}
+                sizes="(min-width: 1024px) 66vw, 100vw"
+              />
+            )}
             {/* Preview thumbnail (with title art) and the clean main photo,
                 cross-faded as the card moves into / out of the main slot. */}
-            <Image
-              src={article.thumb}
-              alt=""
-              fill
-              sizes="30vw"
-              className="object-cover transition-[opacity,filter,transform] duration-700"
-              style={{
-                opacity: isMain && !thumbOnly ? 0 : 1,
-                filter: isMain && thumbOnly ? "blur(14px) brightness(0.7)" : "none",
-                transform: isMain && thumbOnly ? "scale(1.15)" : "none",
-              }}
-            />
+            {!soon && (
+              <Image
+                src={article.thumb}
+                alt=""
+                fill
+                sizes="30vw"
+                className="object-cover transition-[opacity,filter,transform] duration-700"
+                style={{
+                  opacity: isMain && !thumbOnly ? 0 : 1,
+                  filter:
+                    isMain && thumbOnly ? "blur(14px) brightness(0.7)" : "none",
+                  transform: isMain && thumbOnly ? "scale(1.15)" : "none",
+                }}
+              />
+            )}
             {thumbOnly && (
               <div
                 className="absolute transition-opacity duration-700"
@@ -310,24 +333,41 @@ export function BrowseCarouselDesktop() {
         </div>
       </div>
 
-      <Link
-        href={current.href}
-        className="group absolute flex items-center justify-center gap-2 bg-black font-bold text-white transition-colors hover:bg-neutral-800"
-        style={{
-          left: u(69),
-          top: u(2205),
-          width: u(230),
-          height: u(43),
-          fontSize: fs(21.3),
-          zIndex: 40,
-        }}
-      >
-        Go to Article
-        <ChevronRight
-          className="-ml-1 transition-transform duration-300 group-hover:translate-x-1"
-          style={{ width: u(20), height: u(20) }}
-        />
-      </Link>
+      {current.comingSoon ? (
+        <span
+          aria-disabled
+          className="absolute flex cursor-not-allowed items-center justify-center bg-black/25 font-bold text-black/60"
+          style={{
+            left: u(69),
+            top: u(2205),
+            width: u(230),
+            height: u(43),
+            fontSize: fs(21.3),
+            zIndex: 40,
+          }}
+        >
+          Coming Soon
+        </span>
+      ) : (
+        <Link
+          href={current.href}
+          className="group absolute flex items-center justify-center gap-2 bg-black font-bold text-white transition-colors hover:bg-neutral-800"
+          style={{
+            left: u(69),
+            top: u(2205),
+            width: u(230),
+            height: u(43),
+            fontSize: fs(21.3),
+            zIndex: 40,
+          }}
+        >
+          Go to Article
+          <ChevronRight
+            className="-ml-1 transition-transform duration-300 group-hover:translate-x-1"
+            style={{ width: u(20), height: u(20) }}
+          />
+        </Link>
+      )}
 
       {/* Arrows + counter */}
       {[
@@ -379,7 +419,7 @@ export function BrowseCarouselDesktop() {
 /** Mobile / tablet: a swipeable horizontal slider with arrows and dots. */
 export function BrowseCarouselMobile() {
   const { active, direction, goTo, next, prev, setPaused } = useCarousel();
-  const current = ARTICLES[active];
+  const current = ITEMS[active];
   const textSlide = direction === "next" ? "dgd-text-next" : "dgd-text-prev";
   const touchX = useRef<number | null>(null);
 
@@ -408,53 +448,77 @@ export function BrowseCarouselMobile() {
             transition: `transform ${SLIDE_MS}ms ${EASE}`,
           }}
         >
-          {ARTICLES.map((a, i) => (
-            <Link
-              key={a.id}
-              href={a.href}
-              aria-hidden={i !== active}
-              tabIndex={i === active ? 0 : -1}
-              className="relative block aspect-[1270/720] w-full shrink-0 overflow-hidden"
-              style={{ clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)" }}
-            >
-              {hasCleanPhoto(a) ? (
-                <Image
-                  src={a.image}
-                  alt={a.title}
-                  fill
-                  sizes="100vw"
-                  className="object-cover"
-                />
-              ) : (
-                <>
-                  {/* Blurred fill for the slanted wedges; the full thumbnail
-                      sits inset so its title art stays inside the slant. */}
+          {ITEMS.map((a, i) => {
+            const frame = {
+              "aria-hidden": i !== active,
+              className:
+                "relative block aspect-[1270/720] w-full shrink-0 overflow-hidden",
+              style: {
+                clipPath: "polygon(6% 0, 100% 0, 94% 100%, 0 100%)",
+                containerType: "inline-size",
+              } as React.CSSProperties,
+            };
+            if (a.comingSoon) {
+              return (
+                <div
+                  key={a.id}
+                  {...frame}
+                  aria-label={`${a.subtitle}, coming soon`}
+                >
+                  <ComingSoonCover
+                    src={a.image}
+                    label={a.subtitle}
+                    sizes="100vw"
+                  />
+                </div>
+              );
+            }
+            return (
+              <Link
+                key={a.id}
+                href={a.href}
+                tabIndex={i === active ? 0 : -1}
+                {...frame}
+              >
+                {hasCleanPhoto(a) ? (
                   <Image
                     src={a.image}
-                    alt=""
+                    alt={a.title}
                     fill
                     sizes="100vw"
-                    className="scale-110 object-cover blur-md brightness-75"
+                    className="object-cover"
                   />
-                  <div className="absolute inset-[6%]">
+                ) : (
+                  <>
+                    {/* Blurred fill for the slanted wedges; the full thumbnail
+                      sits inset so its title art stays inside the slant. */}
                     <Image
                       src={a.image}
-                      alt={a.title}
+                      alt=""
                       fill
-                      sizes="90vw"
-                      className="object-contain"
+                      sizes="100vw"
+                      className="scale-110 object-cover blur-md brightness-75"
                     />
-                  </div>
-                </>
-              )}
-            </Link>
-          ))}
+                    <div className="absolute inset-[6%]">
+                      <Image
+                        src={a.image}
+                        alt={a.title}
+                        fill
+                        sizes="90vw"
+                        className="object-contain"
+                      />
+                    </div>
+                  </>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
         <div className="flex gap-2">
-          {ARTICLES.map((a, i) => (
+          {ITEMS.map((a, i) => (
             <button
               key={a.id}
               type="button"
@@ -495,12 +559,21 @@ export function BrowseCarouselMobile() {
           <p className="mt-3 max-w-[60ch] text-[15px] leading-relaxed">
             {current.descriptionLines.join(" ")}
           </p>
-          <Link
-            href={current.href}
-            className="mt-5 inline-flex h-10 items-center gap-2 bg-black px-7 text-[14px] font-semibold text-white"
-          >
-            Go to Article <ChevronRight size={15} />
-          </Link>
+          {current.comingSoon ? (
+            <span
+              aria-disabled
+              className="mt-5 inline-flex h-10 cursor-not-allowed items-center bg-black/25 px-7 text-[14px] font-semibold text-black/60"
+            >
+              Coming Soon
+            </span>
+          ) : (
+            <Link
+              href={current.href}
+              className="mt-5 inline-flex h-10 items-center gap-2 bg-black px-7 text-[14px] font-semibold text-white"
+            >
+              Go to Article <ChevronRight size={15} />
+            </Link>
+          )}
         </div>
       </div>
     </div>

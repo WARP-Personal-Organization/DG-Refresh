@@ -195,13 +195,13 @@ function DGDriveDesktop() {
 
         <Abs x={1078} y={513} w={230} h={43}>
           <Reveal variant="right" delay={1000} className="h-full w-full">
-            <a
-              href="#browse-articles"
+            <Link
+              href="/dg-drive/articles"
               className="flex h-full w-full items-center justify-center bg-black font-bold text-white transition-colors hover:bg-neutral-800"
               style={{ fontSize: fs(21.3) }}
             >
               {HERO.cta}
-            </a>
+            </Link>
           </Reveal>
         </Abs>
 
@@ -460,12 +460,12 @@ function DGDriveMobile() {
             ))}
           </h1>
           <Reveal variant="right" delay={850} className="mt-5 flex justify-end">
-            <a
-              href="#browse-articles-m"
+            <Link
+              href="/dg-drive/articles"
               className="inline-flex h-10 w-40 items-center justify-center bg-black text-[15px] font-bold text-white"
             >
               {HERO.cta}
-            </a>
+            </Link>
           </Reveal>
         </div>
       </section>

@@ -103,7 +103,7 @@ export const ARTICLES: DriveArticle[] = [
       "conditions! See why the sleek new 2026 MU-X is",
       "the modern car for modern days.",
     ],
-    image: "/dg-drive/photo-best-in-class.jpg",
+    image: "/dg-drive/photo-best-in-class-clean.jpg",
     thumb: "/dg-drive/thumb-best-in-class.jpg",
     href: "/dg-drive/best-in-class",
     category: "Review",
@@ -203,6 +203,51 @@ export const NEVER_MISS = {
 };
 
 export const COPYRIGHT = "© 2024 DG Drive. All rights reserved.";
+
+/** Anything the Browse carousel can show: a released article or a teaser. */
+export type CarouselItem = Pick<
+  DriveArticle,
+  "id" | "title" | "subtitle" | "descriptionLines" | "image" | "thumb" | "href"
+> & { comingSoon?: boolean };
+
+/**
+ * Unreleased episodes. They appear in the carousel and on the All Articles
+ * page with a blurred photo and a "Coming Soon" badge, and link nowhere.
+ * Move an entry into ARTICLES (with its full fields) once it is released.
+ */
+export const COMING_SOON: CarouselItem[] = [
+  {
+    id: "coming-soon-ep-4",
+    title: "COMING SOON",
+    subtitle: "DG DRIVE EPISODE 4",
+    descriptionLines: [
+      "A new DG Drive episode is on the way.",
+      "Stay tuned and follow DG Drive so you",
+      "don’t miss the release.",
+    ],
+    image: "/dg-drive/photo-best-in-class-clean.jpg",
+    thumb: "/dg-drive/photo-best-in-class-clean.jpg",
+    href: "",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-ep-5",
+    title: "COMING SOON",
+    subtitle: "DG DRIVE EPISODE 5",
+    descriptionLines: [
+      "Another road test is being filmed.",
+      "Follow DG Drive to be the first to",
+      "watch it when it drops.",
+    ],
+    image: "/dg-drive/thumb-off-road.jpg",
+    thumb: "/dg-drive/thumb-off-road.jpg",
+    href: "",
+    comingSoon: true,
+  },
+];
+
+/** Released articles first, then the coming-soon teasers. */
+export const CAROUSEL_ITEMS: CarouselItem[] = [...ARTICLES, ...COMING_SOON];
 
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.id === slug);
 
