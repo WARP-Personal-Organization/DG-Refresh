@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Minus, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Expand, Minus, User } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import {
 } from "@/components/dg-drive/data";
 import { hasCleanPhoto } from "@/components/dg-drive/data";
 import { montserrat } from "@/components/dg-drive/font";
+import ArticleLightbox from "@/components/dg-drive/ArticleLightbox";
 import ReadingProgress from "@/components/dg-drive/ReadingProgress";
 import RelatedSlider from "@/components/dg-drive/RelatedSlider";
 import Reveal from "@/components/dg-drive/Reveal";
@@ -72,6 +73,18 @@ function SlantBar({ children }: { children: React.ReactNode }) {
         {children}
       </h2>
     </Reveal>
+  );
+}
+
+/** Small "enlarge" badge that appears on hover over a zoomable photo. */
+function ZoomHint() {
+  return (
+    <span
+      className="absolute right-2 bottom-2 grid size-8 place-items-center bg-black/70 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+      aria-hidden
+    >
+      <Expand size={16} />
+    </span>
   );
 }
 
@@ -149,15 +162,22 @@ function Block({ block, index }: { block: ArticleBlock; index: number }) {
       return (
         <Reveal variant="zoom">
           <figure className="my-10">
-            <div className="relative aspect-[1270/720] overflow-hidden">
+            <button
+              type="button"
+              data-zoom={block.src}
+              data-caption={block.caption}
+              aria-label={`Enlarge photo: ${block.caption}`}
+              className="group relative block aspect-[1270/720] w-full cursor-zoom-in overflow-hidden"
+            >
               <Image
                 src={block.src}
                 alt={block.caption}
                 fill
                 sizes="(min-width: 1024px) 720px, 100vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
               />
-            </div>
+              <ZoomHint />
+            </button>
             <figcaption className="mt-3 border-l-4 border-black pl-3 text-[13px] text-neutral-600 italic">
               {block.caption}
             </figcaption>
@@ -173,15 +193,22 @@ function Block({ block, index }: { block: ArticleBlock; index: number }) {
                 key={img.src}
                 className={i === 0 ? "col-span-2 sm:col-span-1" : undefined}
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                <button
+                  type="button"
+                  data-zoom={img.src}
+                  data-caption={img.caption}
+                  aria-label={`Enlarge photo: ${img.caption}`}
+                  className="group relative block aspect-[4/3] w-full cursor-zoom-in overflow-hidden bg-black"
+                >
                   <Image
                     src={img.src}
                     alt={img.caption}
                     fill
                     sizes="(min-width: 640px) 240px, 50vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                </div>
+                  <ZoomHint />
+                </button>
                 <figcaption className="mt-1.5 text-[12px] font-semibold text-neutral-600">
                   {img.caption}
                 </figcaption>
@@ -271,6 +298,7 @@ export default async function DGDriveArticlePage({ params }: Props) {
   return (
     <main className={montserrat.className}>
       <ReadingProgress targetId="dgd-article" />
+      <ArticleLightbox targetId="dgd-article" />
 
       {/* ---------- Hero ---------- */}
       <section
