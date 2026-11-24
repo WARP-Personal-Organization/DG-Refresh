@@ -130,7 +130,7 @@ function DGDriveDesktop() {
           className="dgd-wipe-stripe absolute inset-0"
           style={
             {
-              "--stripe-clip": `polygon(0 0, calc(54.5% + ${u(7)}) 0, 0 calc(62.52% + ${u(15.8)}))`,
+              "--stripe-clip": `polygon(0 0, calc(58.8% + ${u(7)}) 0, 0 calc(65.8% + ${u(15.4)}))`,
               clipPath: "var(--stripe-clip)",
               backgroundColor: DG_YELLOW,
             } as React.CSSProperties
@@ -158,7 +158,9 @@ function DGDriveDesktop() {
         />
 
         {/* ---------- Hero ---------- */}
-        <Abs x={88} y={188} w={509} h={117}>
+        {/* x is offset left so the slanted "D"'s bottom corner lines up with
+            the tagline and button at x=90 (the PNG has empty space there). */}
+        <Abs x={74} y={188} w={509} h={117}>
           <Reveal variant="left" delay={350} className="relative h-full w-full">
             <Image
               src="/dg-drive/dg-drive-logo.png"
@@ -429,6 +431,7 @@ function DGDriveMobile() {
             variant="left"
             delay={300}
             className="relative aspect-[1596/367] w-[78vw] max-w-[400px]"
+            style={{ marginLeft: "calc(min(78vw, 400px) * -0.031)" }}
           >
             <Image
               src="/dg-drive/dg-drive-logo.png"
