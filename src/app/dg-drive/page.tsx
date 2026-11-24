@@ -78,6 +78,20 @@ function Lines({ lines }: { lines: readonly string[] }) {
   ));
 }
 
+// Slowly breathing yellow glow in the corner of the hero's black panel.
+function HeroGlow() {
+  return (
+    <div
+      aria-hidden
+      className="dgd-glow pointer-events-none absolute inset-0"
+      style={{
+        background:
+          "radial-gradient(ellipse 45% 35% at 0% 0%, rgba(252,212,0,0.22) 0%, rgba(252,212,0,0) 70%)",
+      }}
+    />
+  );
+}
+
 const SLANT_BAR = "polygon(6.4% 0, 100% 0, 93.6% 100%, 0 100%)";
 const CAPTION_BAR = "polygon(7.6% 0, 100% 0, 92.4% 100%, 0 100%)";
 const NAVY = "#020015";
@@ -110,6 +124,18 @@ function DGDriveDesktop() {
         />
 
         {/* ---------- Background diagonals ---------- */}
+        {/* Yellow stripe peeking out from behind the black panel's diagonal */}
+        <div
+          aria-hidden
+          className="dgd-wipe-stripe absolute inset-0"
+          style={
+            {
+              "--stripe-clip": `polygon(0 0, calc(54.5% + ${u(7)}) 0, 0 calc(62.52% + ${u(15.8)}))`,
+              clipPath: "var(--stripe-clip)",
+              backgroundColor: DG_YELLOW,
+            } as React.CSSProperties
+          }
+        />
         <div
           className="dgd-wipe absolute inset-0"
           style={{
@@ -117,7 +143,11 @@ function DGDriveDesktop() {
             background:
               "radial-gradient(ellipse 55% 30% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
           }}
-        />
+        >
+          <div className="absolute inset-x-0 top-0" style={{ height: u(662) }}>
+            <HeroGlow />
+          </div>
+        </div>
         <div
           className="absolute inset-0"
           style={{
@@ -128,7 +158,7 @@ function DGDriveDesktop() {
         />
 
         {/* ---------- Hero ---------- */}
-        <Abs x={77} y={60} w={521} h={120}>
+        <Abs x={88} y={188} w={509} h={117}>
           <Reveal variant="left" delay={350} className="relative h-full w-full">
             <Image
               src="/dg-drive/dg-drive-logo.png"
@@ -143,26 +173,21 @@ function DGDriveDesktop() {
 
         <Abs
           x={90}
-          y={194}
+          y={292}
           className="text-white"
-          style={{ fontSize: fs(21.33), lineHeight: u(29) }}
+          style={{ fontSize: fs(27.5), lineHeight: u(34) }}
         >
           <Reveal delay={450}>
             <h1 className="font-normal whitespace-nowrap">{HERO.tagline}</h1>
           </Reveal>
-          <Reveal delay={550}>
-            <p style={{ marginTop: u(29) }}>
-              <Lines lines={HERO.overviewLines} />
-            </p>
-          </Reveal>
         </Abs>
 
-        <Abs x={1078} y={513} w={230} h={43}>
-          <Reveal variant="right" delay={1000} className="h-full w-full">
+        <Abs x={90} y={426} w={167} h={42}>
+          <Reveal variant="left" delay={650} className="h-full w-full">
             <Link
               href="/dg-drive/articles"
-              className="flex h-full w-full items-center justify-center bg-black font-bold text-white transition-colors hover:bg-neutral-800"
-              style={{ fontSize: fs(21.3) }}
+              className="flex h-full w-full items-center justify-center font-bold text-black transition-colors hover:bg-white"
+              style={{ fontSize: fs(21.3), backgroundColor: DG_YELLOW }}
             >
               {HERO.cta}
             </Link>
@@ -372,51 +397,58 @@ function DGDriveMobile() {
       style={{ backgroundColor: DG_YELLOW }}
     >
       {/* ---------- Hero ---------- */}
-      {/* Black copy block, then a black wedge slanting down to the left, so the
-          diagonal always clears the copy and the tagline whatever the wrap. */}
-      <section className="dgd-photo-bg relative">
+      {/* Full-bleed photo with the black panel laid over it on a diagonal (and
+          a yellow stripe peeking out along the edge) — the desktop hero,
+          rotated to fit a tall screen. The copy sits well above the diagonal. */}
+      <section
+        className="dgd-photo-bg relative isolate min-h-[540px] sm:min-h-[660px]"
+        style={{ backgroundPosition: "65% center" }}
+      >
         <div
-          className="dgd-wipe-article relative px-5 pt-8 pb-6"
+          aria-hidden
+          className="dgd-wipe-article absolute inset-0 -z-10"
+          style={{
+            backgroundColor: DG_YELLOW,
+            clipPath: "polygon(0 0, 100% 0, 100% calc(46% + 9px), 0 calc(80% + 9px))",
+          }}
+        />
+        <div
+          aria-hidden
+          className="dgd-wipe-article absolute inset-0 -z-10 overflow-hidden"
           style={{
             background:
-              "radial-gradient(ellipse 90% 60% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
+              "radial-gradient(ellipse 90% 50% at 0% 0%, #4a400c 0%, #1d1904 45%, #000 80%), #000",
+            clipPath: "polygon(0 0, 100% 0, 100% 46%, 0 80%)",
           }}
         >
+          <HeroGlow />
+        </div>
+
+        <div className="px-5 pt-12 sm:px-8 sm:pt-16">
           <Reveal
             variant="left"
             delay={300}
-            className="relative h-[60px] w-[260px] sm:h-[80px] sm:w-[350px]"
+            className="relative aspect-[1596/367] w-[78vw] max-w-[400px]"
           >
             <Image
               src="/dg-drive/dg-drive-logo.png"
               alt="DG Drive"
               fill
               priority
-              sizes="350px"
+              sizes="(min-width: 640px) 400px, 78vw"
               className="object-contain object-left"
             />
           </Reveal>
           <Reveal delay={400}>
-            <h1 className="mt-4 text-[14px] leading-relaxed font-normal text-white">
+            <h1 className="mt-2 text-[18px] leading-snug font-normal text-white sm:text-[22px]">
               {HERO.tagline}
             </h1>
           </Reveal>
-          <Reveal delay={450}>
-            <p className="mt-3 max-w-[36ch] text-[14px] leading-relaxed text-white">
-              {HERO.overviewLines.join(" ")}
-            </p>
-          </Reveal>
-        </div>
-        <div
-          aria-hidden
-          className="-mt-px h-16 bg-black sm:h-24"
-          style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
-        />
-        <div className="relative px-5 pb-8">
-          <Reveal variant="right" delay={600} className="flex justify-end">
+          <Reveal variant="left" delay={550}>
             <Link
               href="/dg-drive/articles"
-              className="inline-flex h-10 w-40 items-center justify-center bg-black text-[15px] font-bold text-white"
+              className="mt-7 inline-flex h-11 min-w-36 items-center justify-center px-6 text-[15px] font-bold text-black active:bg-white"
+              style={{ backgroundColor: DG_YELLOW }}
             >
               {HERO.cta}
             </Link>
