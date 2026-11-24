@@ -4,15 +4,8 @@
 export const DG_YELLOW = "#FCD400";
 
 export const HERO = {
-  // Explicit lines so the copy wraps exactly like the Canva design.
-  overviewLines: [
-    "Pondering on what car to get that suits your",
-    "lifestyle? Choose the vehicle with DG Drive, your",
-    "daily guide to cars with comprehensive reviews,",
-    "updates, and comparisons with other vehicles.",
-  ],
-  mottoLines: ["Driven, Tested, Experienced.", "Roll out with DG Drive."],
-  taglineLines: ["DRIVEN. TESTED.", "EXPERIENCED."],
+  // Placeholder until the final tagline is decided.
+  tagline: "Driven. Tested. Experienced.",
   cta: "Articles",
 };
 
@@ -20,11 +13,10 @@ export const LATEST = {
   label: "LATEST",
   heading: "Built for What’s Next",
   blurbLines: [
-    "Hit the roads with a vehicle built",
-    "to adapt to different conditions.",
-    "See why the sleek new 2026",
-    "MU-X is the modern car for",
-    "modern days.",
+    "Witness a vehicle built to adapt",
+    "to different conditions. See why",
+    "the sleek new 2026 MU-X is the",
+    "modern car for modern days.",
   ],
   thumbnail: "/dg-drive/thumb-best-in-class.jpg",
   thumbnailAlt: "Best in Class? 2026 Isuzu MU-X — DG Drive",
@@ -60,6 +52,8 @@ export type DriveArticle = {
   readTime: string;
   dek: string;
   body: ArticleBlock[];
+  /** Full video on YouTube; adds a play button over the article's hero photo. */
+  video?: string;
 };
 
 export type ArticleBlock =
@@ -198,8 +192,9 @@ export const ARTICLES: DriveArticle[] = [
     author: "DG Drive Team",
     date: "November 17, 2026",
     readTime: "4 min read",
-    dek: "Hit the roads with a vehicle built to adapt to different conditions. See why the sleek new 2026 MU-X is the modern car for modern days",
+    dek: "Witness a vehicle built to adapt to different conditions. See why the sleek new 2026 MU-X is the modern car for modern days",
     body: BEST_IN_CLASS_BODY,
+    video: "https://youtu.be/p8OnXcHF3Mk",
   },
 ];
 

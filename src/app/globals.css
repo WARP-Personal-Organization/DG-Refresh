@@ -248,12 +248,27 @@ body {
 }
 .dgd-reveal[data-shown] { opacity: 1; transform: none; }
 
+/* Light-trails photo behind the DG Drive landing hero. */
+.dgd-photo-bg {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url("/dg-drive/Iloilo_Diversion_Road_Light_Trails.png") center / cover;
+  background-color: #0b0a12;
+}
+
 /* Hero black panel wipes in on load */
 @keyframes dgd-wipe {
   from { clip-path: polygon(0 0, 0 0, 0 0); }
-  to { clip-path: polygon(0 0, 54.5% 0, 0 62.52%); }
+  to { clip-path: polygon(0 0, 58.8% 0, 0 65.8%); }
 }
 .dgd-wipe { animation: dgd-wipe 1100ms cubic-bezier(0.65, 0, 0.35, 1) both; }
+
+/* Thin yellow stripe that runs along the hero panel's diagonal edge */
+@keyframes dgd-wipe-stripe {
+  from { clip-path: polygon(0 0, 0 0, 0 0); }
+  to { clip-path: var(--stripe-clip); }
+}
+.dgd-wipe-stripe { animation: dgd-wipe-stripe 1100ms cubic-bezier(0.65, 0, 0.35, 1) both; }
 
 /* Carousel slide between articles */
 @keyframes dgd-slide-next {
@@ -301,9 +316,17 @@ body {
 }
 .dgd-wipe-article { animation: dgd-slide-in-left 1000ms cubic-bezier(0.65, 0, 0.35, 1) both; }
 
+/* Hero panel: slowly breathing glow in the corner. */
+@keyframes dgd-glow {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+.dgd-glow { animation: dgd-glow 4.5s ease-in-out infinite alternate; pointer-events: none; }
+
 @media (prefers-reduced-motion: reduce) {
+  .dgd-glow { animation: none !important; }
   .dgd-wipe-article { animation: none !important; }
   .dgd-slide-card { transition: none !important; }
   .dgd-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .dg-drive-fade, .dgd-wipe, .dgd-slide-next, .dgd-slide-prev, .dgd-text-next, .dgd-text-prev { animation: none !important; }
+  .dg-drive-fade, .dgd-wipe, .dgd-wipe-stripe, .dgd-slide-next, .dgd-slide-prev, .dgd-text-next, .dgd-text-prev { animation: none !important; }
 }
