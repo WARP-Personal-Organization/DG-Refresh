@@ -52,6 +52,8 @@ export type DriveArticle = {
   readTime: string;
   dek: string;
   body: ArticleBlock[];
+  /** Full video on YouTube; adds a play button over the article's hero photo. */
+  video?: string;
 };
 
 export type ArticleBlock =
@@ -192,6 +194,7 @@ export const ARTICLES: DriveArticle[] = [
     readTime: "4 min read",
     dek: "Witness a vehicle built to adapt to different conditions. See why the sleek new 2026 MU-X is the modern car for modern days",
     body: BEST_IN_CLASS_BODY,
+    video: "https://youtu.be/p8OnXcHF3Mk",
   },
 ];
 

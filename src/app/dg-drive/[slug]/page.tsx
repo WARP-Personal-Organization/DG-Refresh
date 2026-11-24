@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Expand, Minus, User } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Check, Clock, Expand, Minus, Play, User } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -373,7 +373,7 @@ export default async function DGDriveArticlePage({ params }: Props) {
             {/* Plain rectangle at the image's own ratio, so nothing is cropped:
                 clean photos are 16:9, thumbnails 1270x720. */}
             <div
-              className={`relative overflow-hidden shadow-2xl ${hasCleanPhoto(article) ? "aspect-video" : "aspect-[1270/720]"}`}
+              className={`relative overflow-hidden shadow-2xl ${article.video ? "group" : ""} ${hasCleanPhoto(article) ? "aspect-video" : "aspect-[1270/720]"}`}
             >
               <Image
                 src={article.image}
@@ -381,8 +381,24 @@ export default async function DGDriveArticlePage({ params }: Props) {
                 fill
                 priority
                 sizes="(min-width: 1024px) 55vw, 100vw"
-                className="object-cover"
+                className={`object-cover ${article.video ? "transition-transform duration-700 group-hover:scale-105" : ""}`}
               />
+              {article.video && (
+                <a
+                  href={article.video}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Watch ${article.title} ${article.subtitle} on YouTube`}
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors duration-300 hover:bg-black/35"
+                >
+                  <span
+                    className="flex h-16 w-16 items-center justify-center rounded-full text-black shadow-[0_8px_30px_rgba(0,0,0,0.45)] ring-4 ring-black/20 transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20"
+                    style={{ backgroundColor: DG_YELLOW }}
+                  >
+                    <Play className="ml-1 h-7 w-7 fill-current sm:h-9 sm:w-9" />
+                  </span>
+                </a>
+              )}
             </div>
           </Reveal>
         </div>
