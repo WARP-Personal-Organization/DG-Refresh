@@ -4,13 +4,6 @@
 export const DG_YELLOW = "#FCD400";
 
 export const HERO = {
-  // Explicit lines so the copy wraps exactly like the Canva design.
-  overviewLines: [
-    "Pondering on what car to get that suits your",
-    "lifestyle? Choose the vehicle with DG Drive, your",
-    "daily guide to cars with comprehensive reviews,",
-    "updates, and comparisons with other vehicles.",
-  ],
   // Placeholder until the final tagline is decided.
   tagline: "Driven. Tested. Experienced.",
   cta: "Articles",
