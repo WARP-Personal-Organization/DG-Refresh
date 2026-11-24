@@ -102,6 +102,13 @@ function DGDriveDesktop() {
           } as React.CSSProperties
         }
       >
+        {/* ---------- Hero photo (ends level with the top of the LATEST bar) ---------- */}
+        <div
+          aria-hidden
+          className="dgd-photo-bg absolute inset-x-0 top-0"
+          style={{ height: u(662) }}
+        />
+
         {/* ---------- Background diagonals ---------- */}
         <div
           className="dgd-wipe absolute inset-0"
@@ -140,30 +147,14 @@ function DGDriveDesktop() {
           className="text-white"
           style={{ fontSize: fs(21.33), lineHeight: u(29) }}
         >
+          <Reveal delay={450}>
+            <h1 className="font-normal whitespace-nowrap">{HERO.tagline}</h1>
+          </Reveal>
           <Reveal delay={550}>
-            <p>
+            <p style={{ marginTop: u(29) }}>
               <Lines lines={HERO.overviewLines} />
             </p>
-            <p style={{ marginTop: u(29) }}>
-              <Lines lines={HERO.mottoLines} />
-            </p>
           </Reveal>
-        </Abs>
-
-        <Abs
-          x={418}
-          y={288}
-          w={900}
-          className="text-right font-black text-black"
-          style={{ fontSize: fs(80), lineHeight: u(72) }}
-        >
-          <h1>
-            {HERO.taglineLines.map((line, i) => (
-              <Reveal key={line} variant="right" delay={700 + i * 160}>
-                <span className="block whitespace-nowrap">{line}</span>
-              </Reveal>
-            ))}
-          </h1>
         </Abs>
 
         <Abs x={1078} y={513} w={230} h={43}>
@@ -383,7 +374,7 @@ function DGDriveMobile() {
       {/* ---------- Hero ---------- */}
       {/* Black copy block, then a black wedge slanting down to the left, so the
           diagonal always clears the copy and the tagline whatever the wrap. */}
-      <section className="relative">
+      <section className="dgd-photo-bg relative">
         <div
           className="dgd-wipe-article relative px-5 pt-8 pb-6"
           style={{
@@ -405,16 +396,14 @@ function DGDriveMobile() {
               className="object-contain object-left"
             />
           </Reveal>
+          <Reveal delay={400}>
+            <h1 className="mt-4 text-[14px] leading-relaxed font-normal text-white">
+              {HERO.tagline}
+            </h1>
+          </Reveal>
           <Reveal delay={450}>
-            <p className="mt-4 max-w-[36ch] text-[14px] leading-relaxed text-white">
+            <p className="mt-3 max-w-[36ch] text-[14px] leading-relaxed text-white">
               {HERO.overviewLines.join(" ")}
-            </p>
-            <p className="mt-3 text-[14px] leading-relaxed text-white">
-              {HERO.mottoLines.map((l) => (
-                <span key={l} className="block">
-                  {l}
-                </span>
-              ))}
             </p>
           </Reveal>
         </div>
@@ -424,14 +413,7 @@ function DGDriveMobile() {
           style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
         />
         <div className="relative px-5 pb-8">
-          <h1 className="text-right text-[34px] leading-[1.02] font-black text-black sm:text-[48px]">
-            {HERO.taglineLines.map((l, i) => (
-              <Reveal key={l} variant="right" delay={550 + i * 150}>
-                <span className="block">{l}</span>
-              </Reveal>
-            ))}
-          </h1>
-          <Reveal variant="right" delay={850} className="mt-5 flex justify-end">
+          <Reveal variant="right" delay={600} className="flex justify-end">
             <Link
               href="/dg-drive/articles"
               className="inline-flex h-10 w-40 items-center justify-center bg-black text-[15px] font-bold text-white"
