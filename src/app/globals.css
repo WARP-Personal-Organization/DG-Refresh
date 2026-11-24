@@ -248,6 +248,14 @@ body {
 }
 .dgd-reveal[data-shown] { opacity: 1; transform: none; }
 
+/* Light-trails photo behind the DG Drive landing hero. */
+.dgd-photo-bg {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url("/dg-drive/Iloilo_Diversion_Road_Light_Trails.png") center / cover;
+  background-color: #0b0a12;
+}
+
 /* Hero black panel wipes in on load */
 @keyframes dgd-wipe {
   from { clip-path: polygon(0 0, 0 0, 0 0); }

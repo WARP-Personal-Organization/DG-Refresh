@@ -11,8 +11,8 @@ export const HERO = {
     "daily guide to cars with comprehensive reviews,",
     "updates, and comparisons with other vehicles.",
   ],
-  mottoLines: ["Driven, Tested, Experienced.", "Roll out with DG Drive."],
-  taglineLines: ["DRIVEN. TESTED.", "EXPERIENCED."],
+  // Placeholder until the final tagline is decided.
+  tagline: "Driven. Tested. Experienced.",
   cta: "Articles",
 };
 
