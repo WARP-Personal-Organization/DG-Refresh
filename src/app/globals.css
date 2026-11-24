@@ -221,3 +221,89 @@ body {
 .prose .td-gallery .td-gallery-slide-copywrite {
   display: block !important;
 }
+
+/* ---------- DG Drive page animations ---------- */
+@keyframes dg-drive-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.dg-drive-fade { animation: dg-drive-fade 450ms ease-out; }
+
+/* Scroll reveal (components/dg-drive/Reveal.tsx) */
+.dgd-reveal {
+  opacity: 0;
+  transition:
+    opacity 800ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+.dgd-reveal.dgd-up { transform: translateY(28px); }
+.dgd-reveal.dgd-left { transform: translateX(-60px); }
+.dgd-reveal.dgd-right { transform: translateX(60px); }
+.dgd-reveal.dgd-zoom { transform: scale(0.94); }
+.dgd-reveal.dgd-drive {
+  transform: translateX(-40%);
+  transition-duration: 1300ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dgd-reveal[data-shown] { opacity: 1; transform: none; }
+
+/* Hero black panel wipes in on load */
+@keyframes dgd-wipe {
+  from { clip-path: polygon(0 0, 0 0, 0 0); }
+  to { clip-path: polygon(0 0, 54.5% 0, 0 62.52%); }
+}
+.dgd-wipe { animation: dgd-wipe 1100ms cubic-bezier(0.65, 0, 0.35, 1) both; }
+
+/* Carousel slide between articles */
+@keyframes dgd-slide-next {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes dgd-slide-prev {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: none; }
+}
+.dgd-slide-next { animation: dgd-slide-next 600ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+.dgd-slide-prev { animation: dgd-slide-prev 600ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+
+/* Carousel text: slides through its clipping box with the cards */
+@keyframes dgd-text-next {
+  from { opacity: 0; transform: translateX(70%); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes dgd-text-prev {
+  from { opacity: 0; transform: translateX(-70%); }
+  to { opacity: 1; transform: none; }
+}
+.dgd-text-next { animation: dgd-text-next 750ms cubic-bezier(0.65, 0, 0.35, 1); }
+.dgd-text-prev { animation: dgd-text-prev 750ms cubic-bezier(0.65, 0, 0.35, 1); }
+
+/* Carousel autoplay progress bar */
+@keyframes dgd-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.dgd-progress {
+  transform-origin: left;
+  animation: dgd-progress var(--dur, 6000ms) linear forwards;
+}
+.dgd-paused .dgd-progress { animation-play-state: paused; }
+
+/* Article page hero panel: diagonal on desktop, angled bottom on mobile */
+.dgd-article-panel { clip-path: polygon(0 0, 100% 0, 100% 56%, 0 68%); }
+@media (min-width: 1024px) {
+  .dgd-article-panel { clip-path: polygon(0 0, 64% 0, 50% 100%, 0 100%); }
+}
+@keyframes dgd-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+.dgd-wipe-article { animation: dgd-slide-in-left 1000ms cubic-bezier(0.65, 0, 0.35, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dgd-wipe-article { animation: none !important; }
+  .dgd-slide-card { transition: none !important; }
+  .dgd-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .dg-drive-fade, .dgd-wipe, .dgd-slide-next, .dgd-slide-prev, .dgd-text-next, .dgd-text-prev { animation: none !important; }
+}
