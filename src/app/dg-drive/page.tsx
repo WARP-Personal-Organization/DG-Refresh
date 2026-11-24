@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Play } from "lucide-react";
 import {
   BrowseCarouselDesktop,
   BrowseCarouselMobile,
@@ -77,32 +76,6 @@ function Lines({ lines }: { lines: readonly string[] }) {
       {line}
     </span>
   ));
-}
-
-/** Yellow play button over the "Latest" video thumbnail; appears on hover on desktop. */
-function PlayBadge({
-  size,
-  alwaysVisible = false,
-}: {
-  size: string;
-  alwaysVisible?: boolean;
-}) {
-  return (
-    <span
-      className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 ${
-        alwaysVisible
-          ? ""
-          : "opacity-0 group-hover:bg-black/20 group-hover:opacity-100"
-      }`}
-    >
-      <span
-        className="flex items-center justify-center rounded-full shadow-xl transition-transform duration-300 group-hover:scale-110"
-        style={{ width: size, height: size, backgroundColor: DG_YELLOW }}
-      >
-        <Play className="ml-[8%] h-[42%] w-[42%] fill-black text-black" />
-      </span>
-    </span>
-  );
 }
 
 const SLANT_BAR = "polygon(6.4% 0, 100% 0, 93.6% 100%, 0 100%)";
@@ -254,7 +227,6 @@ function DGDriveDesktop() {
                 sizes="60vw"
                 className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
               />
-              <PlayBadge size={u(88)} />
             </Link>
           </Reveal>
         </Abs>
@@ -513,7 +485,6 @@ function DGDriveMobile() {
                   sizes="100vw"
                   className="object-cover"
                 />
-                <PlayBadge size="52px" alwaysVisible />
               </Link>
             </Reveal>
           </div>
