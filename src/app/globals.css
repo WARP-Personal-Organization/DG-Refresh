@@ -259,7 +259,7 @@ body {
 /* Hero black panel wipes in on load */
 @keyframes dgd-wipe {
   from { clip-path: polygon(0 0, 0 0, 0 0); }
-  to { clip-path: polygon(0 0, 54.5% 0, 0 62.52%); }
+  to { clip-path: polygon(0 0, 58.8% 0, 0 65.8%); }
 }
 .dgd-wipe { animation: dgd-wipe 1100ms cubic-bezier(0.65, 0, 0.35, 1) both; }
 
